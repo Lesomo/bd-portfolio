@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Business Development — Project Portfolio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:100vh;font-size:13px}
+:root{
+  --primary:#68217D;--primary-dark:#4A1759;--primary-light:#E8D5EE;
+  --sec-blue:#7A92AC;--sec-blue-l:#DDE4EC;--sec-sage:#CFCFB7;--sec-sage-d:#7A7A58;
+  --sec-pink:#E1C6CD;--sec-pink-d:#8C5060;--sec-mauve:#D5A99C;--sec-mauve-d:#7A4A40;
+  --sec-cream:#FCF5E3;--ter-sky:#A6C4CF;--ter-sky-d:#2F6070;
+  --ter-gold:#DBC25D;--ter-gold-d:#6B5A10;--ter-sage:#89AB90;--ter-sage-d:#2E4F34;
+  --ter-slate:#8B90B0;--ter-slate-d:#3A3F60;--ter-lilac:#A98FA8;--ter-lilac-d:#5C3D5B;
+  --red:#C00000;--red-l:#FFDCE0;--amber:#C55A11;--amber-l:#FCE4D6;
+  --green:#375623;--green-l:#E2EFDA;
+  --white:#FFFFFF;--grey-light:#F5F0F7;--grey-mid:#D6C8DB;--grey-text:#595959;
+}
+
+/* ── Nav ── */
+.nav{background:var(--primary);padding:0 16px;display:flex;align-items:center;gap:3px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(74,23,89,.3);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;padding:10px 0;margin-right:14px;flex-shrink:0;text-decoration:none}
+.brand-icon{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:12px;flex-shrink:0}
+.brand-name{color:#fff;font-weight:800;font-size:12px;line-height:1.1}
+.brand-sub{color:rgba(255,255,255,.5);font-size:8px;letter-spacing:2px;text-transform:uppercase}
+.nav-btn{background:transparent;border:none;color:rgba(255,255,255,.6);padding:8px 10px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:400;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.nav-btn.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700}
+.nav-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-badge{background:var(--red);color:#fff;font-size:8px;font-weight:800;border-radius:8px;padding:1px 5px;min-width:16px;text-align:center}
+.role-wrap{display:flex;align-items:center;gap:5px;margin-left:auto;padding:8px 0;flex-shrink:0}
+.role-label{font-size:9px;color:rgba(255,255,255,.5)}
+.role-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:7px;padding:3px 8px;font-size:10px;cursor:pointer}
+
+/* ── Page header ── */
+.page-hdr{background:var(--primary-dark);padding:16px 16px 0}
+.page-title{color:#fff;font-weight:800;font-size:17px;letter-spacing:-.3px}
+.page-sub{color:rgba(255,255,255,.45);font-size:10px;margin-top:2px}
+.tabs-bar{display:flex;gap:0;margin-top:12px;overflow-x:auto}
+.tab-btn{background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.4);padding:7px 12px;cursor:pointer;font-size:11px;font-weight:400;white-space:nowrap;display:flex;align-items:center;gap:4px;transition:all .15s}
+.tab-btn.active{border-bottom:3px solid var(--ter-gold);color:#fff;font-weight:700}
+.tab-btn:hover{color:rgba(255,255,255,.8)}
+
+/* ── Views ── */
+.view{display:none;padding:16px;max-width:1280px;margin:0 auto}
+.view.active{display:grid;gap:14px}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:10px;border:1px solid var(--grey-mid);overflow:hidden}
+.card-head{background:var(--primary);padding:9px 14px;display:flex;justify-content:space-between;align-items:center}
+.card-head span{color:#fff;font-weight:800;font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+
+/* ── Badges ── */
+.pill{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;display:inline-block}
+
+/* ── Progress bar ── */
+.pbar-wrap{display:flex;align-items:center;gap:5px}
+.pbar-bg{flex:1;height:5px;background:var(--grey-mid);border-radius:3px;overflow:hidden;min-width:40px}
+.pbar-fill{height:100%;border-radius:3px;background:var(--primary);transition:width .4s}
+.pbar-txt{font-size:9px;color:var(--grey-text);min-width:24px}
+
+/* ── KPI cards ── */
+.kpi-row{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{border-radius:10px;padding:12px 14px;flex:1;min-width:90px}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.75;margin-bottom:2px}
+.kpi-val{font-size:24px;font-weight:800;line-height:1}
+
+/* ── Stat grid ── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.stat-grid{grid-template-columns:1fr}}
+
+/* ── Filter row ── */
+.filter-row{background:#fff;border-radius:10px;padding:10px 12px;border:1px solid var(--grey-mid);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filter-sel{border:1px solid var(--grey-mid);border-radius:7px;padding:5px 8px;font-size:11px;color:var(--primary-dark);background:#fff;cursor:pointer}
+.add-btn{background:var(--primary);color:#fff;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-weight:700;font-size:11px;margin-left:auto}
+.add-btn:hover{background:var(--primary-dark)}
+.search-inp{border:1px solid var(--grey-mid);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--primary-dark);flex:1;min-width:140px}
+
+/* ── Table ── */
+.tbl-hdr{display:grid;background:var(--primary);padding:9px 14px;gap:8px}
+.tbl-hdr span{font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px}
+.tbl-row{display:grid;padding:10px 14px;gap:8px;align-items:center;border-top:1px solid var(--grey-mid);cursor:pointer;transition:background .1s}
+.tbl-row:hover{filter:brightness(.97)}
+.proj-name{font-weight:700;font-size:11px;color:var(--primary-dark);margin-bottom:1px}
+.proj-sub{font-size:9px;color:var(--grey-text)}
+.tbl-cols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px}
+@media(max-width:700px){
+  .tbl-cols{grid-template-columns:1fr 1fr}
+  .hide-mobile{display:none}
+}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(74,23,89,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(74,23,89,.35)}
+.modal-hdr{background:var(--primary);padding:16px 20px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.modal-hdr span{color:#fff;font-weight:800;font-size:13px}
+.modal-body{padding:20px;display:grid;gap:12px}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.modal-row{grid-template-columns:1fr}}
+.field-label{font-size:10px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;display:block}
+.field-inp{border:1px solid var(--grey-mid);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--primary-dark);width:100%;background:#fff;font-family:inherit}
+.field-inp:focus{outline:none;border-color:var(--primary)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:6px}
+.btn-cancel{padding:7px 18px;border-radius:7px;border:1px solid var(--grey-mid);background:#fff;color:var(--grey-text);cursor:pointer;font-size:12px;font-family:inherit}
+.btn-save{padding:7px 22px;border-radius:7px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
+.btn-delete{padding:7px 14px;border-radius:7px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:11px;font-family:inherit}
+.btn-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+
+/* ── Dashboard ── */
+.mini-bar-wrap{padding:14px;display:grid;gap:10px}
+.mini-bar-item{display:flex;flex-direction:column;gap:3px}
+.mini-bar-labels{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.mini-bar-bg{height:5px;background:var(--grey-mid);border-radius:3px;overflow:hidden}
+
+/* ── WBS ── */
+.wbs-proj-hdr{padding:11px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
+.wbs-proj-hdr:hover{background:var(--primary-dark)}
+.wbs-phase-hdr{display:grid;grid-template-columns:18px 1fr 100px 70px 60px;gap:6px;padding:7px 12px 7px 28px;background:var(--sec-blue-l);border-top:1px solid var(--grey-mid);align-items:center;cursor:pointer;user-select:none}
+.wbs-task-row{display:grid;grid-template-columns:18px 1fr 100px 90px 110px 110px;gap:6px;padding:7px 12px 7px 44px;border-top:1px solid var(--grey-mid);align-items:center}
+@media(max-width:700px){
+  .wbs-phase-hdr{grid-template-columns:18px 1fr 90px}
+  .wbs-phase-hide{display:none}
+  .wbs-task-row{grid-template-columns:18px 1fr 90px}
+  .wbs-task-hide{display:none}
+}
+
+/* ── Gantt ── */
+.gantt-wrap{overflow-x:auto}
+.gantt-inner{min-width:600px}
+.gantt-hdr{display:grid;grid-template-columns:180px 1fr}
+.gantt-lbl-hdr{padding:7px 10px;background:var(--primary-dark)}
+.gantt-time-hdr{background:var(--primary-dark);display:flex}
+.gantt-month{flex:1;padding:7px 2px;font-size:8px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.3px;border-left:1px solid rgba(255,255,255,.15);text-align:center}
+.gantt-row{display:grid;grid-template-columns:180px 1fr;border-top:1px solid var(--grey-mid)}
+.gantt-lbl{padding:8px 10px}
+.gantt-lbl-name{font-size:10px;font-weight:700;color:var(--primary-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.gantt-bar-area{position:relative;min-height:36px;overflow:hidden}
+
+/* ── Recommendations ── */
+.health-box{border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:16px}
+.health-score-num{font-size:40px;font-weight:900;line-height:1;text-align:center}
+.health-score-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;margin-top:2px}
+.health-bar-bg{height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-bottom:5px}
+.health-bar-fill{height:100%;border-radius:4px}
+.sev-row{display:flex;gap:8px;flex-wrap:wrap}
+.sev-card{border-radius:10px;padding:10px 14px;flex:1;min-width:80px;display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,.06)}
+.sev-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cat-filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.cat-filter-btn{border-radius:20px;padding:4px 12px;cursor:pointer;font-size:10px;font-weight:400;border:1px solid var(--grey-mid);background:#fff;color:var(--primary-dark);font-family:inherit}
+.cat-filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
+.rec-card{border-radius:10px;overflow:hidden;border:1.5px solid rgba(0,0,0,.08)}
+.rec-head{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;user-select:none}
+.rec-title{font-weight:800;font-size:12px;color:var(--primary-dark);margin-bottom:3px}
+.rec-detail{font-size:11px;color:var(--grey-text);line-height:1.5}
+.rec-body{border-top:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.65);padding:12px 14px}
+.rec-action-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.rec-action{font-size:11px;color:var(--primary-dark);line-height:1.6}
+.rec-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.rec-chip{background:#fff;border:1px solid var(--grey-mid);color:var(--primary-dark);font-size:10px;padding:3px 8px;border-radius:5px}
+.info-box{background:var(--primary-light);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--primary-dark)}
+
+/* ── Workload cards ── */
+.wl-card{border-radius:9px;padding:10px 12px;text-align:center;flex:1;min-width:80px}
+.wl-num{font-size:24px;font-weight:800;line-height:1}
+.wl-name{font-size:9px;color:var(--grey-text);margin-top:2px}
+.wl-warning{margin:0 14px 14px;padding:7px 10px;background:var(--amber-l);border-radius:7px;font-size:10px;color:var(--amber);font-weight:600}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:20px;font-size:10px;color:var(--grey-text)}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--grey-mid);border-radius:2px}
+
+/* ── Responsive table hide ── */
+@media(max-width:800px){.tbl-hide-md{display:none}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="brand">
+    <div class="brand-icon">BD</div>
+    <div>
+      <div class="brand-name">BUSINESS DEVELOPMENT</div>
+      <div class="brand-sub">Project Portfolio</div>
+    </div>
+  </div>
+  <button class="nav-btn active" onclick="switchView('tracker')">&#9776; Tracker</button>
+  <button class="nav-btn" onclick="switchView('dashboard')">&#9672; Dashboard</button>
+  <button class="nav-btn" onclick="switchView('wbs')">&#8862; Tasks</button>
+  <button class="nav-btn" onclick="switchView('gantt')">&#9644; Gantt</button>
+  <button class="nav-btn" onclick="switchView('recs')" id="rec-nav-btn">&#128161; Recommendations <span class="nav-badge" id="rec-count-badge">0</span></button>
+  <div class="role-wrap">
+    <span class="role-label">View as:</span>
+    <select class="role-sel" id="role-sel" onchange="applyRole()">
+      <option>Admin</option>
+      <option>Project Leads</option>
+      <option>Leadership</option>
+    </select>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-hdr">
+  <div style="max-width:1280px;margin:0 auto">
+    <div class="page-title" id="page-title">Project Tracker</div>
+    <div class="page-sub" id="page-sub"></div>
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchView('tracker')">Project Tracker</button>
+      <button class="tab-btn" onclick="switchView('dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="switchView('wbs')">Task Breakdown</button>
+      <button class="tab-btn" onclick="switchView('gantt')">Gantt Chart</button>
+      <button class="tab-btn" onclick="switchView('recs')">Recommendations <span class="nav-badge" id="rec-count-badge2">0</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     VIEW: TRACKER
+══════════════════════════════════════════════ -->
+<div class="view active" id="view-tracker">
+  <div class="filter-row">
+    <input class="search-inp" id="search-inp" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
+    <select class="filter-sel" id="f-cat" onchange="renderTracker()">
+      <option value="">All Categories</option>
+      <option>Operations</option>
+      <option>People &amp; Training</option>
+      <option>Technology &amp; Assets</option>
+      <option>Finance</option>
+    </select>
+    <select class="filter-sel" id="f-pri" onchange="renderTracker()">
+      <option value="">All Priorities</option>
+      <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+    </select>
+    <select class="filter-sel" id="f-lead" onchange="renderTracker()">
+      <option value="">All Leads</option>
+      <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
+      <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
+    </select>
+    <select class="filter-sel" id="f-stat" onchange="renderTracker()">
+      <option value="">All Statuses</option>
+      <option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option>
+    </select>
+    <span id="filter-count" style="font-size:10px;color:var(--grey-text)"></span>
+    <button class="add-btn" id="add-proj-btn" onclick="openModal(null)">+ Add Project</button>
+  </div>
+  <div class="card">
+    <div class="tbl-hdr tbl-cols" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px">
+      <span>Project</span>
+      <span class="hide-mobile">Lead</span>
+      <span>Priority</span>
+      <span class="tbl-hide-md">Status</span>
+      <span class="tbl-hide-md">Approval</span>
+      <span class="hide-mobile">Progress</span>
+      <span></span>
+    </div>
+    <div id="tbl-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     VIEW: DASHBOARD
+══════════════════════════════════════════════ -->
+<div class="view" id="view-dashboard">
+  <div class="kpi-row" id="kpi-row"></div>
+  <div class="stat-grid">
+    <div class="card">
+      <div class="card-head"><span>By Category</span></div>
+      <div class="mini-bar-wrap" id="dash-cat"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span>By Priority</span></div>
+      <div class="mini-bar-wrap" id="dash-pri"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span>Workload by Project Lead</span></div>
+    <div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap" id="dash-wl"></div>
+    <div id="dash-wl-warn"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span>Portfolio Progress</span></div>
+    <div style="padding:14px;display:grid;gap:8px" id="dash-prog"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     VIEW: WBS
+══════════════════════════════════════════════ -->
+<div class="view" id="view-wbs">
+  <div class="info-box">
+    <strong>Work Breakdown Structure</strong> — Click a project to expand its phases and tasks. Update status and dates inline.
+  </div>
+  <div id="wbs-body"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     VIEW: GANTT
+══════════════════════════════════════════════ -->
+<div class="view" id="view-gantt">
+  <div style="background:var(--primary-light);border-radius:8px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <span style="font-size:11px;color:var(--primary-dark)"><strong>Gantt Chart</strong> — Set start &amp; end dates via Edit. Red = Critical Path. Today line shown.</span>
+    <div style="display:flex;gap:5px">
+      <button id="zoom-month" onclick="setZoom('month')" style="background:var(--primary);color:#fff;border:none;border-radius:5px;padding:4px 12px;font-size:10px;cursor:pointer;font-weight:700;font-family:inherit">Monthly</button>
+      <button id="zoom-quarter" onclick="setZoom('quarter')" style="background:#fff;color:var(--primary-dark);border:1px solid var(--grey-mid);border-radius:5px;padding:4px 12px;font-size:10px;cursor:pointer;font-family:inherit">Quarterly</button>
+    </div>
+  </div>
+  <div class="card">
+    <div style="padding:7px 14px;background:var(--grey-light);border-bottom:1px solid var(--grey-mid);display:flex;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--red)"></div><span style="font-size:9px;color:var(--grey-text)">Critical</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary)"></div><span style="font-size:9px;color:var(--grey-text)">In progress</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--ter-sage)"></div><span style="font-size:9px;color:var(--grey-text)">Complete</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--sec-mauve)"></div><span style="font-size:9px;color:var(--grey-text)">On hold</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><div style="width:2px;height:10px;background:var(--red)"></div><span style="font-size:9px;color:var(--grey-text)">Today</span></div>
+    </div>
+    <div class="gantt-wrap"><div class="gantt-inner" id="gantt-body"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span>Critical Path Summary</span></div>
+    <div style="padding:14px;display:grid;gap:8px" id="critical-summary"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     VIEW: RECOMMENDATIONS
+══════════════════════════════════════════════ -->
+<div class="view" id="view-recs">
+  <div id="health-box-wrap"></div>
+  <div class="sev-row" id="sev-cards"></div>
+  <div class="cat-filter-row" id="cat-filters"></div>
+  <div id="rec-list"></div>
+  <div class="info-box">Recommendations update automatically as you edit projects in the Tracker.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <span id="modal-title">Edit Project</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn-delete" id="modal-del-btn" onclick="deleteProject()">Delete</button>
+        <button class="btn-close" onclick="closeModal()">&#215;</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div><label class="field-label">Project Name</label><input class="field-inp" id="f-name" type="text"/></div>
+      <div class="modal-row">
+        <div><label class="field-label">Project Lead</label>
+          <select class="field-inp" id="f-flead">
+            <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
+            <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
+          </select></div>
+        <div><label class="field-label">Category</label>
+          <select class="field-inp" id="f-fcat">
+            <option>Operations</option><option>People &amp; Training</option>
+            <option>Technology &amp; Assets</option><option>Finance</option>
+          </select></div>
+      </div>
+      <div class="modal-row">
+        <div><label class="field-label">Priority</label>
+          <select class="field-inp" id="f-fpri">
+            <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+          </select></div>
+        <div><label class="field-label">Status</label>
+          <select class="field-inp" id="f-fstat">
+            <option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option>
+          </select></div>
+      </div>
+      <div class="modal-row">
+        <div><label class="field-label">Approval</label>
+          <select class="field-inp" id="f-fappr">
+            <option>Proposed</option><option>Approved</option><option>Deferred</option><option>Rejected</option>
+          </select></div>
+        <div><label class="field-label">% Complete — <span id="pct-display">0</span>%</label>
+          <input type="range" id="f-fpct" min="0" max="100" value="0" oninput="document.getElementById('pct-display').textContent=this.value" style="width:100%;accent-color:var(--primary);margin-top:6px"/></div>
+      </div>
+      <div class="modal-row">
+        <div><label class="field-label">Business Impact</label>
+          <select class="field-inp" id="f-fimpact">
+            <option>Efficiency Gain</option><option>Cost Saving</option><option>Risk Reduction</option>
+            <option>Revenue Growth</option><option>Compliance</option>
+          </select></div>
+        <div><label class="field-label">Customer Value</label>
+          <select class="field-inp" id="f-fcustval">
+            <option>Order Winner</option><option>Order Qualifier</option><option>Disqualifier</option>
+          </select></div>
+      </div>
+      <div class="modal-row">
+        <div><label class="field-label">Target Start Date</label><input class="field-inp" id="f-fstart" type="date"/></div>
+        <div><label class="field-label">Target End Date</label><input class="field-inp" id="f-fend" type="date"/></div>
+      </div>
+      <div><label class="field-label">Problem Statement</label><textarea class="field-inp" id="f-fproblem" rows="2" style="resize:vertical"></textarea></div>
+      <div><label class="field-label">Expected Outcome / Success Metric</label><textarea class="field-inp" id="f-foutcome" rows="2" style="resize:vertical"></textarea></div>
+      <div class="modal-row">
+        <div><label class="field-label">Key Risks</label><textarea class="field-inp" id="f-frisks" rows="2" style="resize:vertical"></textarea></div>
+        <div><label class="field-label">Dependencies</label><textarea class="field-inp" id="f-fdeps" rows="2" style="resize:vertical"></textarea></div>
+      </div>
+      <div><label class="field-label">Notes</label><textarea class="field-inp" id="f-fnotes" rows="2" style="resize:vertical"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveProject()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Business Development Project Portfolio &middot; <span id="year"></span></div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+const PHASES = ['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
+const PHASE_TASKS = {
+  'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],
+  'Planning':['Project plan','Resource plan','Risk register','Communication plan'],
+  'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],
+  'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],
+  'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']
+};
+const LEADS = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+const CATS  = ['Operations','People & Training','Technology & Assets','Finance'];
+const PRIS  = ['Critical','High','Medium','Low'];
+
+function buildTasks(projId){
+  const t=[];
+  PHASES.forEach((phase,pi)=>{
+    t.push({id:`${projId}-p${pi}`,projId,type:'phase',phase,name:phase,status:'Not Started',pct:0,owner:'',start:'',end:''});
+    PHASE_TASKS[phase].forEach((n,ti)=>t.push({id:`${projId}-p${pi}-t${ti}`,projId,type:'task',phase,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}));
+  });
+  return t;
+}
+
+const DEFAULT_PROJECTS = [
+  {id:1, name:'Supervisory training for Prestige',                   lead:'Berenicia',    category:'People & Training',   priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:20, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-01', endDate:'2025-06-30'},
+  {id:2, name:'Automations at factories - not used, switched off',   lead:'Jacques',      category:'Technology & Assets', priority:'High',     bizImpact:'Efficiency Gain', custValue:'Disqualifier',    status:'In Progress', approval:'Approved', pct:35, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-15', endDate:'2025-05-31'},
+  {id:3, name:'Prestige Head Count: Cutting rooms',                  lead:'Letlhogonolo', category:'Operations',          priority:'High',     bizImpact:'Cost Saving',     custValue:'Order Qualifier', status:'In Progress', approval:'Approved', pct:50, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-04-30'},
+  {id:4, name:'Bullmer cutting machine Parameter settings',          lead:'Letlhogonolo', category:'Operations',          priority:'Critical', bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-04-01', endDate:'2025-07-31'},
+  {id:5, name:'Caledon cutting room: Process optimisation',          lead:'Letlhogonolo', category:'Operations',          priority:'Critical', bizImpact:'Efficiency Gain', custValue:'Order Qualifier', status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-05-01', endDate:'2025-09-30'},
+  {id:6, name:'Equipment Capability study: Multiformer use',         lead:'Jacques',      category:'Operations',          priority:'High',     bizImpact:'Efficiency Gain', custValue:'Disqualifier',    status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-03-01', endDate:'2025-06-30'},
+  {id:7, name:'AI project: training tool',                           lead:'Wendy',        category:'People & Training',   priority:'Medium',   bizImpact:'Risk Reduction',  custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:60, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-08-31'},
+  {id:8, name:'Centre of excellence - internal training academy',    lead:'Wendy',        category:'People & Training',   priority:'High',     bizImpact:'Risk Reduction',  custValue:'Order Winner',    status:'On Hold',     approval:'Deferred', pct:15, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-06-01', endDate:'2025-12-31'},
+  {id:9, name:'The Prestige Way: Process standardisation',           lead:'Beverley',     category:'People & Training',   priority:'Critical', bizImpact:'Risk Reduction',  custValue:'Order Qualifier', status:'In Progress', approval:'Approved', pct:40, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-10-31'},
+  {id:10,name:'Cost of Sales and expenses finance project',          lead:'David',        category:'Finance',             priority:'High',     bizImpact:'Cost Saving',     custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:25, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-01', endDate:'2025-07-31'},
+  {id:11,name:'GSD Quest (Design and Factory alignment)',            lead:'Letlhogonolo', category:'Technology & Assets', priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:30, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-03-01', endDate:'2025-09-30'},
+  {id:12,name:'Asset tracking tool: Tracking, Downtime & Inventory', lead:'Letlhogonolo', category:'Technology & Assets', priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:45, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-15', endDate:'2025-08-31'},
+  {id:13,name:'Asset Age Study',                                     lead:'Jacques',      category:'Operations',          priority:'Critical', bizImpact:'Cost Saving',     custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:70, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-05-31'},
+];
+
+// Load from localStorage or use defaults
+function loadData(){
+  try{
+    const saved=localStorage.getItem('bd-projects');
+    return saved?JSON.parse(saved):JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
+  }catch(e){return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));}
+}
+function saveData(){
+  localStorage.setItem('bd-projects',JSON.stringify(projects));
+}
+
+let projects = loadData();
+let tasks = loadData().flatMap ? projects.flatMap(p=>buildTasks(p.id)) : DEFAULT_PROJECTS.flatMap(p=>buildTasks(p.id));
+try{
+  const st=localStorage.getItem('bd-tasks');
+  if(st) tasks=JSON.parse(st);
+  else tasks=projects.flatMap(p=>buildTasks(p.id));
+}catch(e){tasks=projects.flatMap(p=>buildTasks(p.id));}
+function saveTaskData(){localStorage.setItem('bd-tasks',JSON.stringify(tasks));}
+
+let editingId = null;
+let currentView = 'tracker';
+let ganttZoom = 'month';
+let recCatFilter = 'All';
+
+// ── Style helpers ─────────────────────────────────────────────────────────────
+function priStyle(p){return({Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#DBC25D',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}})[p]||{bg:'#F0F0F0',fg:'#595959'};}
+function statStyle(s){return({'In Progress':{bg:'#E8D5EE',fg:'#68217D'},'Not Started':{bg:'#E8E8E8',fg:'#595959'},'On Hold':{bg:'#D5A99C',fg:'#7A4A40'},'Complete':{bg:'#E2EFDA',fg:'#375623'}})[s]||{bg:'#F0F0F0',fg:'#595959'};}
+function apprStyle(a){return({Approved:{bg:'#89AB90',fg:'#2E4F34'},Proposed:{bg:'#DBC25D',fg:'#6B5A10'},Deferred:{bg:'#D5A99C',fg:'#7A4A40'},Rejected:{bg:'#FFDCE0',fg:'#C00000'}})[a]||{bg:'#F0F0F0',fg:'#595959'};}
+function catStyle(c){return({'Operations':{bg:'#A6C4CF',fg:'#2F6070'},'People & Training':{bg:'#E8D5EE',fg:'#68217D'},'Technology & Assets':{bg:'#CFCFB7',fg:'#7A7A58'},'Finance':{bg:'#DBC25D',fg:'#6B5A10'}})[c]||{bg:'#F0F0F0',fg:'#595959'};}
+function pill(label,style){return`<span class="pill" style="background:${style.bg};color:${style.fg}">${esc(label)}</span>`;}
+function pbar(pct){return`<div class="pbar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:${pct}%;background:${pct===100?'#89AB90':'#68217D'}"></div></div><span class="pbar-txt">${pct}%</span></div>`;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── View switching ────────────────────────────────────────────────────────────
+const VIEW_TITLES={tracker:'Project Tracker',dashboard:'Dashboard',wbs:'Task Breakdown',gantt:'Gantt Chart',recs:'Recommendations'};
+function switchView(v){
+  currentView=v;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>{b.classList.toggle('active',['tracker','dashboard','wbs','gantt','recs'][i]===v);});
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['tracker','dashboard','wbs','gantt','recs'][i]===v);});
+  document.getElementById('page-title').textContent=VIEW_TITLES[v];
+  updateSub();
+  if(v==='dashboard')renderDashboard();
+  if(v==='wbs')renderWBS();
+  if(v==='gantt')renderGantt();
+  if(v==='recs')renderRecs();
+}
+function updateSub(){
+  const ip=projects.filter(p=>p.status==='In Progress').length;
+  const cr=projects.filter(p=>p.priority==='Critical').length;
+  const rn=getUrgentRecCount();
+  document.getElementById('page-sub').textContent=`${projects.length} projects · ${ip} in progress · ${cr} critical${rn>0?` · ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
+}
+
+// ── Tracker ───────────────────────────────────────────────────────────────────
+function renderTracker(){
+  const search=(document.getElementById('search-inp').value||'').toLowerCase();
+  const fCat=document.getElementById('f-cat').value;
+  const fPri=document.getElementById('f-pri').value;
+  const fLead=document.getElementById('f-lead').value;
+  const fStat=document.getElementById('f-stat').value;
+  const role=document.getElementById('role-sel').value;
+
+  const filtered=projects.filter(p=>{
+    if(fCat&&p.category!==fCat)return false;
+    if(fPri&&p.priority!==fPri)return false;
+    if(fLead&&p.lead!==fLead)return false;
+    if(fStat&&p.status!==fStat)return false;
+    if(search&&!p.name.toLowerCase().includes(search))return false;
+    return true;
+  });
+
+  document.getElementById('filter-count').textContent=`${filtered.length}/${projects.length}`;
+  document.getElementById('add-proj-btn').style.display=role==='Leadership'?'none':'block';
+
+  const html=filtered.map((p,i)=>`
+    <div class="tbl-row tbl-cols" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px;background:${i%2===0?'#FCF5E3':'#fff'}">
+      <div><div class="proj-name">${esc(p.name)}</div><div class="proj-sub">${esc(p.bizImpact)} · ${esc(p.custValue)}</div></div>
+      <div class="hide-mobile" style="font-size:10px;color:#595959">${esc(p.lead)}</div>
+      <div>${pill(p.priority,priStyle(p.priority))}</div>
+      <div class="tbl-hide-md">${pill(p.status,statStyle(p.status))}</div>
+      <div class="tbl-hide-md">${pill(p.approval,apprStyle(p.approval))}</div>
+      <div class="hide-mobile">${pbar(p.pct)}</div>
+      <div>${role!=='Leadership'?`<button onclick="openModal(${p.id})" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:10px;font-weight:700;font-family:inherit">Edit</button>`:''}
+      </div>
+    </div>`).join('');
+  document.getElementById('tbl-body').innerHTML=html||'<div style="padding:24px;text-align:center;color:#595959">No projects match the filters.</div>';
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(id){
+  editingId=id;
+  const isNew=!id;
+  document.getElementById('modal-title').textContent=isNew?'New Project':'Edit Project';
+  document.getElementById('modal-del-btn').style.display=isNew?'none':'block';
+
+  if(isNew){
+    document.getElementById('f-name').value='New Project';
+    document.getElementById('f-flead').value='Berenicia';
+    document.getElementById('f-fcat').value='Operations';
+    document.getElementById('f-fpri').value='Medium';
+    document.getElementById('f-fstat').value='Not Started';
+    document.getElementById('f-fappr').value='Proposed';
+    document.getElementById('f-fpct').value=0;
+    document.getElementById('pct-display').textContent=0;
+    document.getElementById('f-fimpact').value='Efficiency Gain';
+    document.getElementById('f-fcustval').value='Order Qualifier';
+    document.getElementById('f-fstart').value='';
+    document.getElementById('f-fend').value='';
+    document.getElementById('f-fproblem').value='';
+    document.getElementById('f-foutcome').value='';
+    document.getElementById('f-frisks').value='';
+    document.getElementById('f-fdeps').value='';
+    document.getElementById('f-fnotes').value='';
+  } else {
+    const p=projects.find(x=>x.id===id);
+    document.getElementById('f-name').value=p.name;
+    document.getElementById('f-flead').value=p.lead;
+    document.getElementById('f-fcat').value=p.category;
+    document.getElementById('f-fpri').value=p.priority;
+    document.getElementById('f-fstat').value=p.status;
+    document.getElementById('f-fappr').value=p.approval;
+    document.getElementById('f-fpct').value=p.pct;
+    document.getElementById('pct-display').textContent=p.pct;
+    document.getElementById('f-fimpact').value=p.bizImpact;
+    document.getElementById('f-fcustval').value=p.custValue;
+    document.getElementById('f-fstart').value=p.startDate||'';
+    document.getElementById('f-fend').value=p.endDate||'';
+    document.getElementById('f-fproblem').value=p.problem||'';
+    document.getElementById('f-foutcome').value=p.outcome||'';
+    document.getElementById('f-frisks').value=p.risks||'';
+    document.getElementById('f-fdeps').value=p.deps||'';
+    document.getElementById('f-fnotes').value=p.notes||'';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modal-overlay'))return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function saveProject(){
+  const d={
+    name:document.getElementById('f-name').value,
+    lead:document.getElementById('f-flead').value,
+    category:document.getElementById('f-fcat').value.replace('&amp;','&'),
+    priority:document.getElementById('f-fpri').value,
+    status:document.getElementById('f-fstat').value,
+    approval:document.getElementById('f-fappr').value,
+    pct:parseInt(document.getElementById('f-fpct').value),
+    bizImpact:document.getElementById('f-fimpact').value,
+    custValue:document.getElementById('f-fcustval').value,
+    startDate:document.getElementById('f-fstart').value,
+    endDate:document.getElementById('f-fend').value,
+    problem:document.getElementById('f-fproblem').value,
+    outcome:document.getElementById('f-foutcome').value,
+    risks:document.getElementById('f-frisks').value,
+    deps:document.getElementById('f-fdeps').value,
+    notes:document.getElementById('f-fnotes').value,
+  };
+  // fix category HTML entity
+  d.category=d.category.replace(/&amp;/g,'&');
+  if(editingId){
+    const idx=projects.findIndex(p=>p.id===editingId);
+    projects[idx]={...projects[idx],...d};
+  } else {
+    const newId=Math.max(...projects.map(p=>p.id),0)+1;
+    projects.push({id:newId,...d});
+    tasks.push(...buildTasks(newId));
+    saveTaskData();
+  }
+  saveData();
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderTracker();
+  updateSub();
+  updateRecBadge();
+}
+function deleteProject(){
+  if(!editingId)return;
+  if(!confirm('Delete this project?'))return;
+  projects=projects.filter(p=>p.id!==editingId);
+  tasks=tasks.filter(t=>t.projId!==editingId);
+  saveData();saveTaskData();
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderTracker();updateSub();updateRecBadge();
+}
+function applyRole(){renderTracker();}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const total=projects.length;
+  const ip=projects.filter(p=>p.status==='In Progress').length;
+  const ns=projects.filter(p=>p.status==='Not Started').length;
+  const oh=projects.filter(p=>p.status==='On Hold').length;
+  const dn=projects.filter(p=>p.status==='Complete').length;
+  const cr=projects.filter(p=>p.priority==='Critical').length;
+  const ap=projects.filter(p=>p.approval==='Approved').length;
+  const avg=Math.round(projects.reduce((a,p)=>a+p.pct,0)/total);
+
+  document.getElementById('kpi-row').innerHTML=[
+    {l:'Total',v:total,bg:'#68217D',fg:'#fff'},
+    {l:'In Progress',v:ip,bg:'#DDE4EC',fg:'#3A3F60'},
+    {l:'Not Started',v:ns,bg:'#E8E8E8',fg:'#595959'},
+    {l:'On Hold',v:oh,bg:'#D5A99C',fg:'#7A4A40'},
+    {l:'Complete',v:dn,bg:'#E2EFDA',fg:'#375623'},
+    {l:'Critical',v:cr,bg:'#FFDCE0',fg:'#C00000'},
+    {l:'Approved',v:ap,bg:'#89AB90',fg:'#2E4F34'},
+    {l:'Avg Progress',v:avg+'%',bg:'#E8D5EE',fg:'#68217D'},
+  ].map(k=>`<div class="kpi" style="background:${k.bg}"><div class="kpi-label" style="color:${k.fg}">${k.l}</div><div class="kpi-val" style="color:${k.fg}">${k.v}</div></div>`).join('');
+
+  document.getElementById('dash-cat').innerHTML=CATS.map(c=>{
+    const n=projects.filter(p=>p.category===c).length;
+    const cs=catStyle(c);
+    return`<div class="mini-bar-item"><div class="mini-bar-labels"><span>${pill(c,cs)}</span><strong style="font-size:11px;color:#4A1759">${n}</strong></div><div class="mini-bar-bg"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${cs.fg};border-radius:3px"></div></div></div>`;
+  }).join('');
+
+  document.getElementById('dash-pri').innerHTML=PRIS.map(p=>{
+    const n=projects.filter(x=>x.priority===p).length;
+    const ps=priStyle(p);
+    return`<div class="mini-bar-item"><div class="mini-bar-labels"><span>${pill(p,ps)}</span><strong style="font-size:11px;color:#4A1759">${n}</strong></div><div class="mini-bar-bg"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${ps.fg};border-radius:3px"></div></div></div>`;
+  }).join('');
+
+  document.getElementById('dash-wl').innerHTML=LEADS.map(l=>{
+    const n=projects.filter(p=>p.lead===l).length;
+    const heavy=n>3;
+    return`<div class="wl-card" style="background:${heavy?'#FCE4D6':n===0?'#F0F0F0':'#E8D5EE'}"><div class="wl-num" style="color:${heavy?'#C55A11':n===0?'#595959':'#68217D'}">${n}</div><div class="wl-name">${esc(l)}</div></div>`;
+  }).join('');
+
+  const overloaded=LEADS.filter(l=>projects.filter(p=>p.lead===l).length>3);
+  document.getElementById('dash-wl-warn').innerHTML=overloaded.map(l=>`<div class="wl-warning">&#9888; ${esc(l)} is carrying ${projects.filter(p=>p.lead===l).length} projects — consider redistributing</div>`).join('');
+
+  document.getElementById('dash-prog').innerHTML=[...projects].sort((a,b)=>b.pct-a.pct).map(p=>`
+    <div style="display:grid;grid-template-columns:1fr 180px;gap:10px;align-items:center">
+      <div style="font-size:11px;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.name)}">${esc(p.name)}</div>
+      ${pbar(p.pct)}
+    </div>`).join('');
+}
+
+// ── WBS ───────────────────────────────────────────────────────────────────────
+function renderWBS(){
+  const html=projects.map(p=>{
+    const cs=catStyle(p.category);
+    return`<div class="card" style="margin-bottom:10px">
+      <div class="wbs-proj-hdr" onclick="toggleEl('wbs-${p.id}','wbs-arr-${p.id}')">
+        <span style="color:#fff;font-size:12px;min-width:14px" id="wbs-arr-${p.id}">&#9654;</span>
+        <div style="flex:1;min-width:0"><div style="color:#fff;font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div><div style="color:rgba(255,255,255,.6);font-size:9px;margin-top:1px">${esc(p.lead)} &middot; ${esc(p.category)}</div></div>
+        <div style="display:flex;gap:5px;flex-shrink:0">${pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})}${pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})}</div>
+        <div style="min-width:70px;margin-left:8px">${pbar(p.pct)}</div>
+      </div>
+      <div id="wbs-${p.id}" style="display:none">${renderWBSPhases(p)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('wbs-body').innerHTML=html;
+}
+
+function renderWBSPhases(p){
+  return PHASES.map((phase,pi)=>{
+    const phaseKey=`${p.id}-p${pi}`;
+    const phaseTask=tasks.find(t=>t.id===phaseKey)||{status:'Not Started',pct:0};
+    const phaseTasks=tasks.filter(t=>t.phase===phase&&t.type==='task'&&t.projId===p.id);
+    const doneCount=phaseTasks.filter(t=>t.status==='Complete').length;
+    return`<div class="wbs-phase-hdr" onclick="toggleEl('wbs-ph-${phaseKey}','wbs-ph-arr-${phaseKey}')">
+      <span style="color:#3A3F60;font-size:10px;min-width:12px" id="wbs-ph-arr-${phaseKey}">&#9654;</span>
+      <span style="font-weight:700;font-size:10px;color:#3A3F60">${pi+1}. ${esc(phase)}</span>
+      <select onchange="updateTaskField('${phaseKey}','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 5px;color:#4A1759;font-family:inherit">
+        ${['Not Started','In Progress','On Hold','Complete'].map(s=>`<option${s===phaseTask.status?' selected':''}>${s}</option>`).join('')}
+      </select>
+      <div onclick="event.stopPropagation()" class="wbs-phase-hide" style="display:flex;align-items:center;gap:3px">
+        <input type="range" min="0" max="100" value="${phaseTask.pct}" oninput="updateTaskField('${phaseKey}','pct',+this.value)" style="flex:1;accent-color:#68217D;height:3px"/>
+        <span style="font-size:9px;color:#595959;min-width:22px">${phaseTask.pct}%</span>
+      </div>
+      <span style="font-size:9px;color:#595959" class="wbs-phase-hide">${doneCount}/${phaseTasks.length}</span>
+    </div>
+    <div id="wbs-ph-${phaseKey}" style="display:none">${phaseTasks.map((task,ti)=>{
+      const ss=statStyle(task.status);
+      return`<div class="wbs-task-row" style="background:${ti%2===0?'#FCF5E3':'#fff'}">
+        <span style="font-size:9px;color:#595959">${pi+1}.${ti+1}</span>
+        <span style="font-size:10px;color:#4A1759;font-weight:500">${esc(task.name)}</span>
+        <select onchange="updateTaskField('${task.id}','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">
+          ${['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'].map(l=>`<option${l===(task.owner||p.lead)?' selected':''}>${l}</option>`).join('')}
+        </select>
+        <select onchange="updateTaskField('${task.id}','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;background:${ss.bg};color:${ss.fg};font-weight:700;font-family:inherit">
+          ${['Not Started','In Progress','On Hold','Complete'].map(s=>`<option${s===task.status?' selected':''}>${s}</option>`).join('')}
+        </select>
+        <input type="date" value="${task.start||''}" onchange="updateTaskField('${task.id}','start',this.value)" class="wbs-task-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;width:100%;font-family:inherit"/>
+        <input type="date" value="${task.end||''}" onchange="updateTaskField('${task.id}','end',this.value)" class="wbs-task-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;width:100%;font-family:inherit"/>
+      </div>`;
+    }).join('')}</div>`;
+  }).join('');
+}
+
+function toggleEl(bodyId,arrId){
+  const b=document.getElementById(bodyId);
+  const a=document.getElementById(arrId);
+  if(!b)return;
+  const open=b.style.display==='none';
+  b.style.display=open?'block':'none';
+  if(a)a.innerHTML=open?'&#9660;':'&#9654;';
+}
+
+function updateTaskField(taskId,field,value){
+  const t=tasks.find(x=>x.id===taskId);
+  if(t){t[field]=value;saveTaskData();}
+}
+
+// ── Gantt ─────────────────────────────────────────────────────────────────────
+function setZoom(z){
+  ganttZoom=z;
+  document.getElementById('zoom-month').style.background=z==='month'?'#68217D':'#fff';
+  document.getElementById('zoom-month').style.color=z==='month'?'#fff':'#4A1759';
+  document.getElementById('zoom-quarter').style.background=z==='quarter'?'#68217D':'#fff';
+  document.getElementById('zoom-quarter').style.color=z==='quarter'?'#fff':'#4A1759';
+  renderGantt();
+}
+
+function renderGantt(){
+  const today=new Date();
+  const yearStart=new Date(today.getFullYear(),0,1);
+  const totalDays=365;
+  const diffDays=(a,b)=>Math.round((b-a)/86400000);
+  const pct=d=>Math.max(0,Math.min(100,diffDays(yearStart,d)/totalDays*100));
+  const todayPct=pct(today);
+
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const quarters=['Q1 (Jan–Mar)','Q2 (Apr–Jun)','Q3 (Jul–Sep)','Q4 (Oct–Dec)'];
+  const cols=ganttZoom==='month'?months:quarters;
+
+  const sorted=[...projects.filter(p=>p.priority==='Critical'),...projects.filter(p=>p.priority!=='Critical')];
+
+  const colsHtml=cols.map((c,i)=>`<div class="gantt-month" style="${i===0?'border-left:none':''}">${c}</div>`).join('');
+
+  const rowsHtml=sorted.map((p,idx)=>{
+    const start=p.startDate?new Date(p.startDate):null;
+    const end=p.endDate?new Date(p.endDate):null;
+    const hasBar=start&&end&&end>start;
+    const left=hasBar?pct(start):0;
+    const width=hasBar?Math.max(1,pct(end)-pct(start)):0;
+    const isCrit=p.priority==='Critical';
+    const barColor=isCrit?'#C00000':p.status==='Complete'?'#89AB90':p.status==='On Hold'?'#D5A99C':'#68217D';
+    const daysLeft=end?diffDays(today,end):null;
+    const overdue=daysLeft!==null&&daysLeft<0;
+    const dueSoon=daysLeft!==null&&daysLeft>=0&&daysLeft<14;
+    const warn=overdue?`<span style="font-size:8px;color:#C00000;font-weight:700">&#9888; ${Math.abs(daysLeft)}d overdue</span>`:dueSoon?`<span style="font-size:8px;color:#C55A11;font-weight:700">&#9888; ${daysLeft}d left</span>`:'';
+
+    const gridLines=cols.map((_,i)=>`<div style="flex:1;border-left:${i>0?`1px solid #D6C8DB`:'none'};height:100%"></div>`).join('');
+
+    return`<div class="gantt-row" style="background:${idx%2===0?'#FCF5E3':'#fff'}">
+      <div class="gantt-lbl">
+        <div class="gantt-lbl-name" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">${pill(p.priority,priStyle(p.priority))}<span style="font-size:8px;color:#595959">${esc(p.lead)}</span>${warn}</div>
+      </div>
+      <div class="gantt-bar-area">
+        <div style="position:absolute;inset:0;display:flex;pointer-events:none">${gridLines}</div>
+        <div style="position:absolute;top:0;bottom:0;left:${todayPct}%;width:2px;background:#C00000;opacity:.65;z-index:2;pointer-events:none"></div>
+        ${hasBar?`<div style="position:absolute;top:50%;transform:translateY(-50%);left:${left}%;width:${width}%;height:16px;background:${barColor};border-radius:3px;z-index:1;overflow:hidden;min-width:4px">
+          <div style="position:absolute;inset:0;background:rgba(255,255,255,.3);width:${100-p.pct}%;right:0;left:auto"></div>
+          ${width>8?`<span style="position:absolute;inset:0;display:flex;align-items:center;padding-left:4px;font-size:8px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap">${p.pct}%</span>`:''}
+        </div>`:`<div style="position:absolute;top:50%;transform:translateY(-50%);left:8px;font-size:9px;color:#595959;font-style:italic">No dates set</div>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('gantt-body').innerHTML=`
+    <div class="gantt-hdr">
+      <div class="gantt-lbl-hdr"><span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Project</span></div>
+      <div class="gantt-time-hdr">${colsHtml}</div>
+    </div>${rowsHtml}`;
+
+  document.getElementById('critical-summary').innerHTML=projects.filter(p=>p.priority==='Critical').map(p=>{
+    const end=p.endDate?new Date(p.endDate):null;
+    const dl=end?Math.round((end-today)/86400000):null;
+    const dlHtml=dl!==null?`<span style="font-size:11px;font-weight:700;color:${dl<0?'#C00000':dl<14?'#C55A11':'#375623'}">${dl<0?`${Math.abs(dl)}d overdue`:`${dl}d left`}</span>`:`<span style="font-size:9px;color:#595959;font-style:italic">No end date</span>`;
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#FFDCE0;border-radius:7px;flex-wrap:wrap">
+      <div style="width:8px;height:8px;border-radius:50%;background:#C00000;flex-shrink:0"></div>
+      <div style="flex:1;font-size:11px;font-weight:600;color:#4A1759;min-width:120px">${esc(p.name)}</div>
+      <span style="font-size:10px;color:#595959">${esc(p.lead)}</span>
+      ${pill(p.status,statStyle(p.status))}
+      ${dlHtml}
+      <div style="min-width:80px">${pbar(p.pct)}</div>
+    </div>`;
+  }).join('')||'<div style="color:#595959;font-size:11px;font-style:italic">No critical projects.</div>';
+}
+
+// ── Recommendations ───────────────────────────────────────────────────────────
+function generateRecs(){
+  const recs=[];
+  const today=new Date();
+  const diffD=(a,b)=>Math.round((b-a)/86400000);
+  const total=projects.length;
+
+  const wl=LEADS.map(l=>({lead:l,count:projects.filter(p=>p.lead===l).length}));
+  const unassigned=wl.filter(w=>w.count===0).map(w=>w.lead);
+  wl.filter(w=>w.count>3).forEach(w=>{
+    recs.push({id:`wl-${w.lead}`,severity:'high',category:'Workload',icon:'&#9888;',title:`${w.lead} is overloaded`,detail:`Carrying ${w.count} projects: ${projects.filter(p=>p.lead===w.lead).map(p=>p.name).join(', ')}.`,action:`Consider redistributing 1–2 projects to ${unassigned.join(' or ')||'another lead'}.`,affected:projects.filter(p=>p.lead===w.lead).map(p=>p.name)});
+  });
+  if(unassigned.length){
+    recs.push({id:'wl-un',severity:'info',category:'Workload',icon:'&#128100;',title:`${unassigned.join(', ')} ${unassigned.length===1?'has':'have'} no projects assigned`,detail:'Available capacity that could relieve pressure on overloaded leads.',action:'Assign upcoming or redistributed projects to balance the portfolio.',affected:[]});
+  }
+
+  const critNS=projects.filter(p=>p.priority==='Critical'&&p.status==='Not Started');
+  if(critNS.length) recs.push({id:'cp-ns',severity:'critical',category:'Critical Path',icon:'&#128308;',title:`${critNS.length} critical project${critNS.length>1?'s':''} not yet started`,detail:critNS.map(p=>p.name).join('; ')+'.',action:'Confirm approval and assign a kick-off date immediately.',affected:critNS.map(p=>p.name)});
+
+  const critOH=projects.filter(p=>p.priority==='Critical'&&p.status==='On Hold');
+  if(critOH.length) recs.push({id:'cp-oh',severity:'critical',category:'Critical Path',icon:'&#128308;',title:`Critical project${critOH.length>1?'s':''} on hold`,detail:critOH.map(p=>p.name).join('; ')+'.',action:'Escalate to leadership — a Critical project should not be paused without explicit sign-off.',affected:critOH.map(p=>p.name)});
+
+  const overdue=projects.filter(p=>p.endDate&&p.status!=='Complete'&&new Date(p.endDate)<today);
+  if(overdue.length) recs.push({id:'sch-od',severity:'critical',category:'Schedule',icon:'&#128197;',title:`${overdue.length} project${overdue.length>1?'s':''} past end date`,detail:overdue.map(p=>`${p.name} (${diffD(new Date(p.endDate),today)}d overdue)`).join('; ')+'.',action:'Update end dates or escalate to agree revised timelines.',affected:overdue.map(p=>p.name)});
+
+  const dueSoon=projects.filter(p=>p.endDate&&p.status!=='Complete'&&p.status!=='On Hold'&&diffD(today,new Date(p.endDate))>=0&&diffD(today,new Date(p.endDate))<=21&&p.pct<70);
+  if(dueSoon.length) recs.push({id:'sch-ds',severity:'high',category:'Schedule',icon:'&#9200;',title:`${dueSoon.length} project${dueSoon.length>1?'s':''} due within 3 weeks but under 70%`,detail:dueSoon.map(p=>`${p.name} (${diffD(today,new Date(p.endDate))}d left, ${p.pct}% done)`).join('; ')+'.',action:'Review capacity and assess whether delivery dates are still achievable.',affected:dueSoon.map(p=>p.name)});
+
+  const proposed=projects.filter(p=>p.approval==='Proposed'&&p.status==='In Progress');
+  if(proposed.length) recs.push({id:'gov-pr',severity:'high',category:'Governance',icon:'&#128203;',title:`${proposed.length} in-progress project${proposed.length>1?'s':''} awaiting approval`,detail:proposed.map(p=>p.name).join('; ')+'.',action:'Obtain sign-off retrospectively or pause until approved.',affected:proposed.map(p=>p.name)});
+
+  const deferred=projects.filter(p=>p.approval==='Deferred'&&p.status==='In Progress');
+  if(deferred.length) recs.push({id:'gov-df',severity:'high',category:'Governance',icon:'&#9940;',title:`Project${deferred.length>1?'s':''} in progress with deferred approval`,detail:deferred.map(p=>p.name).join('; ')+'.',action:'Stop work or seek urgent approval.',affected:deferred.map(p=>p.name)});
+
+  const stalled=projects.filter(p=>p.status==='In Progress'&&p.pct<10);
+  if(stalled.length) recs.push({id:'prog-st',severity:'medium',category:'Progress',icon:'&#128002;',title:`${stalled.length} in-progress project${stalled.length>1?'s':''} showing little progress`,detail:stalled.map(p=>p.name).join('; ')+'.',action:'Check if these are genuinely active. Update status if work has not begun.',affected:stalled.map(p=>p.name)});
+
+  const noDates=projects.filter(p=>(!p.startDate||!p.endDate)&&p.status!=='Complete');
+  if(noDates.length) recs.push({id:'pl-nd',severity:'medium',category:'Planning',icon:'&#128198;',title:`${noDates.length} project${noDates.length>1?'s have':" has"} no dates set`,detail:noDates.map(p=>p.name).join('; ')+'.',action:'Set target start and end dates to enable Gantt tracking.',affected:noDates.map(p=>p.name)});
+
+  const noProblem=projects.filter(p=>!p.problem&&p.status!=='Complete');
+  if(noProblem.length) recs.push({id:'dq-pr',severity:'low',category:'Data Quality',icon:'&#128221;',title:`${noProblem.length} project${noProblem.length>1?'s':''} missing a problem statement`,detail:'A clear problem statement strengthens the business case.',action:'Add a one-line problem statement to each project.',affected:noProblem.map(p=>p.name)});
+
+  const noOutcome=projects.filter(p=>!p.outcome&&p.status!=='Complete');
+  if(noOutcome.length) recs.push({id:'dq-oc',severity:'low',category:'Data Quality',icon:'&#127919;',title:`${noOutcome.length} project${noOutcome.length>1?'s':''} missing a success metric`,detail:'Without a defined outcome it is impossible to know when a project has succeeded.',action:"Define a measurable success metric (e.g. 'reduce downtime by 20%').",affected:noOutcome.map(p=>p.name)});
+
+  const noRisks=projects.filter(p=>!p.risks&&p.status!=='Complete'&&(p.priority==='Critical'||p.priority==='High'));
+  if(noRisks.length) recs.push({id:'risk-nr',severity:'medium',category:'Risk',icon:'&#9889;',title:`${noRisks.length} high-priority project${noRisks.length>1?'s':''} with no risks documented`,detail:noRisks.map(p=>p.name).join('; ')+'.',action:'Document at least the top 3 risks for each Critical and High priority project.',affected:noRisks.map(p=>p.name)});
+
+  const disq=projects.filter(p=>p.custValue==='Disqualifier'&&p.priority!=='Low');
+  if(disq.length) recs.push({id:'port-dq',severity:'info',category:'Portfolio Strategy',icon:'&#128161;',title:`${disq.length} non-low-priority Disqualifier project${disq.length>1?'s':''}`,detail:disq.map(p=>p.name).join('; ')+'.',action:'Review whether these should be reprioritised to free capacity for Order Winners.',affected:disq.map(p=>p.name)});
+
+  const order={critical:0,high:1,medium:2,low:3,info:4};
+  return recs.sort((a,b)=>order[a.severity]-order[b.severity]);
+}
+
+function getUrgentRecCount(){return generateRecs().filter(r=>r.severity==='critical'||r.severity==='high').length;}
+function updateRecBadge(){
+  const n=getUrgentRecCount();
+  document.getElementById('rec-count-badge').textContent=n;
+  document.getElementById('rec-count-badge2').textContent=n;
+}
+
+const SEV={
+  critical:{bg:'#FFDCE0',border:'#C00000',fg:'#C00000',dot:'#C00000',label:'Critical'},
+  high:    {bg:'#FCE4D6',border:'#C55A11',fg:'#C55A11',dot:'#C55A11',label:'High'},
+  medium:  {bg:'#FFF8DC',border:'#DBC25D',fg:'#6B5A10',dot:'#DBC25D',label:'Medium'},
+  low:     {bg:'#E2EFDA',border:'#89AB90',fg:'#375623',dot:'#89AB90',label:'Low'},
+  info:    {bg:'#DDE4EC',border:'#7A92AC',fg:'#3A3F60',dot:'#7A92AC',label:'Info'},
+};
+
+function renderRecs(){
+  const recs=generateRecs();
+  const score=Math.max(0,100-recs.filter(r=>r.severity==='critical').length*20-recs.filter(r=>r.severity==='high').length*10-recs.filter(r=>r.severity==='medium').length*5-recs.filter(r=>r.severity==='low').length*2);
+  const sc=score>=80?{color:'#375623',bg:'#E2EFDA',label:'Healthy'}:score>=60?{color:'#C55A11',bg:'#FCE4D6',label:'Needs Attention'}:{color:'#C00000',bg:'#FFDCE0',label:'At Risk'};
+
+  document.getElementById('health-box-wrap').innerHTML=`
+    <div class="health-box" style="background:${sc.bg};border:1px solid ${sc.color}22">
+      <div style="min-width:70px;text-align:center"><div class="health-score-num" style="color:${sc.color}">${score}</div><div class="health-score-lbl" style="color:${sc.color}">Health Score</div></div>
+      <div style="flex:1"><div style="font-weight:800;color:${sc.color};font-size:15px;margin-bottom:5px">${sc.label}</div>
+      <div class="health-bar-bg"><div class="health-bar-fill" style="width:${score}%;background:${sc.color}"></div></div>
+      <div style="font-size:11px;color:${sc.color};opacity:.85">${score>=80?'Your portfolio is in good shape. Address remaining items to maintain momentum.':score>=60?'Several issues need attention. Focus on critical and high severity items first.':'Immediate action required. Multiple critical issues are putting the portfolio at risk.'}</div></div>
+    </div>`;
+
+  const counts={critical:0,high:0,medium:0,low:0,info:0};
+  recs.forEach(r=>counts[r.severity]++);
+  document.getElementById('sev-cards').innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([s,n])=>{
+    const sc2=SEV[s];
+    return`<div class="sev-card" style="background:${sc2.bg};border-color:${sc2.border}22"><div class="sev-dot" style="background:${sc2.dot}"></div><div><div style="font-size:22px;font-weight:800;color:${sc2.fg};line-height:1">${n}</div><div style="font-size:9px;color:${sc2.fg};opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.4px">${sc2.label}</div></div></div>`;
+  }).join('')+`<div class="sev-card" style="background:#fff"><div><div style="font-size:22px;font-weight:800;color:#4A1759;line-height:1">${recs.length}</div><div style="font-size:9px;color:#595959;font-weight:700;text-transform:uppercase;letter-spacing:.4px">Total</div></div></div>`;
+
+  const cats=['All',...new Set(recs.map(r=>r.category))];
+  document.getElementById('cat-filters').innerHTML=cats.map(c=>`<button class="cat-filter-btn${c===recCatFilter?' active':''}" onclick="setRecFilter('${c}')">${c}${c!=='All'?` (${recs.filter(r=>r.category===c).length})`:''}</button>`).join('');
+
+  const shown=recCatFilter==='All'?recs:recs.filter(r=>r.category===recCatFilter);
+  if(shown.length===0){
+    document.getElementById('rec-list').innerHTML=`<div style="background:#E2EFDA;border-radius:10px;padding:24px;text-align:center;border:1px solid #89AB90"><div style="font-size:28px;margin-bottom:8px">&#10003;</div><div style="font-weight:800;color:#375623;font-size:15px">All clear for ${recCatFilter}</div></div>`;
+    return;
+  }
+  document.getElementById('rec-list').innerHTML=shown.map(r=>{
+    const sc3=SEV[r.severity];
+    return`<div class="rec-card" style="background:${sc3.bg};border-color:${sc3.border}33;margin-bottom:8px">
+      <div class="rec-head" onclick="toggleRec('rb-${r.id}','ra-${r.id}')">
+        <span style="font-size:18px;flex-shrink:0;margin-top:1px">${r.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+            <span class="rec-title">${r.title}</span>
+            <span class="pill" style="background:${sc3.dot};color:#fff;font-size:9px">${sc3.label}</span>
+            <span class="pill" style="background:${sc3.dot}22;color:${sc3.fg};font-size:9px">${r.category}</span>
+          </div>
+          <div class="rec-detail">${r.detail}</div>
+        </div>
+        <span style="color:#595959;font-size:12px;flex-shrink:0;margin-left:8px" id="ra-${r.id}">&#9660;</span>
+      </div>
+      <div class="rec-body" id="rb-${r.id}" style="display:none">
+        <div class="rec-action-lbl" style="color:${sc3.dot}">Recommended Action</div>
+        <div class="rec-action">${r.action}</div>
+        ${r.affected.length?`<div style="font-size:9px;font-weight:800;color:#595959;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;margin-bottom:5px">Affected Projects (${r.affected.length})</div><div class="rec-chips">${r.affected.map(n=>`<span class="rec-chip">${esc(n)}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setRecFilter(cat){recCatFilter=cat;renderRecs();}
+function toggleRec(bodyId,arrId){
+  const b=document.getElementById(bodyId);const a=document.getElementById(arrId);
+  if(!b)return;
+  const open=b.style.display==='none';
+  b.style.display=open?'block':'none';
+  if(a)a.innerHTML=open?'&#9650;':'&#9660;';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderTracker();
+updateSub();
+updateRecBadge();
+</script>
+</body>
+</html>
