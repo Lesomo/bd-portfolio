@@ -941,6 +941,10 @@ function getAllBoardTasks(){
   const ah=adHocTasks.map(t=>({...t,projId:'adhoc',projName:'Ad Hoc',projPriority:t.priority,isAdHoc:true}));
   return[...projTasks,...ah];
 }
+function editAdHocFromBadge(el) {
+  event.stopPropagation();
+  openAdHocModal(el.getAttribute('data-ahid'));
+}
 function changeTaskStatus(taskId, isAdHoc, newStatus) {
   isAdHoc = isAdHoc === true || isAdHoc === 'true';
   if (isAdHoc) {
@@ -984,7 +988,7 @@ function renderTaskBoard(){
           ${cc>0?'<span style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">'+cc+'</span>':''}
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
             <div class="tcard-name" style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">${esc(t.name)}</div>
-            ${t.isAdHoc?'<span class="adhoc-badge" style="cursor:pointer" onclick="openAdHocModal(''+t.id+'')">Ad Hoc &#9998;</span>':''}
+            ${t.isAdHoc?'<span class="adhoc-badge" data-ahid="'+t.id+'" onclick="editAdHocFromBadge(this)" style="cursor:pointer">Ad Hoc &#9998;</span>':''}
           </div>
           <div class="tcard-proj">${esc(t.projName)}</div>
           <div class="tcard-meta" style="margin-bottom:6px">
