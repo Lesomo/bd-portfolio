@@ -966,7 +966,7 @@ function renderTaskBoard(){
         const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
         const cc=getCommentCount(String(t.id),t.isAdHoc);
         return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" onclick="openPanel('${t.id}',${t.isAdHoc})" style="position:relative">
-          \${cc>0?`<div style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">\${cc}</div>`:''}
+          ${cc>0?`<div style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">${cc}</div>`:''}
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
             <div class="tcard-name">${esc(t.name)}</div>
             ${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
