@@ -8,175 +8,179 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:100vh;font-size:13px}
 :root{
-  --primary:#68217D;--primary-dark:#4A1759;--primary-light:#E8D5EE;
-  --sec-blue:#7A92AC;--sec-blue-l:#DDE4EC;--sec-sage:#CFCFB7;--sec-sage-d:#7A7A58;
-  --sec-pink:#E1C6CD;--sec-pink-d:#8C5060;--sec-mauve:#D5A99C;--sec-mauve-d:#7A4A40;
-  --sec-cream:#FCF5E3;--ter-sky:#A6C4CF;--ter-sky-d:#2F6070;
-  --ter-gold:#DBC25D;--ter-gold-d:#6B5A10;--ter-sage:#89AB90;--ter-sage-d:#2E4F34;
-  --ter-slate:#8B90B0;--ter-slate-d:#3A3F60;--ter-lilac:#A98FA8;--ter-lilac-d:#5C3D5B;
-  --red:#C00000;--red-l:#FFDCE0;--amber:#C55A11;--amber-l:#FCE4D6;
-  --green:#375623;--green-l:#E2EFDA;
-  --white:#FFFFFF;--grey-light:#F5F0F7;--grey-mid:#D6C8DB;--grey-text:#595959;
+  --primary:#68217D;--pd:#4A1759;--pl:#E8D5EE;
+  --sb:#7A92AC;--sbl:#DDE4EC;--sg:#CFCFB7;--sgd:#7A7A58;
+  --sp:#E1C6CD;--spd:#8C5060;--sm:#D5A99C;--smd:#7A4A40;
+  --sc:#FCF5E3;--tsky:#A6C4CF;--tskyd:#2F6070;
+  --tg:#DBC25D;--tgd:#6B5A10;--tst:#89AB90;--tstd:#2E4F34;
+  --tsl:#8B90B0;--tsld:#3A3F60;--tl:#A98FA8;--tld:#5C3D5B;
+  --red:#C00000;--redl:#FFDCE0;--amb:#C55A11;--ambl:#FCE4D6;
+  --grn:#375623;--grnl:#E2EFDA;
+  --wh:#FFFFFF;--gl:#F5F0F7;--gm:#D6C8DB;--gt:#595959;
 }
-
 /* ── Nav ── */
-.nav{background:var(--primary);padding:0 16px;display:flex;align-items:center;gap:3px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(74,23,89,.3);flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:8px;padding:10px 0;margin-right:14px;flex-shrink:0;text-decoration:none}
-.brand-icon{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:12px;flex-shrink:0}
-.brand-name{color:#fff;font-weight:800;font-size:12px;line-height:1.1}
-.brand-sub{color:rgba(255,255,255,.5);font-size:8px;letter-spacing:2px;text-transform:uppercase}
-.nav-btn{background:transparent;border:none;color:rgba(255,255,255,.6);padding:8px 10px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:400;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.nav-btn.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700}
-.nav-btn:hover{background:rgba(255,255,255,.1);color:#fff}
-.nav-badge{background:var(--red);color:#fff;font-size:8px;font-weight:800;border-radius:8px;padding:1px 5px;min-width:16px;text-align:center}
-.role-wrap{display:flex;align-items:center;gap:5px;margin-left:auto;padding:8px 0;flex-shrink:0}
-.role-label{font-size:9px;color:rgba(255,255,255,.5)}
-.role-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:7px;padding:3px 8px;font-size:10px;cursor:pointer}
-
-/* ── Page header ── */
-.page-hdr{background:var(--primary-dark);padding:16px 16px 0}
-.page-title{color:#fff;font-weight:800;font-size:17px;letter-spacing:-.3px}
-.page-sub{color:rgba(255,255,255,.45);font-size:10px;margin-top:2px}
-.tabs-bar{display:flex;gap:0;margin-top:12px;overflow-x:auto}
-.tab-btn{background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.4);padding:7px 12px;cursor:pointer;font-size:11px;font-weight:400;white-space:nowrap;display:flex;align-items:center;gap:4px;transition:all .15s}
-.tab-btn.active{border-bottom:3px solid var(--ter-gold);color:#fff;font-weight:700}
-.tab-btn:hover{color:rgba(255,255,255,.8)}
-
+.nav{background:var(--primary);padding:0 14px;display:flex;align-items:center;gap:2px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(74,23,89,.3);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;padding:9px 0;margin-right:12px;flex-shrink:0}
+.brand-icon{width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:11px}
+.brand-name{color:#fff;font-weight:800;font-size:11px;line-height:1.1}
+.brand-sub{color:rgba(255,255,255,.5);font-size:8px;letter-spacing:1.5px;text-transform:uppercase}
+.nb{background:transparent;border:none;color:rgba(255,255,255,.6);padding:7px 9px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:400;display:flex;align-items:center;gap:3px;white-space:nowrap;font-family:inherit}
+.nb.active{background:rgba(255,255,255,.18);color:#fff;font-weight:700}
+.nb:hover{background:rgba(255,255,255,.1);color:#fff}
+.nbadge{background:var(--red);color:#fff;font-size:8px;font-weight:800;border-radius:8px;padding:1px 5px}
+.role-wrap{display:flex;align-items:center;gap:5px;margin-left:auto;padding:7px 0;flex-shrink:0}
+.role-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:inherit}
+/* ── Page hdr ── */
+.phdr{background:var(--pd);padding:14px 16px 0}
+.ptitle{color:#fff;font-weight:800;font-size:16px;letter-spacing:-.3px}
+.psub{color:rgba(255,255,255,.45);font-size:10px;margin-top:2px}
+.tabs-bar{display:flex;gap:0;margin-top:11px;overflow-x:auto}
+.tb{background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.4);padding:7px 11px;cursor:pointer;font-size:10px;font-weight:400;white-space:nowrap;display:flex;align-items:center;gap:3px;font-family:inherit}
+.tb.active{border-bottom:3px solid var(--tg);color:#fff;font-weight:700}
 /* ── Views ── */
-.view{display:none;padding:16px;max-width:1280px;margin:0 auto}
-.view.active{display:grid;gap:14px}
-
+.view{display:none;padding:14px;max-width:1280px;margin:0 auto}
+.view.active{display:grid;gap:12px}
 /* ── Cards ── */
-.card{background:#fff;border-radius:10px;border:1px solid var(--grey-mid);overflow:hidden}
-.card-head{background:var(--primary);padding:9px 14px;display:flex;justify-content:space-between;align-items:center}
-.card-head span{color:#fff;font-weight:800;font-size:11px;letter-spacing:.4px;text-transform:uppercase}
-
+.card{background:#fff;border-radius:10px;border:1px solid var(--gm);overflow:hidden}
+.ch{background:var(--primary);padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+.ch span{color:#fff;font-weight:800;font-size:10px;letter-spacing:.4px;text-transform:uppercase}
 /* ── Badges ── */
-.pill{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;display:inline-block}
-
-/* ── Progress bar ── */
-.pbar-wrap{display:flex;align-items:center;gap:5px}
-.pbar-bg{flex:1;height:5px;background:var(--grey-mid);border-radius:3px;overflow:hidden;min-width:40px}
-.pbar-fill{height:100%;border-radius:3px;background:var(--primary);transition:width .4s}
-.pbar-txt{font-size:9px;color:var(--grey-text);min-width:24px}
-
-/* ── KPI cards ── */
-.kpi-row{display:flex;gap:8px;flex-wrap:wrap}
-.kpi{border-radius:10px;padding:12px 14px;flex:1;min-width:90px}
-.kpi-label{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.75;margin-bottom:2px}
-.kpi-val{font-size:24px;font-weight:800;line-height:1}
-
-/* ── Stat grid ── */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:600px){.stat-grid{grid-template-columns:1fr}}
-
+.pill{padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;white-space:nowrap;display:inline-block}
+/* ── Progress ── */
+.pb{display:flex;align-items:center;gap:4px}
+.pb-bg{flex:1;height:5px;background:var(--gm);border-radius:3px;overflow:hidden;min-width:36px}
+.pb-fill{height:100%;border-radius:3px;background:var(--primary)}
+.pb-txt{font-size:9px;color:var(--gt);min-width:22px}
+/* ── KPI row ── */
+.krow{display:flex;gap:8px;flex-wrap:wrap}
+.kcard{border-radius:10px;padding:11px 13px;flex:1;min-width:85px}
+.klbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.75;margin-bottom:2px}
+.kval{font-size:22px;font-weight:800;line-height:1}
 /* ── Filter row ── */
-.filter-row{background:#fff;border-radius:10px;padding:10px 12px;border:1px solid var(--grey-mid);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.filter-sel{border:1px solid var(--grey-mid);border-radius:7px;padding:5px 8px;font-size:11px;color:var(--primary-dark);background:#fff;cursor:pointer}
-.add-btn{background:var(--primary);color:#fff;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-weight:700;font-size:11px;margin-left:auto}
-.add-btn:hover{background:var(--primary-dark)}
-.search-inp{border:1px solid var(--grey-mid);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--primary-dark);flex:1;min-width:140px}
-
+.frow{background:#fff;border-radius:10px;padding:9px 12px;border:1px solid var(--gm);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fsel{border:1px solid var(--gm);border-radius:6px;padding:4px 7px;font-size:10px;color:var(--pd);background:#fff;cursor:pointer;font-family:inherit}
+.sinp{border:1px solid var(--gm);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--pd);flex:1;min-width:130px;font-family:inherit}
+.abtn{background:var(--primary);color:#fff;border:none;border-radius:6px;padding:5px 11px;cursor:pointer;font-weight:700;font-size:10px;margin-left:auto;font-family:inherit}
+.abtn:hover{background:var(--pd)}
 /* ── Table ── */
-.tbl-hdr{display:grid;background:var(--primary);padding:9px 14px;gap:8px}
-.tbl-hdr span{font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px}
-.tbl-row{display:grid;padding:10px 14px;gap:8px;align-items:center;border-top:1px solid var(--grey-mid);cursor:pointer;transition:background .1s}
-.tbl-row:hover{filter:brightness(.97)}
-.proj-name{font-weight:700;font-size:11px;color:var(--primary-dark);margin-bottom:1px}
-.proj-sub{font-size:9px;color:var(--grey-text)}
-.tbl-cols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px}
-@media(max-width:700px){
-  .tbl-cols{grid-template-columns:1fr 1fr}
-  .hide-mobile{display:none}
-}
-
+.thdr{display:grid;background:var(--primary);padding:8px 14px;gap:7px}
+.thdr span{font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px}
+.trow{display:grid;padding:9px 14px;gap:7px;align-items:center;border-top:1px solid var(--gm)}
+.trow:hover{filter:brightness(.97)}
+.pname{font-weight:700;font-size:11px;color:var(--pd);margin-bottom:1px}
+.psub{font-size:9px;color:var(--gt)}
+.tcols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 90px 28px}
+@media(max-width:750px){.tcols{grid-template-columns:1fr 1fr}.hm{display:none}}
+/* ── Avatar ── */
+.av{width:20px;height:20px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:var(--primary);flex-shrink:0;border:1.5px solid #fff}
+.av-sm{width:16px;height:16px;font-size:6px}
 /* ── Modal ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(74,23,89,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:14px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(74,23,89,.35)}
-.modal-hdr{background:var(--primary);padding:16px 20px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.modal-hdr span{color:#fff;font-weight:800;font-size:13px}
-.modal-body{padding:20px;display:grid;gap:12px}
-.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:500px){.modal-row{grid-template-columns:1fr}}
-.field-label{font-size:10px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;display:block}
-.field-inp{border:1px solid var(--grey-mid);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--primary-dark);width:100%;background:#fff;font-family:inherit}
-.field-inp:focus{outline:none;border-color:var(--primary)}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:6px}
-.btn-cancel{padding:7px 18px;border-radius:7px;border:1px solid var(--grey-mid);background:#fff;color:var(--grey-text);cursor:pointer;font-size:12px;font-family:inherit}
-.btn-save{padding:7px 22px;border-radius:7px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit}
-.btn-delete{padding:7px 14px;border-radius:7px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:11px;font-family:inherit}
-.btn-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-
-/* ── Dashboard ── */
-.mini-bar-wrap{padding:14px;display:grid;gap:10px}
-.mini-bar-item{display:flex;flex-direction:column;gap:3px}
-.mini-bar-labels{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.mini-bar-bg{height:5px;background:var(--grey-mid);border-radius:3px;overflow:hidden}
-
+.mo{position:fixed;inset:0;background:rgba(74,23,89,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:14px}
+.mo.open{display:flex}
+.mbox{background:#fff;border-radius:13px;width:100%;max-width:660px;max-height:93vh;overflow-y:auto;box-shadow:0 24px 64px rgba(74,23,89,.35)}
+.mhdr{background:var(--primary);padding:14px 18px;border-radius:13px 13px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.mhdr span{color:#fff;font-weight:800;font-size:12px}
+.mbody{padding:18px;display:grid;gap:11px}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:480px){.mrow{grid-template-columns:1fr}}
+.fl{font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;display:block}
+.fi{border:1px solid var(--gm);border-radius:5px;padding:5px 9px;font-size:11px;color:var(--pd);width:100%;background:#fff;font-family:inherit}
+.fi:focus{outline:none;border-color:var(--primary)}
+.mact{display:flex;justify-content:flex-end;gap:7px;padding-top:4px}
+.bcan{padding:6px 16px;border-radius:6px;border:1px solid var(--gm);background:#fff;color:var(--gt);cursor:pointer;font-size:11px;font-family:inherit}
+.bsav{padding:6px 20px;border-radius:6px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit}
+.bdel{padding:6px 12px;border-radius:6px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:10px;font-family:inherit}
+.bcls{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+/* ── Stat grid ── */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:580px){.sgrid{grid-template-columns:1fr}}
+.mbar{padding:13px;display:grid;gap:9px}
+.mbi{display:flex;flex-direction:column;gap:2px}
+.mbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.mbb{height:5px;background:var(--gm);border-radius:3px;overflow:hidden}
 /* ── WBS ── */
-.wbs-proj-hdr{padding:11px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
-.wbs-proj-hdr:hover{background:var(--primary-dark)}
-.wbs-phase-hdr{display:grid;grid-template-columns:18px 1fr 100px 70px 60px;gap:6px;padding:7px 12px 7px 28px;background:var(--sec-blue-l);border-top:1px solid var(--grey-mid);align-items:center;cursor:pointer;user-select:none}
-.wbs-task-row{display:grid;grid-template-columns:18px 1fr 100px 90px 110px 110px;gap:6px;padding:7px 12px 7px 44px;border-top:1px solid var(--grey-mid);align-items:center}
-@media(max-width:700px){
-  .wbs-phase-hdr{grid-template-columns:18px 1fr 90px}
-  .wbs-phase-hide{display:none}
-  .wbs-task-row{grid-template-columns:18px 1fr 90px}
-  .wbs-task-hide{display:none}
-}
-
+.wph{padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
+.wph:hover{background:var(--pd)}
+.wphase{display:grid;grid-template-columns:16px 1fr 95px 65px 55px;gap:5px;padding:7px 11px 7px 26px;background:var(--sbl);border-top:1px solid var(--gm);align-items:center;cursor:pointer;user-select:none}
+.wtask{display:grid;grid-template-columns:16px 1fr 95px 85px 105px 105px;gap:5px;padding:6px 11px 6px 40px;border-top:1px solid var(--gm);align-items:center}
+@media(max-width:680px){.wphase{grid-template-columns:16px 1fr 85px}.wph-hide{display:none}.wtask{grid-template-columns:16px 1fr 85px}.wt-hide{display:none}}
+/* ── KPI tiles ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px;padding:12px;background:#fff;border:1px solid var(--gm);border-top:none;border-radius:0 0 10px 10px}
+.kpi-tile{border-radius:8px;padding:11px;border:1px solid var(--gm)}
+.kpi-cat{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kpi-nm{font-size:10px;font-weight:700;color:var(--pd);margin-bottom:7px;line-height:1.3}
+.kpi-vals{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px}
+.kpi-vbox{text-align:center;padding:5px;border-radius:5px}
+.kpi-vlbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+.kpi-vnum{font-size:15px;font-weight:800;line-height:1}
+.kpi-bbg{height:4px;background:var(--gm);border-radius:3px;overflow:hidden}
+.kpi-bfill{height:100%;border-radius:3px}
+.kpi-pct{font-size:9px;font-weight:700;margin-top:3px}
+.rag{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px}
 /* ── Gantt ── */
-.gantt-wrap{overflow-x:auto}
-.gantt-inner{min-width:600px}
-.gantt-hdr{display:grid;grid-template-columns:180px 1fr}
-.gantt-lbl-hdr{padding:7px 10px;background:var(--primary-dark)}
-.gantt-time-hdr{background:var(--primary-dark);display:flex}
-.gantt-month{flex:1;padding:7px 2px;font-size:8px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.3px;border-left:1px solid rgba(255,255,255,.15);text-align:center}
-.gantt-row{display:grid;grid-template-columns:180px 1fr;border-top:1px solid var(--grey-mid)}
-.gantt-lbl{padding:8px 10px}
-.gantt-lbl-name{font-size:10px;font-weight:700;color:var(--primary-dark);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
-.gantt-bar-area{position:relative;min-height:36px;overflow:hidden}
-
-/* ── Recommendations ── */
-.health-box{border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:16px}
-.health-score-num{font-size:40px;font-weight:900;line-height:1;text-align:center}
-.health-score-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;margin-top:2px}
-.health-bar-bg{height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-bottom:5px}
-.health-bar-fill{height:100%;border-radius:4px}
-.sev-row{display:flex;gap:8px;flex-wrap:wrap}
-.sev-card{border-radius:10px;padding:10px 14px;flex:1;min-width:80px;display:flex;align-items:center;gap:8px;border:1px solid rgba(0,0,0,.06)}
-.sev-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.cat-filter-row{display:flex;gap:6px;flex-wrap:wrap}
-.cat-filter-btn{border-radius:20px;padding:4px 12px;cursor:pointer;font-size:10px;font-weight:400;border:1px solid var(--grey-mid);background:#fff;color:var(--primary-dark);font-family:inherit}
-.cat-filter-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
-.rec-card{border-radius:10px;overflow:hidden;border:1.5px solid rgba(0,0,0,.08)}
-.rec-head{padding:12px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;user-select:none}
-.rec-title{font-weight:800;font-size:12px;color:var(--primary-dark);margin-bottom:3px}
-.rec-detail{font-size:11px;color:var(--grey-text);line-height:1.5}
-.rec-body{border-top:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.65);padding:12px 14px}
-.rec-action-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.rec-action{font-size:11px;color:var(--primary-dark);line-height:1.6}
-.rec-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.rec-chip{background:#fff;border:1px solid var(--grey-mid);color:var(--primary-dark);font-size:10px;padding:3px 8px;border-radius:5px}
-.info-box{background:var(--primary-light);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--primary-dark)}
-
-/* ── Workload cards ── */
-.wl-card{border-radius:9px;padding:10px 12px;text-align:center;flex:1;min-width:80px}
-.wl-num{font-size:24px;font-weight:800;line-height:1}
-.wl-name{font-size:9px;color:var(--grey-text);margin-top:2px}
-.wl-warning{margin:0 14px 14px;padding:7px 10px;background:var(--amber-l);border-radius:7px;font-size:10px;color:var(--amber);font-weight:600}
-
-/* ── Footer ── */
-.footer{text-align:center;padding:20px;font-size:10px;color:var(--grey-text)}
-
+.gw{overflow-x:auto}
+.gi{min-width:580px}
+.ghdr{display:grid;grid-template-columns:170px 1fr}
+.glh{padding:7px 9px;background:var(--pd)}
+.gth{background:var(--pd);display:flex}
+.gm2{flex:1;padding:6px 2px;font-size:8px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.3px;border-left:1px solid rgba(255,255,255,.15);text-align:center}
+.grow{display:grid;grid-template-columns:170px 1fr;border-top:1px solid var(--gm)}
+.gl{padding:7px 9px}
+.gln{font-size:10px;font-weight:700;color:var(--pd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.gba{position:relative;min-height:34px;overflow:hidden}
+/* ── Recs ── */
+.hbox{border-radius:11px;padding:13px 15px;display:flex;align-items:center;gap:14px}
+.hsnum{font-size:38px;font-weight:900;line-height:1;text-align:center}
+.hslbl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;margin-top:1px}
+.hbbg{height:7px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.hbfill{height:100%;border-radius:3px}
+.srow{display:flex;gap:7px;flex-wrap:wrap}
+.sc2{border-radius:9px;padding:9px 13px;flex:1;min-width:75px;display:flex;align-items:center;gap:7px;border:1px solid rgba(0,0,0,.06)}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cfrow{display:flex;gap:5px;flex-wrap:wrap}
+.cfb{border-radius:20px;padding:3px 11px;cursor:pointer;font-size:10px;font-weight:400;border:1px solid var(--gm);background:#fff;color:var(--pd);font-family:inherit}
+.cfb.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
+.rc{border-radius:9px;overflow:hidden;border:1.5px solid rgba(0,0,0,.08);margin-bottom:7px}
+.rh{padding:11px 13px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;user-select:none}
+.rt{font-weight:800;font-size:11px;color:var(--pd);margin-bottom:2px}
+.rd{font-size:10px;color:var(--gt);line-height:1.5}
+.rb{border-top:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.65);padding:11px 13px}
+.ral{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.ra{font-size:10px;color:var(--pd);line-height:1.6}
+.rcs{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.rch{background:#fff;border:1px solid var(--gm);color:var(--pd);font-size:9px;padding:2px 7px;border-radius:4px}
+/* ── Task Board ── */
+.tog-bar{background:#fff;border-radius:10px;border:1px solid var(--gm);padding:9px 12px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.togb{border-radius:6px;padding:4px 12px;border:1px solid var(--gm);background:#fff;color:var(--pd);font-size:10px;cursor:pointer;font-weight:400;font-family:inherit}
+.togb.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+@media(max-width:680px){.board{grid-template-columns:repeat(2,1fr)}}
+.bcol-hdr{padding:7px 9px;border-radius:7px 7px 0 0;display:flex;justify-content:space-between;align-items:center}
+.bcol-body{background:#F5F0F7;border-radius:0 0 7px 7px;padding:7px;display:grid;gap:5px;min-height:100px}
+.tcard{background:#fff;border-radius:7px;border:1px solid var(--gm);padding:9px;cursor:pointer;transition:border-color .15s}
+.tcard:hover{border-color:var(--primary)}
+.tcard-name{font-size:10px;font-weight:700;color:var(--pd);margin-bottom:4px;line-height:1.3}
+.tcard-proj{font-size:9px;color:var(--gt);margin-bottom:4px}
+.tcard-meta{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+.adhoc-badge{font-size:8px;padding:1px 5px;border-radius:8px;background:var(--tg);color:var(--tgd);font-weight:700}
+.due-warn{font-size:8px;color:var(--red);font-weight:700}
+/* ── Benefits ── */
+.brow{display:flex;gap:8px;flex-wrap:wrap}
+.bkpi{border-radius:10px;padding:11px 13px;flex:1;min-width:90px}
+.bklbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.75;margin-bottom:2px}
+.bkval{font-size:20px;font-weight:800;line-height:1}
+.lgrow{display:grid;grid-template-columns:1fr auto auto;gap:9px;padding:8px 12px;align-items:center;border-top:1px solid var(--gm)}
+.lgbar-bg{height:5px;background:var(--gm);border-radius:3px;overflow:hidden;margin-top:2px}
+/* ── KPI add modal ── */
+.info-box{background:var(--pl);border-radius:7px;padding:8px 12px;font-size:10px;color:var(--pd)}
+/* ── Collab chips ── */
+.collab-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.collab-chip{display:flex;align-items:center;gap:3px;background:var(--pl);border-radius:10px;padding:2px 7px 2px 3px;font-size:9px;color:var(--pd)}
 /* ── Scrollbar ── */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--grey-mid);border-radius:2px}
-
-/* ── Responsive table hide ── */
-@media(max-width:800px){.tbl-hide-md{display:none}}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--gm);border-radius:2px}
+/* ── Footer ── */
+.footer{text-align:center;padding:18px;font-size:9px;color:var(--gt)}
+@media(max-width:750px){.hm{display:none}}
 </style>
 </head>
 <body>
@@ -185,466 +189,473 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 <nav class="nav">
   <div class="brand">
     <div class="brand-icon">BD</div>
-    <div>
-      <div class="brand-name">BUSINESS DEVELOPMENT</div>
-      <div class="brand-sub">Project Portfolio</div>
-    </div>
+    <div><div class="brand-name">BUSINESS DEVELOPMENT</div><div class="brand-sub">Project Portfolio</div></div>
   </div>
-  <button class="nav-btn active" onclick="switchView('tracker')">&#9776; Tracker</button>
-  <button class="nav-btn" onclick="switchView('dashboard')">&#9672; Dashboard</button>
-  <button class="nav-btn" onclick="switchView('wbs')">&#8862; Tasks</button>
-  <button class="nav-btn" onclick="switchView('gantt')">&#9644; Gantt</button>
-  <button class="nav-btn" onclick="switchView('recs')" id="rec-nav-btn">&#128161; Recommendations <span class="nav-badge" id="rec-count-badge">0</span></button>
+  <button class="nb active" onclick="sv('tracker')">&#9776; Tracker</button>
+  <button class="nb" onclick="sv('dashboard')">&#9672; Dashboard</button>
+  <button class="nb" onclick="sv('activity')">&#8862; Activity</button>
+  <button class="nb" onclick="sv('taskboard')">&#9634; Task Board</button>
+  <button class="nb" onclick="sv('gantt')">&#9644; Gantt</button>
+  <button class="nb" onclick="sv('benefits')">&#9733; Benefits</button>
+  <button class="nb" onclick="sv('recs')" id="rec-nav"><span>&#128161;</span> Recs <span class="nbadge" id="rbadge">0</span></button>
   <div class="role-wrap">
-    <span class="role-label">View as:</span>
-    <select class="role-sel" id="role-sel" onchange="applyRole()">
-      <option>Admin</option>
-      <option>Project Leads</option>
-      <option>Leadership</option>
+    <span style="font-size:9px;color:rgba(255,255,255,.5)">View as:</span>
+    <select class="role-sel" id="role-sel" onchange="renderTracker()">
+      <option>Admin</option><option>Project Leads</option><option>Leadership</option>
     </select>
   </div>
 </nav>
 
-<!-- PAGE HEADER -->
-<div class="page-hdr">
+<!-- PAGE HDR -->
+<div class="phdr">
   <div style="max-width:1280px;margin:0 auto">
-    <div class="page-title" id="page-title">Project Tracker</div>
-    <div class="page-sub" id="page-sub"></div>
+    <div class="ptitle" id="ptitle">Project Tracker</div>
+    <div class="psub" id="psub"></div>
     <div class="tabs-bar">
-      <button class="tab-btn active" onclick="switchView('tracker')">Project Tracker</button>
-      <button class="tab-btn" onclick="switchView('dashboard')">Dashboard</button>
-      <button class="tab-btn" onclick="switchView('wbs')">Task Breakdown</button>
-      <button class="tab-btn" onclick="switchView('gantt')">Gantt Chart</button>
-      <button class="tab-btn" onclick="switchView('recs')">Recommendations <span class="nav-badge" id="rec-count-badge2">0</span></button>
+      <button class="tb active" onclick="sv('tracker')">Project Tracker</button>
+      <button class="tb" onclick="sv('dashboard')">Dashboard</button>
+      <button class="tb" onclick="sv('activity')">Activity Breakdown</button>
+      <button class="tb" onclick="sv('taskboard')">Task Board</button>
+      <button class="tb" onclick="sv('gantt')">Gantt Chart</button>
+      <button class="tb" onclick="sv('benefits')">Results &amp; Benefits</button>
+      <button class="tb" onclick="sv('recs')">Recommendations <span class="nbadge" id="rbadge2">0</span></button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     VIEW: TRACKER
-══════════════════════════════════════════════ -->
+<!-- TRACKER -->
 <div class="view active" id="view-tracker">
-  <div class="filter-row">
-    <input class="search-inp" id="search-inp" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
-    <select class="filter-sel" id="f-cat" onchange="renderTracker()">
-      <option value="">All Categories</option>
-      <option>Operations</option>
-      <option>People &amp; Training</option>
-      <option>Technology &amp; Assets</option>
-      <option>Finance</option>
-    </select>
-    <select class="filter-sel" id="f-pri" onchange="renderTracker()">
-      <option value="">All Priorities</option>
-      <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
-    </select>
-    <select class="filter-sel" id="f-lead" onchange="renderTracker()">
-      <option value="">All Leads</option>
-      <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
-      <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
-    </select>
-    <select class="filter-sel" id="f-stat" onchange="renderTracker()">
-      <option value="">All Statuses</option>
-      <option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option>
-    </select>
-    <span id="filter-count" style="font-size:10px;color:var(--grey-text)"></span>
-    <button class="add-btn" id="add-proj-btn" onclick="openModal(null)">+ Add Project</button>
+  <div class="frow">
+    <input class="sinp" id="si" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
+    <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select>
+    <select class="fsel" id="fp" onchange="renderTracker()"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+    <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+    <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
+    <span id="fcount" style="font-size:9px;color:var(--gt)"></span>
+    <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
   </div>
   <div class="card">
-    <div class="tbl-hdr tbl-cols" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px">
-      <span>Project</span>
-      <span class="hide-mobile">Lead</span>
-      <span>Priority</span>
-      <span class="tbl-hide-md">Status</span>
-      <span class="tbl-hide-md">Approval</span>
-      <span class="hide-mobile">Progress</span>
-      <span></span>
-    </div>
-    <div id="tbl-body"></div>
+    <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span></span></div>
+    <div id="tbody"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     VIEW: DASHBOARD
-══════════════════════════════════════════════ -->
+<!-- DASHBOARD -->
 <div class="view" id="view-dashboard">
-  <div class="kpi-row" id="kpi-row"></div>
-  <div class="stat-grid">
-    <div class="card">
-      <div class="card-head"><span>By Category</span></div>
-      <div class="mini-bar-wrap" id="dash-cat"></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><span>By Priority</span></div>
-      <div class="mini-bar-wrap" id="dash-pri"></div>
-    </div>
+  <div class="krow" id="dkrow"></div>
+  <div class="sgrid">
+    <div class="card"><div class="ch"><span>By Category</span></div><div class="mbar" id="dcat"></div></div>
+    <div class="card"><div class="ch"><span>By Priority</span></div><div class="mbar" id="dpri"></div></div>
   </div>
   <div class="card">
-    <div class="card-head"><span>Workload by Project Lead</span></div>
-    <div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap" id="dash-wl"></div>
-    <div id="dash-wl-warn"></div>
+    <div class="ch"><span>Total Involvement by Lead (lead + collaborator roles)</span></div>
+    <div style="padding:13px;display:flex;gap:7px;flex-wrap:wrap" id="dwl"></div>
+    <div id="dwlw"></div>
   </div>
-  <div class="card">
-    <div class="card-head"><span>Portfolio Progress</span></div>
-    <div style="padding:14px;display:grid;gap:8px" id="dash-prog"></div>
-  </div>
+  <div class="card"><div class="ch"><span>Portfolio Progress</span></div><div style="padding:13px;display:grid;gap:7px" id="dprog"></div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     VIEW: WBS
-══════════════════════════════════════════════ -->
-<div class="view" id="view-wbs">
-  <div class="info-box">
-    <strong>Work Breakdown Structure</strong> — Click a project to expand its phases and tasks. Update status and dates inline.
-  </div>
-  <div id="wbs-body"></div>
+<!-- ACTIVITY BREAKDOWN -->
+<div class="view" id="view-activity">
+  <div class="info-box"><strong>Activity Breakdown</strong> — Click a project to expand phases, tasks and KPIs. Update status and dates inline.</div>
+  <div id="actbody"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     VIEW: GANTT
-══════════════════════════════════════════════ -->
+<!-- TASK BOARD -->
+<div class="view" id="view-taskboard">
+  <div class="tog-bar">
+    <button class="togb active" id="tog-board" onclick="setTog('board')">Board</button>
+    <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
+    <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+    <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
+    <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
+    <button class="abtn" onclick="openAdHocModal()">+ Add Task</button>
+  </div>
+  <div id="tbboard"></div>
+  <div id="tblist" style="display:none"></div>
+</div>
+
+<!-- GANTT -->
 <div class="view" id="view-gantt">
-  <div style="background:var(--primary-light);border-radius:8px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-    <span style="font-size:11px;color:var(--primary-dark)"><strong>Gantt Chart</strong> — Set start &amp; end dates via Edit. Red = Critical Path. Today line shown.</span>
-    <div style="display:flex;gap:5px">
-      <button id="zoom-month" onclick="setZoom('month')" style="background:var(--primary);color:#fff;border:none;border-radius:5px;padding:4px 12px;font-size:10px;cursor:pointer;font-weight:700;font-family:inherit">Monthly</button>
-      <button id="zoom-quarter" onclick="setZoom('quarter')" style="background:#fff;color:var(--primary-dark);border:1px solid var(--grey-mid);border-radius:5px;padding:4px 12px;font-size:10px;cursor:pointer;font-family:inherit">Quarterly</button>
+  <div style="background:var(--pl);border-radius:7px;padding:8px 13px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px">
+    <span style="font-size:10px;color:var(--pd)"><strong>Gantt Chart</strong> — Set start &amp; end dates via Edit. Red = Critical Path.</span>
+    <div style="display:flex;gap:4px">
+      <button id="zm" onclick="setZoom('month')" style="background:var(--primary);color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Monthly</button>
+      <button id="zq" onclick="setZoom('quarter')" style="background:#fff;color:var(--pd);border:1px solid var(--gm);border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-family:inherit">Quarterly</button>
     </div>
   </div>
   <div class="card">
-    <div style="padding:7px 14px;background:var(--grey-light);border-bottom:1px solid var(--grey-mid);display:flex;gap:12px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--red)"></div><span style="font-size:9px;color:var(--grey-text)">Critical</span></div>
-      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--primary)"></div><span style="font-size:9px;color:var(--grey-text)">In progress</span></div>
-      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--ter-sage)"></div><span style="font-size:9px;color:var(--grey-text)">Complete</span></div>
-      <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:var(--sec-mauve)"></div><span style="font-size:9px;color:var(--grey-text)">On hold</span></div>
-      <div style="display:flex;align-items:center;gap:4px"><div style="width:2px;height:10px;background:var(--red)"></div><span style="font-size:9px;color:var(--grey-text)">Today</span></div>
+    <div style="padding:6px 13px;background:var(--gl);border-bottom:1px solid var(--gm);display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--red)"></div><span style="font-size:8px;color:var(--gt)">Critical</span></div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--primary)"></div><span style="font-size:8px;color:var(--gt)">In progress</span></div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--tst)"></div><span style="font-size:8px;color:var(--gt)">Complete</span></div>
+      <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--sm)"></div><span style="font-size:8px;color:var(--gt)">On hold</span></div>
+      <div style="display:flex;align-items:center;gap:3px;margin-left:auto"><div style="width:2px;height:9px;background:var(--red)"></div><span style="font-size:8px;color:var(--gt)">Today</span></div>
     </div>
-    <div class="gantt-wrap"><div class="gantt-inner" id="gantt-body"></div></div>
+    <div class="gw"><div class="gi" id="gbody"></div></div>
   </div>
-  <div class="card">
-    <div class="card-head"><span>Critical Path Summary</span></div>
-    <div style="padding:14px;display:grid;gap:8px" id="critical-summary"></div>
-  </div>
+  <div class="card"><div class="ch"><span>Critical Path Summary</span></div><div style="padding:13px;display:grid;gap:7px" id="cpsumm"></div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     VIEW: RECOMMENDATIONS
-══════════════════════════════════════════════ -->
+<!-- RESULTS & BENEFITS -->
+<div class="view" id="view-benefits">
+  <div class="brow" id="benrow"></div>
+  <div class="sgrid">
+    <div class="card"><div class="ch"><span>Value by Category</span></div><div class="mbar" id="bencat"></div></div>
+    <div class="card"><div class="ch"><span>KPI Achievement by Project</span></div><div class="mbar" id="benach"></div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span>Project League Table — Financial Value Delivered</span></div>
+    <div id="league"></div>
+    <div id="nokpi-warn"></div>
+  </div>
+  <div class="card"><div class="ch"><span>All KPI Records</span></div><div style="padding:13px;display:grid;gap:8px" id="allkpi"></div></div>
+</div>
+
+<!-- RECS -->
 <div class="view" id="view-recs">
-  <div id="health-box-wrap"></div>
-  <div class="sev-row" id="sev-cards"></div>
-  <div class="cat-filter-row" id="cat-filters"></div>
-  <div id="rec-list"></div>
-  <div class="info-box">Recommendations update automatically as you edit projects in the Tracker.</div>
+  <div id="hbox"></div>
+  <div class="srow" id="scards"></div>
+  <div class="cfrow" id="cfilters"></div>
+  <div id="rlist"></div>
+  <div class="info-box">Recommendations update automatically as you edit project data.</div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     MODAL
-══════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <span id="modal-title">Edit Project</span>
-      <div style="display:flex;gap:6px">
-        <button class="btn-delete" id="modal-del-btn" onclick="deleteProject()">Delete</button>
-        <button class="btn-close" onclick="closeModal()">&#215;</button>
+<!-- PROJECT MODAL -->
+<div class="mo" id="pmodal" onclick="closeMo('pmodal',event)">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span id="mtitle">Edit Project</span>
+      <div style="display:flex;gap:5px">
+        <button class="bdel" id="mdelb" onclick="delProj()">Delete</button>
+        <button class="bcls" onclick="closeMo('pmodal')">&#215;</button>
       </div>
     </div>
-    <div class="modal-body">
-      <div><label class="field-label">Project Name</label><input class="field-inp" id="f-name" type="text"/></div>
-      <div class="modal-row">
-        <div><label class="field-label">Project Lead</label>
-          <select class="field-inp" id="f-flead">
-            <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
-            <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
-          </select></div>
-        <div><label class="field-label">Category</label>
-          <select class="field-inp" id="f-fcat">
-            <option>Operations</option><option>People &amp; Training</option>
-            <option>Technology &amp; Assets</option><option>Finance</option>
-          </select></div>
+    <div class="mbody">
+      <div><label class="fl">Project Name</label><input class="fi" id="fn" type="text"/></div>
+      <div class="mrow">
+        <div><label class="fl">Project Lead</label><select class="fi" id="fld"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select></div>
+        <div><label class="fl">Category</label><select class="fi" id="fcat"><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select></div>
       </div>
-      <div class="modal-row">
-        <div><label class="field-label">Priority</label>
-          <select class="field-inp" id="f-fpri">
-            <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
-          </select></div>
-        <div><label class="field-label">Status</label>
-          <select class="field-inp" id="f-fstat">
-            <option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option>
-          </select></div>
+      <div class="mrow">
+        <div><label class="fl">Priority</label><select class="fi" id="fpri"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div><label class="fl">Status</label><select class="fi" id="fst"><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select></div>
       </div>
-      <div class="modal-row">
-        <div><label class="field-label">Approval</label>
-          <select class="field-inp" id="f-fappr">
-            <option>Proposed</option><option>Approved</option><option>Deferred</option><option>Rejected</option>
-          </select></div>
-        <div><label class="field-label">% Complete — <span id="pct-display">0</span>%</label>
-          <input type="range" id="f-fpct" min="0" max="100" value="0" oninput="document.getElementById('pct-display').textContent=this.value" style="width:100%;accent-color:var(--primary);margin-top:6px"/></div>
+      <div class="mrow">
+        <div><label class="fl">Approval</label><select class="fi" id="fap"><option>Proposed</option><option>Approved</option><option>Deferred</option><option>Rejected</option></select></div>
+        <div><label class="fl">% Complete — <span id="pctd">0</span>%</label><input type="range" id="fpct" min="0" max="100" value="0" step="1" oninput="document.getElementById('pctd').textContent=this.value" style="width:100%;accent-color:var(--primary);margin-top:5px"/></div>
       </div>
-      <div class="modal-row">
-        <div><label class="field-label">Business Impact</label>
-          <select class="field-inp" id="f-fimpact">
-            <option>Efficiency Gain</option><option>Cost Saving</option><option>Risk Reduction</option>
-            <option>Revenue Growth</option><option>Compliance</option>
-          </select></div>
-        <div><label class="field-label">Customer Value</label>
-          <select class="field-inp" id="f-fcustval">
-            <option>Order Winner</option><option>Order Qualifier</option><option>Disqualifier</option>
-          </select></div>
+      <div class="mrow">
+        <div><label class="fl">Business Impact</label><select class="fi" id="fbi"><option>Efficiency Gain</option><option>Cost Saving</option><option>Risk Reduction</option><option>Revenue Growth</option><option>Compliance</option></select></div>
+        <div><label class="fl">Customer Value</label><select class="fi" id="fcv"><option>Order Winner</option><option>Order Qualifier</option><option>Disqualifier</option></select></div>
       </div>
-      <div class="modal-row">
-        <div><label class="field-label">Target Start Date</label><input class="field-inp" id="f-fstart" type="date"/></div>
-        <div><label class="field-label">Target End Date</label><input class="field-inp" id="f-fend" type="date"/></div>
+      <div class="mrow">
+        <div><label class="fl">Target Start Date</label><input class="fi" id="fsd" type="date"/></div>
+        <div><label class="fl">Target End Date</label><input class="fi" id="fed" type="date"/></div>
       </div>
-      <div><label class="field-label">Problem Statement</label><textarea class="field-inp" id="f-fproblem" rows="2" style="resize:vertical"></textarea></div>
-      <div><label class="field-label">Expected Outcome / Success Metric</label><textarea class="field-inp" id="f-foutcome" rows="2" style="resize:vertical"></textarea></div>
-      <div class="modal-row">
-        <div><label class="field-label">Key Risks</label><textarea class="field-inp" id="f-frisks" rows="2" style="resize:vertical"></textarea></div>
-        <div><label class="field-label">Dependencies</label><textarea class="field-inp" id="f-fdeps" rows="2" style="resize:vertical"></textarea></div>
+      <!-- Collaborators -->
+      <div>
+        <label class="fl">Collaborators (internal)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px" id="collab-checks">
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Berenicia" style="accent-color:var(--primary)"> Berenicia</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Jacques" style="accent-color:var(--primary)"> Jacques</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Letlhogonolo" style="accent-color:var(--primary)"> Letlhogonolo</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Wendy" style="accent-color:var(--primary)"> Wendy</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Beverley" style="accent-color:var(--primary)"> Beverley</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="David" style="accent-color:var(--primary)"> David</label>
+          <label style="font-size:10px;color:var(--pd);display:flex;align-items:center;gap:3px;cursor:pointer"><input type="checkbox" value="Danesha" style="accent-color:var(--primary)"> Danesha</label>
+        </div>
+        <label class="fl">External collaborators (comma separated)</label>
+        <input class="fi" id="fext" type="text" placeholder="e.g. John Smith, ABC Consulting"/>
       </div>
-      <div><label class="field-label">Notes</label><textarea class="field-inp" id="f-fnotes" rows="2" style="resize:vertical"></textarea></div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-        <button class="btn-save" onclick="saveProject()">Save Changes</button>
+      <div><label class="fl">Problem Statement</label><textarea class="fi" id="fprob" rows="2" style="resize:vertical"></textarea></div>
+      <div><label class="fl">Expected Outcome / Success Metric</label><textarea class="fi" id="fout" rows="2" style="resize:vertical"></textarea></div>
+      <div class="mrow">
+        <div><label class="fl">Key Risks</label><textarea class="fi" id="frisk" rows="2" style="resize:vertical"></textarea></div>
+        <div><label class="fl">Dependencies</label><textarea class="fi" id="fdep" rows="2" style="resize:vertical"></textarea></div>
+      </div>
+      <div><label class="fl">Notes</label><textarea class="fi" id="fnotes" rows="2" style="resize:vertical"></textarea></div>
+      <div class="mact">
+        <button class="bcan" onclick="closeMo('pmodal')">Cancel</button>
+        <button class="bsav" onclick="saveProj()">Save Changes</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="footer">Business Development Project Portfolio &middot; <span id="year"></span></div>
+<!-- AD HOC TASK MODAL -->
+<div class="mo" id="ahmodal" onclick="closeMo('ahmodal',event)">
+  <div class="mbox" style="max-width:440px" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span id="ahtitle">Add Ad Hoc Task</span>
+      <div style="display:flex;gap:5px">
+        <button class="bdel" id="ahdelb" onclick="delAdHoc()" style="display:none">Delete</button>
+        <button class="bcls" onclick="closeMo('ahmodal')">&#215;</button>
+      </div>
+    </div>
+    <div class="mbody">
+      <div><label class="fl">Task Name</label><input class="fi" id="ahtname" type="text"/></div>
+      <div class="mrow">
+        <div><label class="fl">Owner</label><select class="fi" id="ahowner"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select></div>
+        <div><label class="fl">Priority</label><select class="fi" id="ahpri"><option>High</option><option>Critical</option><option>Medium</option><option>Low</option></select></div>
+      </div>
+      <div class="mrow">
+        <div><label class="fl">Status</label><select class="fi" id="ahstat"><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select></div>
+        <div><label class="fl">Due Date</label><input class="fi" id="ahdue" type="date"/></div>
+      </div>
+      <div><label class="fl">Notes</label><textarea class="fi" id="ahnotes" rows="2" style="resize:vertical"></textarea></div>
+      <div class="mact">
+        <button class="bcan" onclick="closeMo('ahmodal')">Cancel</button>
+        <button class="bsav" onclick="saveAdHoc()">Save Task</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI MODAL -->
+<div class="mo" id="kpimodal" onclick="closeMo('kpimodal',event)">
+  <div class="mbox" style="max-width:480px" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span id="kpimtitle">Add KPI</span>
+      <div style="display:flex;gap:5px">
+        <button class="bdel" id="kpidelb" onclick="delKPI()" style="display:none">Delete</button>
+        <button class="bcls" onclick="closeMo('kpimodal')">&#215;</button>
+      </div>
+    </div>
+    <div class="mbody">
+      <div class="mrow">
+        <div><label class="fl">Category</label><select class="fi" id="kpicat"><option>Financial</option><option>Efficiency</option><option>People</option><option>Quality</option><option>Custom</option></select></div>
+        <div><label class="fl">KPI Name</label><input class="fi" id="kpiname" type="text" placeholder="e.g. Cost saving"/></div>
+      </div>
+      <div class="mrow">
+        <div><label class="fl">Unit</label><input class="fi" id="kpiunit" type="text" placeholder="e.g. R, %, hours"/></div>
+        <div><label class="fl">Target Value</label><input class="fi" id="kpitgt" type="number" placeholder="0"/></div>
+      </div>
+      <div class="mrow">
+        <div><label class="fl">Actual Value</label><input class="fi" id="kpiact" type="number" placeholder="0"/></div>
+        <div><label class="fl">Notes / Source</label><input class="fi" id="kpinotes" type="text" placeholder="e.g. Q2 audit"/></div>
+      </div>
+      <div class="mact">
+        <button class="bcan" onclick="closeMo('kpimodal')">Cancel</button>
+        <button class="bsav" onclick="saveKPI()">Save KPI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Business Development Project Portfolio &middot; <span id="yr"></span></div>
 
 <script>
-document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('yr').textContent=new Date().getFullYear();
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-const PHASES = ['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
-const PHASE_TASKS = {
-  'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],
-  'Planning':['Project plan','Resource plan','Risk register','Communication plan'],
-  'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],
-  'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],
-  'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']
-};
-const LEADS = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
-const CATS  = ['Operations','People & Training','Technology & Assets','Finance'];
-const PRIS  = ['Critical','High','Medium','Low'];
+// ── Constants ─────────────────────────────────────────────────────────────────
+const PHASES=['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
+const PTASKS={'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],'Planning':['Project plan','Resource plan','Risk register','Communication plan'],'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']};
+const LEADS=['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+const CATS=['Operations','People & Training','Technology & Assets','Finance'];
+const PRIS=['Critical','High','Medium','Low'];
+const STATUSES=['Not Started','In Progress','On Hold','Complete'];
 
-function buildTasks(projId){
+function buildTasks(pid){
   const t=[];
-  PHASES.forEach((phase,pi)=>{
-    t.push({id:`${projId}-p${pi}`,projId,type:'phase',phase,name:phase,status:'Not Started',pct:0,owner:'',start:'',end:''});
-    PHASE_TASKS[phase].forEach((n,ti)=>t.push({id:`${projId}-p${pi}-t${ti}`,projId,type:'task',phase,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}));
+  PHASES.forEach((ph,pi)=>{
+    t.push({id:`${pid}-p${pi}`,projId:pid,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:''});
+    PTASKS[ph].forEach((n,ti)=>t.push({id:`${pid}-p${pi}-t${ti}`,projId:pid,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}));
   });
   return t;
 }
 
-const DEFAULT_PROJECTS = [
-  {id:1, name:'Supervisory training for Prestige',                   lead:'Berenicia',    category:'People & Training',   priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:20, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-01', endDate:'2025-06-30'},
-  {id:2, name:'Automations at factories - not used, switched off',   lead:'Jacques',      category:'Technology & Assets', priority:'High',     bizImpact:'Efficiency Gain', custValue:'Disqualifier',    status:'In Progress', approval:'Approved', pct:35, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-15', endDate:'2025-05-31'},
-  {id:3, name:'Prestige Head Count: Cutting rooms',                  lead:'Letlhogonolo', category:'Operations',          priority:'High',     bizImpact:'Cost Saving',     custValue:'Order Qualifier', status:'In Progress', approval:'Approved', pct:50, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-04-30'},
-  {id:4, name:'Bullmer cutting machine Parameter settings',          lead:'Letlhogonolo', category:'Operations',          priority:'Critical', bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-04-01', endDate:'2025-07-31'},
-  {id:5, name:'Caledon cutting room: Process optimisation',          lead:'Letlhogonolo', category:'Operations',          priority:'Critical', bizImpact:'Efficiency Gain', custValue:'Order Qualifier', status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-05-01', endDate:'2025-09-30'},
-  {id:6, name:'Equipment Capability study: Multiformer use',         lead:'Jacques',      category:'Operations',          priority:'High',     bizImpact:'Efficiency Gain', custValue:'Disqualifier',    status:'Not Started', approval:'Proposed', pct:0,  problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-03-01', endDate:'2025-06-30'},
-  {id:7, name:'AI project: training tool',                           lead:'Wendy',        category:'People & Training',   priority:'Medium',   bizImpact:'Risk Reduction',  custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:60, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-08-31'},
-  {id:8, name:'Centre of excellence - internal training academy',    lead:'Wendy',        category:'People & Training',   priority:'High',     bizImpact:'Risk Reduction',  custValue:'Order Winner',    status:'On Hold',     approval:'Deferred', pct:15, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-06-01', endDate:'2025-12-31'},
-  {id:9, name:'The Prestige Way: Process standardisation',           lead:'Beverley',     category:'People & Training',   priority:'Critical', bizImpact:'Risk Reduction',  custValue:'Order Qualifier', status:'In Progress', approval:'Approved', pct:40, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-10-31'},
-  {id:10,name:'Cost of Sales and expenses finance project',          lead:'David',        category:'Finance',             priority:'High',     bizImpact:'Cost Saving',     custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:25, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-01', endDate:'2025-07-31'},
-  {id:11,name:'GSD Quest (Design and Factory alignment)',            lead:'Letlhogonolo', category:'Technology & Assets', priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:30, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-03-01', endDate:'2025-09-30'},
-  {id:12,name:'Asset tracking tool: Tracking, Downtime & Inventory', lead:'Letlhogonolo', category:'Technology & Assets', priority:'Medium',   bizImpact:'Efficiency Gain', custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:45, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-02-15', endDate:'2025-08-31'},
-  {id:13,name:'Asset Age Study',                                     lead:'Jacques',      category:'Operations',          priority:'Critical', bizImpact:'Cost Saving',     custValue:'Order Winner',    status:'In Progress', approval:'Approved', pct:70, problem:'', outcome:'', risks:'', deps:'', notes:'', startDate:'2025-01-01', endDate:'2025-05-31'},
+// ── Default data ──────────────────────────────────────────────────────────────
+const DP=[
+  {id:1,name:'Supervisory training for Prestige',lead:'Berenicia',category:'People & Training',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:20,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-01',endDate:'2025-06-30'},
+  {id:2,name:'Automations at factories - not used, switched off',lead:'Jacques',category:'Technology & Assets',priority:'High',bizImpact:'Efficiency Gain',custValue:'Disqualifier',status:'In Progress',approval:'Approved',pct:35,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-15',endDate:'2025-05-31'},
+  {id:3,name:'Prestige Head Count: Cutting rooms',lead:'Letlhogonolo',category:'Operations',priority:'High',bizImpact:'Cost Saving',custValue:'Order Qualifier',status:'In Progress',approval:'Approved',pct:50,collaborators:['Berenicia'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-04-30'},
+  {id:4,name:'Bullmer cutting machine Parameter settings',lead:'Letlhogonolo',category:'Operations',priority:'Critical',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-04-01',endDate:'2025-07-31'},
+  {id:5,name:'Caledon cutting room: Process optimisation',lead:'Letlhogonolo',category:'Operations',priority:'Critical',bizImpact:'Efficiency Gain',custValue:'Order Qualifier',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-05-01',endDate:'2025-09-30'},
+  {id:6,name:'Equipment Capability study: Multiformer use',lead:'Jacques',category:'Operations',priority:'High',bizImpact:'Efficiency Gain',custValue:'Disqualifier',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-03-01',endDate:'2025-06-30'},
+  {id:7,name:'AI project: training tool',lead:'Wendy',category:'People & Training',priority:'Medium',bizImpact:'Risk Reduction',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:60,collaborators:['David'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-08-31'},
+  {id:8,name:'Centre of excellence - internal training academy',lead:'Wendy',category:'People & Training',priority:'High',bizImpact:'Risk Reduction',custValue:'Order Winner',status:'On Hold',approval:'Deferred',pct:15,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-06-01',endDate:'2025-12-31'},
+  {id:9,name:'The Prestige Way: Process standardisation',lead:'Beverley',category:'People & Training',priority:'Critical',bizImpact:'Risk Reduction',custValue:'Order Qualifier',status:'In Progress',approval:'Approved',pct:40,collaborators:['Letlhogonolo','Wendy'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-10-31'},
+  {id:10,name:'Cost of Sales and expenses finance project',lead:'David',category:'Finance',priority:'High',bizImpact:'Cost Saving',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:25,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-01',endDate:'2025-07-31'},
+  {id:11,name:'GSD Quest (Design and Factory alignment)',lead:'Letlhogonolo',category:'Technology & Assets',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:30,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-03-01',endDate:'2025-09-30'},
+  {id:12,name:'Asset tracking tool: Tracking, Downtime & Inventory',lead:'Letlhogonolo',category:'Technology & Assets',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:45,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-15',endDate:'2025-08-31'},
+  {id:13,name:'Asset Age Study',lead:'Jacques',category:'Operations',priority:'Critical',bizImpact:'Cost Saving',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:70,collaborators:['Letlhogonolo'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-05-31'},
 ];
 
-// Load from localStorage or use defaults
-function loadData(){
-  try{
-    const saved=localStorage.getItem('bd-projects');
-    return saved?JSON.parse(saved):JSON.parse(JSON.stringify(DEFAULT_PROJECTS));
-  }catch(e){return JSON.parse(JSON.stringify(DEFAULT_PROJECTS));}
-}
-function saveData(){
-  localStorage.setItem('bd-projects',JSON.stringify(projects));
-}
+const DEFAULT_KPIS=[
+  {id:'k1',projId:13,category:'Financial',name:'Cost saving from asset optimisation',unit:'R',target:180000,actual:210000,notes:'Q2 audit'},
+  {id:'k2',projId:13,category:'Efficiency',name:'Downtime reduction',unit:'%',target:30,actual:22,notes:''},
+  {id:'k3',projId:9,category:'People',name:'Process adoption rate',unit:'%',target:80,actual:65,notes:''},
+  {id:'k4',projId:3,category:'Financial',name:'Headcount cost saving',unit:'R',target:150000,actual:135000,notes:''},
+  {id:'k5',projId:10,category:'Financial',name:'Finance process cost reduction',unit:'R',target:200000,actual:115000,notes:'Q1 report'},
+];
 
-let projects = loadData();
-let tasks = loadData().flatMap ? projects.flatMap(p=>buildTasks(p.id)) : DEFAULT_PROJECTS.flatMap(p=>buildTasks(p.id));
-try{
-  const st=localStorage.getItem('bd-tasks');
-  if(st) tasks=JSON.parse(st);
-  else tasks=projects.flatMap(p=>buildTasks(p.id));
-}catch(e){tasks=projects.flatMap(p=>buildTasks(p.id));}
-function saveTaskData(){localStorage.setItem('bd-tasks',JSON.stringify(tasks));}
+function ld(k,def){try{const s=localStorage.getItem(k);return s?JSON.parse(s):JSON.parse(JSON.stringify(def));}catch(e){return JSON.parse(JSON.stringify(def));}}
+function sd(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 
-let editingId = null;
-let currentView = 'tracker';
-let ganttZoom = 'month';
-let recCatFilter = 'All';
+let projects=ld('bd-projs',DP);
+let tasks=ld('bd-tasks',null)||projects.flatMap(p=>buildTasks(p.id));
+let adHocTasks=ld('bd-adhoc',[]);
+let kpis=ld('bd-kpis',DEFAULT_KPIS);
+
+function saveAll(){sd('bd-projs',projects);sd('bd-tasks',tasks);sd('bd-adhoc',adHocTasks);sd('bd-kpis',kpis);}
 
 // ── Style helpers ─────────────────────────────────────────────────────────────
-function priStyle(p){return({Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#DBC25D',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}})[p]||{bg:'#F0F0F0',fg:'#595959'};}
-function statStyle(s){return({'In Progress':{bg:'#E8D5EE',fg:'#68217D'},'Not Started':{bg:'#E8E8E8',fg:'#595959'},'On Hold':{bg:'#D5A99C',fg:'#7A4A40'},'Complete':{bg:'#E2EFDA',fg:'#375623'}})[s]||{bg:'#F0F0F0',fg:'#595959'};}
-function apprStyle(a){return({Approved:{bg:'#89AB90',fg:'#2E4F34'},Proposed:{bg:'#DBC25D',fg:'#6B5A10'},Deferred:{bg:'#D5A99C',fg:'#7A4A40'},Rejected:{bg:'#FFDCE0',fg:'#C00000'}})[a]||{bg:'#F0F0F0',fg:'#595959'};}
-function catStyle(c){return({'Operations':{bg:'#A6C4CF',fg:'#2F6070'},'People & Training':{bg:'#E8D5EE',fg:'#68217D'},'Technology & Assets':{bg:'#CFCFB7',fg:'#7A7A58'},'Finance':{bg:'#DBC25D',fg:'#6B5A10'}})[c]||{bg:'#F0F0F0',fg:'#595959'};}
-function pill(label,style){return`<span class="pill" style="background:${style.bg};color:${style.fg}">${esc(label)}</span>`;}
-function pbar(pct){return`<div class="pbar-wrap"><div class="pbar-bg"><div class="pbar-fill" style="width:${pct}%;background:${pct===100?'#89AB90':'#68217D'}"></div></div><span class="pbar-txt">${pct}%</span></div>`;}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+const PS=p=>({Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#DBC25D',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}}[p]||{bg:'#F0F0F0',fg:'#595959'});
+const SS=s=>({'In Progress':{bg:'#E8D5EE',fg:'#68217D'},'Not Started':{bg:'#E8E8E8',fg:'#595959'},'On Hold':{bg:'#D5A99C',fg:'#7A4A40'},'Complete':{bg:'#E2EFDA',fg:'#375623'}}[s]||{bg:'#F0F0F0',fg:'#595959'});
+const AS=a=>({Approved:{bg:'#89AB90',fg:'#2E4F34'},Proposed:{bg:'#DBC25D',fg:'#6B5A10'},Deferred:{bg:'#D5A99C',fg:'#7A4A40'},Rejected:{bg:'#FFDCE0',fg:'#C00000'}}[a]||{bg:'#F0F0F0',fg:'#595959'});
+const CS=c=>({'Operations':{bg:'#A6C4CF',fg:'#2F6070'},'People & Training':{bg:'#E8D5EE',fg:'#68217D'},'Technology & Assets':{bg:'#CFCFB7',fg:'#7A7A58'},'Finance':{bg:'#DBC25D',fg:'#6B5A10'}}[c]||{bg:'#F0F0F0',fg:'#595959'});
+const KCAT=c=>({Financial:{bg:'#E2EFDA',fg:'#375623',dot:'#375623'},Efficiency:{bg:'#E8D5EE',fg:'#68217D',dot:'#68217D'},People:{bg:'#DDE4EC',fg:'#3A3F60',dot:'#7A92AC'},Quality:{bg:'#FCF5E3',fg:'#6B5A10',dot:'#DBC25D'},Custom:{bg:'#FCE4D6',fg:'#C55A11',dot:'#C55A11'}}[c]||{bg:'#F0F0F0',fg:'#595959',dot:'#595959'});
+function pill(l,s){return`<span class="pill" style="background:${s.bg};color:${s.fg}">${esc(l)}</span>`;}
+function pbar(p){return`<div class="pb"><div class="pb-bg"><div class="pb-fill" style="width:${p}%;background:${p===100?'#89AB90':'#68217D'}"></div></div><span class="pb-txt">${p}%</span></div>`;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);}
+function avHtml(name,sm){return`<div class="av${sm?' av-sm':''}" title="${esc(name)}">${initials(name)}</div>`;}
+function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)return`R ${Math.round(v/1000)}k`;return`R ${Math.round(v)}`;}
 
-// ── View switching ────────────────────────────────────────────────────────────
-const VIEW_TITLES={tracker:'Project Tracker',dashboard:'Dashboard',wbs:'Task Breakdown',gantt:'Gantt Chart',recs:'Recommendations'};
-function switchView(v){
-  currentView=v;
+// ── View switching ─────────────────────────────────────────────────────────────
+const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',recs:'Recommendations'};
+let curView='tracker';
+function sv(v){
+  curView=v;
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach((b,i)=>{b.classList.toggle('active',['tracker','dashboard','wbs','gantt','recs'][i]===v);});
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{b.classList.toggle('active',['tracker','dashboard','wbs','gantt','recs'][i]===v);});
-  document.getElementById('page-title').textContent=VIEW_TITLES[v];
+  const vids=['tracker','dashboard','activity','taskboard','gantt','benefits','recs'];
+  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
+  document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
+  document.getElementById('ptitle').textContent=VTITLES[v];
   updateSub();
-  if(v==='dashboard')renderDashboard();
-  if(v==='wbs')renderWBS();
+  if(v==='dashboard')renderDash();
+  if(v==='activity')renderActivity();
+  if(v==='taskboard'){populateProjFilter();renderTaskBoard();}
   if(v==='gantt')renderGantt();
+  if(v==='benefits')renderBenefits();
   if(v==='recs')renderRecs();
 }
 function updateSub(){
   const ip=projects.filter(p=>p.status==='In Progress').length;
   const cr=projects.filter(p=>p.priority==='Critical').length;
-  const rn=getUrgentRecCount();
-  document.getElementById('page-sub').textContent=`${projects.length} projects · ${ip} in progress · ${cr} critical${rn>0?` · ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
+  const rn=urgentRecs();
+  document.getElementById('psub').textContent=`${projects.length} projects · ${ip} in progress · ${cr} critical${rn>0?` · ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
 }
 
 // ── Tracker ───────────────────────────────────────────────────────────────────
 function renderTracker(){
-  const search=(document.getElementById('search-inp').value||'').toLowerCase();
-  const fCat=document.getElementById('f-cat').value;
-  const fPri=document.getElementById('f-pri').value;
-  const fLead=document.getElementById('f-lead').value;
-  const fStat=document.getElementById('f-stat').value;
+  const s=(document.getElementById('si').value||'').toLowerCase();
+  const fc=document.getElementById('fc').value;
+  const fp=document.getElementById('fp').value;
+  const fl=document.getElementById('fl').value;
+  const fs=document.getElementById('fs').value;
   const role=document.getElementById('role-sel').value;
-
+  document.getElementById('addpb').style.display=role==='Leadership'?'none':'block';
   const filtered=projects.filter(p=>{
-    if(fCat&&p.category!==fCat)return false;
-    if(fPri&&p.priority!==fPri)return false;
-    if(fLead&&p.lead!==fLead)return false;
-    if(fStat&&p.status!==fStat)return false;
-    if(search&&!p.name.toLowerCase().includes(search))return false;
+    if(fc&&p.category!==fc)return false;
+    if(fp&&p.priority!==fp)return false;
+    if(fl&&p.lead!==fl)return false;
+    if(fs&&p.status!==fs)return false;
+    if(s&&!p.name.toLowerCase().includes(s))return false;
     return true;
   });
-
-  document.getElementById('filter-count').textContent=`${filtered.length}/${projects.length}`;
-  document.getElementById('add-proj-btn').style.display=role==='Leadership'?'none':'block';
-
-  const html=filtered.map((p,i)=>`
-    <div class="tbl-row tbl-cols" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px 32px;background:${i%2===0?'#FCF5E3':'#fff'}">
-      <div><div class="proj-name">${esc(p.name)}</div><div class="proj-sub">${esc(p.bizImpact)} · ${esc(p.custValue)}</div></div>
-      <div class="hide-mobile" style="font-size:10px;color:#595959">${esc(p.lead)}</div>
-      <div>${pill(p.priority,priStyle(p.priority))}</div>
-      <div class="tbl-hide-md">${pill(p.status,statStyle(p.status))}</div>
-      <div class="tbl-hide-md">${pill(p.approval,apprStyle(p.approval))}</div>
-      <div class="hide-mobile">${pbar(p.pct)}</div>
-      <div>${role!=='Leadership'?`<button onclick="openModal(${p.id})" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:10px;font-weight:700;font-family:inherit">Edit</button>`:''}
+  document.getElementById('fcount').textContent=`${filtered.length}/${projects.length}`;
+  // KPI health dot
+  function kpiDot(pid){
+    const pk=kpis.filter(k=>k.projId===pid&&k.target>0);
+    if(!pk.length)return'';
+    const avg=pk.reduce((a,k)=>a+(k.actual/k.target*100),0)/pk.length;
+    const col=avg>=100?'#375623':avg>=80?'#DBC25D':'#C00000';
+    return`<span title="KPI: ${Math.round(avg)}% of target" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${col};margin-left:4px;vertical-align:middle"></span>`;
+  }
+  const html=filtered.map((p,i)=>{
+    const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
+    return`<div class="trow tcols" style="background:${i%2===0?'#FCF5E3':'#fff'}">
+      <div><div class="pname">${esc(p.name)}${kpiDot(p.id)}</div>
+        <div class="psub">${esc(p.bizImpact)} · ${esc(p.custValue)}</div>
+        ${collabs.length?`<div class="collab-wrap">${collabs.map(c=>`<div class="collab-chip">${avHtml(c,true)}<span>${esc(c)}</span></div>`).join('')}</div>`:''}
       </div>
-    </div>`).join('');
-  document.getElementById('tbl-body').innerHTML=html||'<div style="padding:24px;text-align:center;color:#595959">No projects match the filters.</div>';
+      <div class="hm" style="font-size:10px;color:var(--gt)">${esc(p.lead)}</div>
+      <div>${pill(p.priority,PS(p.priority))}</div>
+      <div class="hm">${pill(p.status,SS(p.status))}</div>
+      <div class="hm">${pill(p.approval,AS(p.approval))}</div>
+      <div class="hm">${pbar(p.pct)}</div>
+      <div>${role!=='Leadership'?`<button onclick="openModal(${p.id})" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:9px;font-weight:700;font-family:inherit">Edit</button>`:''}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('tbody').innerHTML=html||'<div style="padding:22px;text-align:center;color:var(--gt)">No projects match the filters.</div>';
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
+let editId=null;
 function openModal(id){
-  editingId=id;
+  editId=id;
   const isNew=!id;
-  document.getElementById('modal-title').textContent=isNew?'New Project':'Edit Project';
-  document.getElementById('modal-del-btn').style.display=isNew?'none':'block';
-
-  if(isNew){
-    document.getElementById('f-name').value='New Project';
-    document.getElementById('f-flead').value='Berenicia';
-    document.getElementById('f-fcat').value='Operations';
-    document.getElementById('f-fpri').value='Medium';
-    document.getElementById('f-fstat').value='Not Started';
-    document.getElementById('f-fappr').value='Proposed';
-    document.getElementById('f-fpct').value=0;
-    document.getElementById('pct-display').textContent=0;
-    document.getElementById('f-fimpact').value='Efficiency Gain';
-    document.getElementById('f-fcustval').value='Order Qualifier';
-    document.getElementById('f-fstart').value='';
-    document.getElementById('f-fend').value='';
-    document.getElementById('f-fproblem').value='';
-    document.getElementById('f-foutcome').value='';
-    document.getElementById('f-frisks').value='';
-    document.getElementById('f-fdeps').value='';
-    document.getElementById('f-fnotes').value='';
-  } else {
-    const p=projects.find(x=>x.id===id);
-    document.getElementById('f-name').value=p.name;
-    document.getElementById('f-flead').value=p.lead;
-    document.getElementById('f-fcat').value=p.category;
-    document.getElementById('f-fpri').value=p.priority;
-    document.getElementById('f-fstat').value=p.status;
-    document.getElementById('f-fappr').value=p.approval;
-    document.getElementById('f-fpct').value=p.pct;
-    document.getElementById('pct-display').textContent=p.pct;
-    document.getElementById('f-fimpact').value=p.bizImpact;
-    document.getElementById('f-fcustval').value=p.custValue;
-    document.getElementById('f-fstart').value=p.startDate||'';
-    document.getElementById('f-fend').value=p.endDate||'';
-    document.getElementById('f-fproblem').value=p.problem||'';
-    document.getElementById('f-foutcome').value=p.outcome||'';
-    document.getElementById('f-frisks').value=p.risks||'';
-    document.getElementById('f-fdeps').value=p.deps||'';
-    document.getElementById('f-fnotes').value=p.notes||'';
-  }
-  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('mtitle').textContent=isNew?'New Project':'Edit Project';
+  document.getElementById('mdelb').style.display=isNew?'none':'block';
+  const p=isNew?{name:'New Project',lead:'Berenicia',category:'Operations',priority:'Medium',status:'Not Started',approval:'Proposed',pct:0,bizImpact:'Efficiency Gain',custValue:'Order Qualifier',startDate:'',endDate:'',collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:''}:projects.find(x=>x.id===id);
+  document.getElementById('fn').value=p.name;
+  document.getElementById('fld').value=p.lead;
+  document.getElementById('fcat').value=p.category;
+  document.getElementById('fpri').value=p.priority;
+  document.getElementById('fst').value=p.status;
+  document.getElementById('fap').value=p.approval;
+  document.getElementById('fpct').value=p.pct;
+  document.getElementById('pctd').textContent=p.pct;
+  document.getElementById('fbi').value=p.bizImpact;
+  document.getElementById('fcv').value=p.custValue;
+  document.getElementById('fsd').value=p.startDate||'';
+  document.getElementById('fed').value=p.endDate||'';
+  document.getElementById('fext').value=p.extCollabs||'';
+  document.getElementById('fprob').value=p.problem||'';
+  document.getElementById('fout').value=p.outcome||'';
+  document.getElementById('frisk').value=p.risks||'';
+  document.getElementById('fdep').value=p.deps||'';
+  document.getElementById('fnotes').value=p.notes||'';
+  document.querySelectorAll('#collab-checks input[type=checkbox]').forEach(cb=>{
+    cb.checked=(p.collaborators||[]).includes(cb.value)&&cb.value!==p.lead;
+  });
+  openMo('pmodal');
 }
-function closeModal(e){
-  if(e&&e.target!==document.getElementById('modal-overlay'))return;
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-function saveProject(){
+function saveProj(){
+  const collabs=Array.from(document.querySelectorAll('#collab-checks input[type=checkbox]')).filter(c=>c.checked).map(c=>c.value);
   const d={
-    name:document.getElementById('f-name').value,
-    lead:document.getElementById('f-flead').value,
-    category:document.getElementById('f-fcat').value.replace('&amp;','&'),
-    priority:document.getElementById('f-fpri').value,
-    status:document.getElementById('f-fstat').value,
-    approval:document.getElementById('f-fappr').value,
-    pct:parseInt(document.getElementById('f-fpct').value),
-    bizImpact:document.getElementById('f-fimpact').value,
-    custValue:document.getElementById('f-fcustval').value,
-    startDate:document.getElementById('f-fstart').value,
-    endDate:document.getElementById('f-fend').value,
-    problem:document.getElementById('f-fproblem').value,
-    outcome:document.getElementById('f-foutcome').value,
-    risks:document.getElementById('f-frisks').value,
-    deps:document.getElementById('f-fdeps').value,
-    notes:document.getElementById('f-fnotes').value,
+    name:document.getElementById('fn').value,
+    lead:document.getElementById('fld').value,
+    category:document.getElementById('fcat').value.replace(/&amp;/g,'&'),
+    priority:document.getElementById('fpri').value,
+    status:document.getElementById('fst').value,
+    approval:document.getElementById('fap').value,
+    pct:parseInt(document.getElementById('fpct').value),
+    bizImpact:document.getElementById('fbi').value,
+    custValue:document.getElementById('fcv').value,
+    startDate:document.getElementById('fsd').value,
+    endDate:document.getElementById('fed').value,
+    collaborators:collabs.filter(c=>c!==document.getElementById('fld').value),
+    extCollabs:document.getElementById('fext').value,
+    problem:document.getElementById('fprob').value,
+    outcome:document.getElementById('fout').value,
+    risks:document.getElementById('frisk').value,
+    deps:document.getElementById('fdep').value,
+    notes:document.getElementById('fnotes').value,
   };
-  // fix category HTML entity
-  d.category=d.category.replace(/&amp;/g,'&');
-  if(editingId){
-    const idx=projects.findIndex(p=>p.id===editingId);
-    projects[idx]={...projects[idx],...d};
-  } else {
-    const newId=Math.max(...projects.map(p=>p.id),0)+1;
-    projects.push({id:newId,...d});
-    tasks.push(...buildTasks(newId));
-    saveTaskData();
+  if(editId){
+    const i=projects.findIndex(p=>p.id===editId);
+    projects[i]={...projects[i],...d};
+  }else{
+    const nid=Math.max(...projects.map(p=>p.id),0)+1;
+    projects.push({id:nid,...d});
+    tasks.push(...buildTasks(nid));
   }
-  saveData();
-  document.getElementById('modal-overlay').classList.remove('open');
-  renderTracker();
-  updateSub();
-  updateRecBadge();
+  saveAll();closeMo('pmodal');renderTracker();updateSub();updateBadge();
 }
-function deleteProject(){
-  if(!editingId)return;
-  if(!confirm('Delete this project?'))return;
-  projects=projects.filter(p=>p.id!==editingId);
-  tasks=tasks.filter(t=>t.projId!==editingId);
-  saveData();saveTaskData();
-  document.getElementById('modal-overlay').classList.remove('open');
-  renderTracker();updateSub();updateRecBadge();
+function delProj(){
+  if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
+  projects=projects.filter(p=>p.id!==editId);
+  tasks=tasks.filter(t=>t.projId!==editId);
+  kpis=kpis.filter(k=>k.projId!==editId);
+  saveAll();closeMo('pmodal');renderTracker();updateSub();updateBadge();
 }
-function applyRole(){renderTracker();}
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-function renderDashboard(){
+function renderDash(){
   const total=projects.length;
   const ip=projects.filter(p=>p.status==='In Progress').length;
   const ns=projects.filter(p=>p.status==='Not Started').length;
@@ -653,8 +664,7 @@ function renderDashboard(){
   const cr=projects.filter(p=>p.priority==='Critical').length;
   const ap=projects.filter(p=>p.approval==='Approved').length;
   const avg=Math.round(projects.reduce((a,p)=>a+p.pct,0)/total);
-
-  document.getElementById('kpi-row').innerHTML=[
+  document.getElementById('dkrow').innerHTML=[
     {l:'Total',v:total,bg:'#68217D',fg:'#fff'},
     {l:'In Progress',v:ip,bg:'#DDE4EC',fg:'#3A3F60'},
     {l:'Not Started',v:ns,bg:'#E8E8E8',fg:'#595959'},
@@ -663,317 +673,536 @@ function renderDashboard(){
     {l:'Critical',v:cr,bg:'#FFDCE0',fg:'#C00000'},
     {l:'Approved',v:ap,bg:'#89AB90',fg:'#2E4F34'},
     {l:'Avg Progress',v:avg+'%',bg:'#E8D5EE',fg:'#68217D'},
-  ].map(k=>`<div class="kpi" style="background:${k.bg}"><div class="kpi-label" style="color:${k.fg}">${k.l}</div><div class="kpi-val" style="color:${k.fg}">${k.v}</div></div>`).join('');
+  ].map(k=>`<div class="kcard" style="background:${k.bg}"><div class="klbl" style="color:${k.fg}">${k.l}</div><div class="kval" style="color:${k.fg}">${k.v}</div></div>`).join('');
 
-  document.getElementById('dash-cat').innerHTML=CATS.map(c=>{
-    const n=projects.filter(p=>p.category===c).length;
-    const cs=catStyle(c);
-    return`<div class="mini-bar-item"><div class="mini-bar-labels"><span>${pill(c,cs)}</span><strong style="font-size:11px;color:#4A1759">${n}</strong></div><div class="mini-bar-bg"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${cs.fg};border-radius:3px"></div></div></div>`;
+  document.getElementById('dcat').innerHTML=CATS.map(c=>{
+    const n=projects.filter(p=>p.category===c).length;const cs=CS(c);
+    return`<div class="mbi"><div class="mbl"><span>${pill(c,cs)}</span><strong style="font-size:10px;color:#4A1759">${n}</strong></div><div class="mbb"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${cs.fg};border-radius:3px"></div></div></div>`;
   }).join('');
 
-  document.getElementById('dash-pri').innerHTML=PRIS.map(p=>{
-    const n=projects.filter(x=>x.priority===p).length;
-    const ps=priStyle(p);
-    return`<div class="mini-bar-item"><div class="mini-bar-labels"><span>${pill(p,ps)}</span><strong style="font-size:11px;color:#4A1759">${n}</strong></div><div class="mini-bar-bg"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${ps.fg};border-radius:3px"></div></div></div>`;
+  document.getElementById('dpri').innerHTML=PRIS.map(p=>{
+    const n=projects.filter(x=>x.priority===p).length;const ps=PS(p);
+    return`<div class="mbi"><div class="mbl"><span>${pill(p,ps)}</span><strong style="font-size:10px;color:#4A1759">${n}</strong></div><div class="mbb"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${ps.fg};border-radius:3px"></div></div></div>`;
   }).join('');
 
-  document.getElementById('dash-wl').innerHTML=LEADS.map(l=>{
-    const n=projects.filter(p=>p.lead===l).length;
-    const heavy=n>3;
-    return`<div class="wl-card" style="background:${heavy?'#FCE4D6':n===0?'#F0F0F0':'#E8D5EE'}"><div class="wl-num" style="color:${heavy?'#C55A11':n===0?'#595959':'#68217D'}">${n}</div><div class="wl-name">${esc(l)}</div></div>`;
+  // Total involvement = lead + collaborator
+  document.getElementById('dwl').innerHTML=LEADS.map(l=>{
+    const led=projects.filter(p=>p.lead===l).length;
+    const collab=projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length;
+    const tot=led+collab;const heavy=tot>4;
+    return`<div style="background:${heavy?'#FCE4D6':tot===0?'#F0F0F0':'#E8D5EE'};border-radius:9px;padding:10px 12px;text-align:center;flex:1;min-width:80px">
+      <div style="font-size:22px;font-weight:800;color:${heavy?'#C55A11':tot===0?'#595959':'#68217D'}">${tot}</div>
+      <div style="font-size:8px;color:#595959;margin-top:1px">${esc(l)}</div>
+      ${tot>0?`<div style="font-size:8px;color:#595959">${led} lead${collab>0?` + ${collab} collab`:''}</div>`:''}
+    </div>`;
   }).join('');
 
-  const overloaded=LEADS.filter(l=>projects.filter(p=>p.lead===l).length>3);
-  document.getElementById('dash-wl-warn').innerHTML=overloaded.map(l=>`<div class="wl-warning">&#9888; ${esc(l)} is carrying ${projects.filter(p=>p.lead===l).length} projects — consider redistributing</div>`).join('');
+  const overloaded=LEADS.filter(l=>{
+    const led=projects.filter(p=>p.lead===l).length;
+    const collab=projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length;
+    return led+collab>4;
+  });
+  document.getElementById('dwlw').innerHTML=overloaded.map(l=>`<div style="margin:0 13px 13px;padding:6px 9px;background:#FCE4D6;border-radius:6px;font-size:9px;color:#C55A11;font-weight:600">&#9888; ${esc(l)}'s total involvement exceeds 4 projects</div>`).join('');
 
-  document.getElementById('dash-prog').innerHTML=[...projects].sort((a,b)=>b.pct-a.pct).map(p=>`
-    <div style="display:grid;grid-template-columns:1fr 180px;gap:10px;align-items:center">
-      <div style="font-size:11px;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.name)}">${esc(p.name)}</div>
+  document.getElementById('dprog').innerHTML=[...projects].sort((a,b)=>b.pct-a.pct).map(p=>`
+    <div style="display:grid;grid-template-columns:1fr 160px;gap:9px;align-items:center">
+      <div style="font-size:10px;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.name)}">${esc(p.name)}</div>
       ${pbar(p.pct)}
     </div>`).join('');
 }
 
-// ── WBS ───────────────────────────────────────────────────────────────────────
-function renderWBS(){
-  const html=projects.map(p=>{
-    const cs=catStyle(p.category);
-    return`<div class="card" style="margin-bottom:10px">
-      <div class="wbs-proj-hdr" onclick="toggleEl('wbs-${p.id}','wbs-arr-${p.id}')">
-        <span style="color:#fff;font-size:12px;min-width:14px" id="wbs-arr-${p.id}">&#9654;</span>
-        <div style="flex:1;min-width:0"><div style="color:#fff;font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div><div style="color:rgba(255,255,255,.6);font-size:9px;margin-top:1px">${esc(p.lead)} &middot; ${esc(p.category)}</div></div>
-        <div style="display:flex;gap:5px;flex-shrink:0">${pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})}${pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})}</div>
-        <div style="min-width:70px;margin-left:8px">${pbar(p.pct)}</div>
+// ── Activity Breakdown ────────────────────────────────────────────────────────
+function renderActivity(){
+  document.getElementById('actbody').innerHTML=projects.map(p=>{
+    const cs=CS(p.category);
+    const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
+    return`<div class="card" style="margin-bottom:9px">
+      <div class="wph" onclick="toggleEl('act-${p.id}','act-arr-${p.id}')">
+        <span style="color:#fff;font-size:11px;min-width:12px" id="act-arr-${p.id}">&#9654;</span>
+        <div style="flex:1;min-width:0">
+          <div style="color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div>
+          <div style="color:rgba(255,255,255,.6);font-size:8px;margin-top:1px;display:flex;align-items:center;gap:5px">
+            <span>Lead: ${esc(p.lead)}</span>
+            ${collabs.length?`<span>· Collaborators: ${collabs.map(c=>`<span style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:8px;font-size:8px">${esc(c)}</span>`).join(' ')}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">${pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})}${pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})}</div>
+        <div style="min-width:65px;margin-left:7px">${pbar(p.pct)}</div>
       </div>
-      <div id="wbs-${p.id}" style="display:none">${renderWBSPhases(p)}</div>
+      <div id="act-${p.id}" style="display:none">
+        ${renderPhases(p)}
+        ${renderKPISection(p)}
+      </div>
     </div>`;
   }).join('');
-  document.getElementById('wbs-body').innerHTML=html;
 }
 
-function renderWBSPhases(p){
+function renderPhases(p){
   return PHASES.map((phase,pi)=>{
-    const phaseKey=`${p.id}-p${pi}`;
-    const phaseTask=tasks.find(t=>t.id===phaseKey)||{status:'Not Started',pct:0};
+    const pk=`${p.id}-p${pi}`;
+    const pt=tasks.find(t=>t.id===pk)||{status:'Not Started',pct:0};
     const phaseTasks=tasks.filter(t=>t.phase===phase&&t.type==='task'&&t.projId===p.id);
-    const doneCount=phaseTasks.filter(t=>t.status==='Complete').length;
-    return`<div class="wbs-phase-hdr" onclick="toggleEl('wbs-ph-${phaseKey}','wbs-ph-arr-${phaseKey}')">
-      <span style="color:#3A3F60;font-size:10px;min-width:12px" id="wbs-ph-arr-${phaseKey}">&#9654;</span>
+    const done=phaseTasks.filter(t=>t.status==='Complete').length;
+    return`<div class="wphase" onclick="toggleEl('ph-${pk}','ph-arr-${pk}')">
+      <span style="color:#3A3F60;font-size:9px;min-width:10px" id="ph-arr-${pk}">&#9654;</span>
       <span style="font-weight:700;font-size:10px;color:#3A3F60">${pi+1}. ${esc(phase)}</span>
-      <select onchange="updateTaskField('${phaseKey}','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 5px;color:#4A1759;font-family:inherit">
-        ${['Not Started','In Progress','On Hold','Complete'].map(s=>`<option${s===phaseTask.status?' selected':''}>${s}</option>`).join('')}
+      <select onchange="updTask('${pk}','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">
+        ${STATUSES.map(s=>`<option${s===pt.status?' selected':''}>${s}</option>`).join('')}
       </select>
-      <div onclick="event.stopPropagation()" class="wbs-phase-hide" style="display:flex;align-items:center;gap:3px">
-        <input type="range" min="0" max="100" value="${phaseTask.pct}" oninput="updateTaskField('${phaseKey}','pct',+this.value)" style="flex:1;accent-color:#68217D;height:3px"/>
-        <span style="font-size:9px;color:#595959;min-width:22px">${phaseTask.pct}%</span>
+      <div onclick="event.stopPropagation()" class="wph-hide" style="display:flex;align-items:center;gap:3px">
+        <input type="range" min="0" max="100" step="1" value="${pt.pct}" oninput="updTask('${pk}','pct',+this.value)" style="flex:1;accent-color:#68217D;height:3px"/>
+        <span style="font-size:8px;color:#595959;min-width:20px">${pt.pct}%</span>
       </div>
-      <span style="font-size:9px;color:#595959" class="wbs-phase-hide">${doneCount}/${phaseTasks.length}</span>
+      <span style="font-size:8px;color:#595959" class="wph-hide">${done}/${phaseTasks.length}</span>
     </div>
-    <div id="wbs-ph-${phaseKey}" style="display:none">${phaseTasks.map((task,ti)=>{
-      const ss=statStyle(task.status);
-      return`<div class="wbs-task-row" style="background:${ti%2===0?'#FCF5E3':'#fff'}">
-        <span style="font-size:9px;color:#595959">${pi+1}.${ti+1}</span>
-        <span style="font-size:10px;color:#4A1759;font-weight:500">${esc(task.name)}</span>
-        <select onchange="updateTaskField('${task.id}','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">
-          ${['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'].map(l=>`<option${l===(task.owner||p.lead)?' selected':''}>${l}</option>`).join('')}
+    <div id="ph-${pk}" style="display:none">${phaseTasks.map((t,ti)=>{
+      const ss=SS(t.status);
+      return`<div class="wtask" style="background:${ti%2===0?'#FCF5E3':'#fff'}">
+        <span style="font-size:8px;color:#595959">${pi+1}.${ti+1}</span>
+        <span style="font-size:10px;color:#4A1759;font-weight:500">${esc(t.name)}</span>
+        <select onchange="updTask('${t.id}','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit">
+          ${LEADS.map(l=>`<option${l===(t.owner||p.lead)?' selected':''}>${l}</option>`).join('')}
         </select>
-        <select onchange="updateTaskField('${task.id}','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;background:${ss.bg};color:${ss.fg};font-weight:700;font-family:inherit">
-          ${['Not Started','In Progress','On Hold','Complete'].map(s=>`<option${s===task.status?' selected':''}>${s}</option>`).join('')}
+        <select onchange="updTask('${t.id}','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;background:${ss.bg};color:${ss.fg};font-weight:700;font-family:inherit">
+          ${STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}
         </select>
-        <input type="date" value="${task.start||''}" onchange="updateTaskField('${task.id}','start',this.value)" class="wbs-task-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;width:100%;font-family:inherit"/>
-        <input type="date" value="${task.end||''}" onchange="updateTaskField('${task.id}','end',this.value)" class="wbs-task-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;width:100%;font-family:inherit"/>
+        <input type="date" value="${t.start||''}" onchange="updTask('${t.id}','start',this.value)" class="wt-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;width:100%;font-family:inherit"/>
+        <input type="date" value="${t.end||''}" onchange="updTask('${t.id}','end',this.value)" class="wt-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;width:100%;font-family:inherit"/>
       </div>`;
     }).join('')}</div>`;
   }).join('');
 }
 
-function toggleEl(bodyId,arrId){
-  const b=document.getElementById(bodyId);
-  const a=document.getElementById(arrId);
+function renderKPISection(p){
+  const pk=kpis.filter(k=>k.projId===p.id);
+  return`<div style="background:#F5F0F7;border-top:1px solid #D6C8DB;padding:10px 12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:10px;font-weight:800;color:#4A1759;text-transform:uppercase;letter-spacing:.4px">KPIs &amp; Benefits</span>
+      <button onclick="openKPIModal(${p.id},null)" style="background:#68217D;color:#fff;border:none;border-radius:5px;padding:3px 8px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add KPI</button>
+    </div>
+    ${pk.length===0?`<div style="font-size:10px;color:#595959;font-style:italic;padding:8px 0">No KPIs defined yet. Add targets to track value delivered.</div>`:''}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+      ${pk.map(k=>{
+        const kc=KCAT(k.category);
+        const pct=k.target>0?Math.round(k.actual/k.target*100):0;
+        const rag=pct>=100?'#375623':pct>=80?'#DBC25D':'#C00000';
+        const ragbg=pct>=100?'#E2EFDA':pct>=80?'#FFF8DC':'#FFDCE0';
+        const unit=k.unit==='R'?'R ':k.unit==='%'?'':'';
+        const suffix=k.unit==='%'?'%':k.unit!=='R'?` ${k.unit}`:'';
+        const fmt=v=>k.unit==='R'?fmtR(v):`${unit}${v}${suffix}`;
+        return`<div class="kpi-tile" style="background:${kc.bg};border-color:${kc.dot}33;cursor:pointer" onclick="openKPIModal(${p.id},'${k.id}')">
+          <div class="kpi-cat" style="color:${kc.fg}">&bull; ${esc(k.category)}</div>
+          <div class="kpi-nm">${esc(k.name)}</div>
+          <div class="kpi-vals">
+            <div class="kpi-vbox" style="background:rgba(255,255,255,.6)"><div class="kpi-vlbl" style="color:${kc.fg}">Target</div><div class="kpi-vnum" style="color:${kc.fg}">${fmt(k.target)}</div></div>
+            <div class="kpi-vbox" style="background:${ragbg}"><div class="kpi-vlbl" style="color:${rag}">Actual</div><div class="kpi-vnum" style="color:${rag}">${fmt(k.actual)}</div></div>
+          </div>
+          <div class="kpi-bbg"><div class="kpi-bfill" style="width:${Math.min(100,pct)}%;background:${rag}"></div></div>
+          <div class="kpi-pct" style="color:${rag}"><span class="rag" style="background:${rag}"></span>${pct}% of target${k.notes?` · ${esc(k.notes)}`:''}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function updTask(id,field,val){
+  const t=tasks.find(x=>x.id===id);
+  if(t){t[field]=val;saveAll();}
+}
+function toggleEl(bid,aid){
+  const b=document.getElementById(bid);const a=document.getElementById(aid);
   if(!b)return;
   const open=b.style.display==='none';
   b.style.display=open?'block':'none';
   if(a)a.innerHTML=open?'&#9660;':'&#9654;';
 }
 
-function updateTaskField(taskId,field,value){
-  const t=tasks.find(x=>x.id===taskId);
-  if(t){t[field]=value;saveTaskData();}
+// ── KPI Modal ─────────────────────────────────────────────────────────────────
+let kpiEditId=null,kpiProjId=null;
+function openKPIModal(projId,kpiId){
+  kpiProjId=projId;kpiEditId=kpiId;
+  document.getElementById('kpimtitle').textContent=kpiId?'Edit KPI':'Add KPI';
+  document.getElementById('kpidelb').style.display=kpiId?'block':'none';
+  if(kpiId){
+    const k=kpis.find(x=>x.id===kpiId);
+    document.getElementById('kpicat').value=k.category;
+    document.getElementById('kpiname').value=k.name;
+    document.getElementById('kpiunit').value=k.unit;
+    document.getElementById('kpitgt').value=k.target;
+    document.getElementById('kpiact').value=k.actual;
+    document.getElementById('kpinotes').value=k.notes||'';
+  }else{
+    document.getElementById('kpicat').value='Financial';
+    document.getElementById('kpiname').value='';
+    document.getElementById('kpiunit').value='R';
+    document.getElementById('kpitgt').value='';
+    document.getElementById('kpiact').value='';
+    document.getElementById('kpinotes').value='';
+  }
+  openMo('kpimodal');
+}
+function saveKPI(){
+  const d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
+  if(kpiEditId){const i=kpis.findIndex(k=>k.id===kpiEditId);kpis[i]={...kpis[i],...d};}
+  else{kpis.push({id:'k'+Date.now(),...d});}
+  saveAll();closeMo('kpimodal');
+  if(curView==='activity')renderActivity();
+  if(curView==='benefits')renderBenefits();
+}
+function delKPI(){
+  if(!kpiEditId)return;
+  kpis=kpis.filter(k=>k.id!==kpiEditId);
+  saveAll();closeMo('kpimodal');
+  if(curView==='activity')renderActivity();
+  if(curView==='benefits')renderBenefits();
+}
+
+// ── Task Board ────────────────────────────────────────────────────────────────
+let togView='board';
+function setTog(v){
+  togView=v;
+  document.getElementById('tog-board').classList.toggle('active',v==='board');
+  document.getElementById('tog-list').classList.toggle('active',v==='list');
+  document.getElementById('tbboard').style.display=v==='board'?'block':'none';
+  document.getElementById('tblist').style.display=v==='list'?'block':'none';
+  renderTaskBoard();
+}
+function populateProjFilter(){
+  const sel=document.getElementById('tb-proj');
+  sel.innerHTML='<option value="">All Projects</option>'+projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')+'<option value="adhoc">Ad Hoc</option>';
+}
+function getAllBoardTasks(){
+  const projTasks=tasks.filter(t=>t.type==='task').map(t=>{
+    const p=projects.find(x=>x.id===t.projId);
+    return{...t,projName:p?p.name:'Unknown',projPriority:p?p.priority:'Medium',isAdHoc:false};
+  });
+  const ah=adHocTasks.map(t=>({...t,projId:'adhoc',projName:'Ad Hoc',projPriority:t.priority,isAdHoc:true}));
+  return[...projTasks,...ah];
+}
+function renderTaskBoard(){
+  const lead=document.getElementById('tb-lead').value;
+  const proj=document.getElementById('tb-proj').value;
+  const type=document.getElementById('tb-type').value;
+  const today=new Date();today.setHours(0,0,0,0);
+
+  let all=getAllBoardTasks().filter(t=>{
+    if(lead&&(t.owner||'')!==lead)return false;
+    if(proj==='adhoc'&&!t.isAdHoc)return false;
+    if(proj&&proj!=='adhoc'&&t.projId!=proj)return false;
+    if(type==='project'&&t.isAdHoc)return false;
+    if(type==='adhoc'&&!t.isAdHoc)return false;
+    return true;
+  });
+
+  if(togView==='board'){
+    const cols=STATUSES.map(s=>{
+      const items=all.filter(t=>t.status===s);
+      const hdr=SS(s);
+      const cards=items.map(t=>{
+        const dueStr=t.end||t.due||'';
+        const due=dueStr?new Date(dueStr):null;
+        const overdue=due&&due<today&&s!=='Complete';
+        const dueSoon=due&&!overdue&&(due-today)/(86400000)<=3;
+        const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
+        return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" onclick="${t.isAdHoc?`openAdHocModal('${t.id}')`:`openTaskStatusModal('${t.id}')`}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+            <div class="tcard-name">${esc(t.name)}</div>
+            ${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
+          </div>
+          <div class="tcard-proj">${esc(t.projName)}</div>
+          <div class="tcard-meta">
+            ${avHtml(t.owner||t.projName,true)}
+            ${pill(pri,PS(pri))}
+            ${dueStr?`<span style="font-size:8px;color:${overdue?'#C00000':dueSoon?'#C55A11':'#595959'};font-weight:${overdue||dueSoon?700:400}">${overdue?'Overdue':dueStr}</span>`:''}
+          </div>
+        </div>`;
+      }).join('');
+      return`<div>
+        <div class="bcol-hdr" style="background:${hdr.bg}">
+          <span style="font-size:10px;font-weight:700;color:${hdr.fg}">${s}</span>
+          <span style="font-size:9px;font-weight:700;border-radius:8px;padding:1px 6px;background:${hdr.fg}22;color:${hdr.fg}">${items.length}</span>
+        </div>
+        <div class="bcol-body">${cards||`<div style="font-size:9px;color:#595959;font-style:italic;padding:6px">No tasks</div>`}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('tbboard').innerHTML=`<div class="board">${cols}</div>`;
+  } else {
+    const rows=all.map((t,i)=>{
+      const dueStr=t.end||t.due||'';
+      const due=dueStr?new Date(dueStr):null;
+      const overdue=due&&due<today&&t.status!=='Complete';
+      const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
+      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;cursor:pointer" onclick="${t.isAdHoc?`openAdHocModal('${t.id}')`:`openTaskStatusModal('${t.id}')`}">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#4A1759;margin-bottom:1px">${esc(t.name)}</div>
+          <div style="font-size:8px;color:#595959;display:flex;align-items:center;gap:4px">
+            ${esc(t.projName)}${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:3px">${avHtml(t.owner||'',true)}<span style="font-size:9px;color:#595959">${esc(t.owner||'')}</span></div>
+        ${pill(pri,PS(pri))}
+        ${pill(t.status,SS(t.status))}
+        <span style="font-size:9px;color:${overdue?'#C00000':'#595959'};font-weight:${overdue?700:400}">${dueStr||'—'}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('tblist').innerHTML=`<div class="card">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;background:#68217D;padding:8px 13px;gap:7px">
+        ${['Task','Owner','Priority','Status','Due Date'].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
+      </div>
+      ${rows||'<div style="padding:20px;text-align:center;color:#595959;font-size:10px">No tasks found.</div>'}
+    </div>`;
+  }
+}
+
+// ── Task status quick-edit ────────────────────────────────────────────────────
+function openTaskStatusModal(taskId){
+  const t=tasks.find(x=>x.id===taskId);if(!t)return;
+  const s=prompt(`Update status for "${t.name}":\n1. Not Started\n2. In Progress\n3. On Hold\n4. Complete\n\nType the number or status name:`,'');
+  if(!s)return;
+  const map={'1':'Not Started','2':'In Progress','3':'On Hold','4':'Complete'};
+  const newStat=map[s.trim()]||STATUSES.find(x=>x.toLowerCase()===s.trim().toLowerCase());
+  if(newStat){t.status=newStat;saveAll();renderTaskBoard();if(curView==='activity')renderActivity();}
+}
+
+// ── Ad Hoc Modal ──────────────────────────────────────────────────────────────
+let ahEditId=null;
+function openAdHocModal(id){
+  ahEditId=id||null;
+  document.getElementById('ahtitle').textContent=id?'Edit Task':'Add Ad Hoc Task';
+  document.getElementById('ahdelb').style.display=id?'block':'none';
+  if(id){
+    const t=adHocTasks.find(x=>x.id===id);
+    document.getElementById('ahtname').value=t.name;
+    document.getElementById('ahowner').value=t.owner||'Berenicia';
+    document.getElementById('ahpri').value=t.priority||'Medium';
+    document.getElementById('ahstat').value=t.status||'Not Started';
+    document.getElementById('ahdue').value=t.due||'';
+    document.getElementById('ahnotes').value=t.notes||'';
+  }else{
+    document.getElementById('ahtname').value='';
+    document.getElementById('ahowner').value='Berenicia';
+    document.getElementById('ahpri').value='High';
+    document.getElementById('ahstat').value='Not Started';
+    document.getElementById('ahdue').value='';
+    document.getElementById('ahnotes').value='';
+  }
+  openMo('ahmodal');
+}
+function saveAdHoc(){
+  const d={name:document.getElementById('ahtname').value,owner:document.getElementById('ahowner').value,priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
+  if(ahEditId){const i=adHocTasks.findIndex(t=>t.id===ahEditId);adHocTasks[i]={...adHocTasks[i],...d};}
+  else adHocTasks.push({id:'ah'+Date.now(),...d});
+  saveAll();closeMo('ahmodal');renderTaskBoard();
+}
+function delAdHoc(){
+  if(!ahEditId)return;
+  adHocTasks=adHocTasks.filter(t=>t.id!==ahEditId);
+  saveAll();closeMo('ahmodal');renderTaskBoard();
 }
 
 // ── Gantt ─────────────────────────────────────────────────────────────────────
+let gz='month';
 function setZoom(z){
-  ganttZoom=z;
-  document.getElementById('zoom-month').style.background=z==='month'?'#68217D':'#fff';
-  document.getElementById('zoom-month').style.color=z==='month'?'#fff':'#4A1759';
-  document.getElementById('zoom-quarter').style.background=z==='quarter'?'#68217D':'#fff';
-  document.getElementById('zoom-quarter').style.color=z==='quarter'?'#fff':'#4A1759';
+  gz=z;
+  document.getElementById('zm').style.cssText=`background:${z==='month'?'#68217D':'#fff'};color:${z==='month'?'#fff':'#4A1759'};border:${z==='month'?'none':'1px solid #D6C8DB'};border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-weight:${z==='month'?700:400};font-family:inherit`;
+  document.getElementById('zq').style.cssText=`background:${z==='quarter'?'#68217D':'#fff'};color:${z==='quarter'?'#fff':'#4A1759'};border:${z==='quarter'?'none':'1px solid #D6C8DB'};border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-weight:${z==='quarter'?700:400};font-family:inherit`;
   renderGantt();
 }
-
 function renderGantt(){
-  const today=new Date();
-  const yearStart=new Date(today.getFullYear(),0,1);
-  const totalDays=365;
-  const diffDays=(a,b)=>Math.round((b-a)/86400000);
-  const pct=d=>Math.max(0,Math.min(100,diffDays(yearStart,d)/totalDays*100));
-  const todayPct=pct(today);
-
+  const today=new Date();const ys=new Date(today.getFullYear(),0,1);const td=365;
+  const dd=(a,b)=>Math.round((b-a)/86400000);
+  const pct=d=>Math.max(0,Math.min(100,dd(ys,d)/td*100));
+  const tp=pct(today);
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const quarters=['Q1 (Jan–Mar)','Q2 (Apr–Jun)','Q3 (Jul–Sep)','Q4 (Oct–Dec)'];
-  const cols=ganttZoom==='month'?months:quarters;
-
+  const quarters=['Q1','Q2','Q3','Q4'];
+  const cols=gz==='month'?months:quarters;
   const sorted=[...projects.filter(p=>p.priority==='Critical'),...projects.filter(p=>p.priority!=='Critical')];
-
-  const colsHtml=cols.map((c,i)=>`<div class="gantt-month" style="${i===0?'border-left:none':''}">${c}</div>`).join('');
-
-  const rowsHtml=sorted.map((p,idx)=>{
-    const start=p.startDate?new Date(p.startDate):null;
-    const end=p.endDate?new Date(p.endDate):null;
-    const hasBar=start&&end&&end>start;
-    const left=hasBar?pct(start):0;
-    const width=hasBar?Math.max(1,pct(end)-pct(start)):0;
-    const isCrit=p.priority==='Critical';
-    const barColor=isCrit?'#C00000':p.status==='Complete'?'#89AB90':p.status==='On Hold'?'#D5A99C':'#68217D';
-    const daysLeft=end?diffDays(today,end):null;
-    const overdue=daysLeft!==null&&daysLeft<0;
-    const dueSoon=daysLeft!==null&&daysLeft>=0&&daysLeft<14;
-    const warn=overdue?`<span style="font-size:8px;color:#C00000;font-weight:700">&#9888; ${Math.abs(daysLeft)}d overdue</span>`:dueSoon?`<span style="font-size:8px;color:#C55A11;font-weight:700">&#9888; ${daysLeft}d left</span>`:'';
-
-    const gridLines=cols.map((_,i)=>`<div style="flex:1;border-left:${i>0?`1px solid #D6C8DB`:'none'};height:100%"></div>`).join('');
-
-    return`<div class="gantt-row" style="background:${idx%2===0?'#FCF5E3':'#fff'}">
-      <div class="gantt-lbl">
-        <div class="gantt-lbl-name" title="${esc(p.name)}">${esc(p.name)}</div>
-        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">${pill(p.priority,priStyle(p.priority))}<span style="font-size:8px;color:#595959">${esc(p.lead)}</span>${warn}</div>
+  const colsH=cols.map((c,i)=>`<div class="gm2" style="${i===0?'border-left:none':''}">${c}</div>`).join('');
+  const rowsH=sorted.map((p,idx)=>{
+    const s=p.startDate?new Date(p.startDate):null;const e=p.endDate?new Date(p.endDate):null;
+    const hb=s&&e&&e>s;const l=hb?pct(s):0;const w=hb?Math.max(1,pct(e)-pct(s)):0;
+    const ic=p.priority==='Critical';const bc=ic?'#C00000':p.status==='Complete'?'#89AB90':p.status==='On Hold'?'#D5A99C':'#68217D';
+    const dl=e?dd(today,e):null;const ov=dl!==null&&dl<0;const ds=dl!==null&&dl>=0&&dl<14;
+    const gl=cols.map((_,i)=>`<div style="flex:1;border-left:${i>0?`1px solid #D6C8DB`:'none'};height:100%"></div>`).join('');
+    return`<div class="grow" style="background:${idx%2===0?'#FCF5E3':'#fff'}">
+      <div class="gl">
+        <div class="gln" title="${esc(p.name)}">${esc(p.name)}</div>
+        <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">${pill(p.priority,PS(p.priority))}<span style="font-size:8px;color:#595959">${esc(p.lead)}</span>${ov?`<span style="font-size:8px;color:#C00000;font-weight:700">&#9888; ${Math.abs(dl)}d over</span>`:ds?`<span style="font-size:8px;color:#C55A11;font-weight:700">&#9888; ${dl}d left</span>`:''}</div>
       </div>
-      <div class="gantt-bar-area">
-        <div style="position:absolute;inset:0;display:flex;pointer-events:none">${gridLines}</div>
-        <div style="position:absolute;top:0;bottom:0;left:${todayPct}%;width:2px;background:#C00000;opacity:.65;z-index:2;pointer-events:none"></div>
-        ${hasBar?`<div style="position:absolute;top:50%;transform:translateY(-50%);left:${left}%;width:${width}%;height:16px;background:${barColor};border-radius:3px;z-index:1;overflow:hidden;min-width:4px">
-          <div style="position:absolute;inset:0;background:rgba(255,255,255,.3);width:${100-p.pct}%;right:0;left:auto"></div>
-          ${width>8?`<span style="position:absolute;inset:0;display:flex;align-items:center;padding-left:4px;font-size:8px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap">${p.pct}%</span>`:''}
-        </div>`:`<div style="position:absolute;top:50%;transform:translateY(-50%);left:8px;font-size:9px;color:#595959;font-style:italic">No dates set</div>`}
+      <div class="gba">
+        <div style="position:absolute;inset:0;display:flex;pointer-events:none">${gl}</div>
+        <div style="position:absolute;top:0;bottom:0;left:${tp}%;width:2px;background:#C00000;opacity:.65;z-index:2;pointer-events:none"></div>
+        ${hb?`<div style="position:absolute;top:50%;transform:translateY(-50%);left:${l}%;width:${w}%;height:14px;background:${bc};border-radius:3px;z-index:1;overflow:hidden;min-width:4px"><div style="position:absolute;inset:0;background:rgba(255,255,255,.3);width:${100-p.pct}%;right:0;left:auto"></div>${w>8?`<span style="position:absolute;inset:0;display:flex;align-items:center;padding-left:3px;font-size:7px;color:#fff;font-weight:700;overflow:hidden;white-space:nowrap">${p.pct}%</span>`:''}</div>`:`<div style="position:absolute;top:50%;transform:translateY(-50%);left:7px;font-size:8px;color:#595959;font-style:italic">No dates set</div>`}
       </div>
     </div>`;
   }).join('');
-
-  document.getElementById('gantt-body').innerHTML=`
-    <div class="gantt-hdr">
-      <div class="gantt-lbl-hdr"><span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Project</span></div>
-      <div class="gantt-time-hdr">${colsHtml}</div>
-    </div>${rowsHtml}`;
-
-  document.getElementById('critical-summary').innerHTML=projects.filter(p=>p.priority==='Critical').map(p=>{
-    const end=p.endDate?new Date(p.endDate):null;
-    const dl=end?Math.round((end-today)/86400000):null;
-    const dlHtml=dl!==null?`<span style="font-size:11px;font-weight:700;color:${dl<0?'#C00000':dl<14?'#C55A11':'#375623'}">${dl<0?`${Math.abs(dl)}d overdue`:`${dl}d left`}</span>`:`<span style="font-size:9px;color:#595959;font-style:italic">No end date</span>`;
-    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#FFDCE0;border-radius:7px;flex-wrap:wrap">
-      <div style="width:8px;height:8px;border-radius:50%;background:#C00000;flex-shrink:0"></div>
-      <div style="flex:1;font-size:11px;font-weight:600;color:#4A1759;min-width:120px">${esc(p.name)}</div>
-      <span style="font-size:10px;color:#595959">${esc(p.lead)}</span>
-      ${pill(p.status,statStyle(p.status))}
-      ${dlHtml}
-      <div style="min-width:80px">${pbar(p.pct)}</div>
+  document.getElementById('gbody').innerHTML=`<div class="ghdr"><div class="glh"><span style="font-size:8px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Project</span></div><div class="gth">${colsH}</div></div>${rowsH}`;
+  document.getElementById('cpsumm').innerHTML=projects.filter(p=>p.priority==='Critical').map(p=>{
+    const e=p.endDate?new Date(p.endDate):null;const dl=e?dd(today,e):null;
+    return`<div style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:#FFDCE0;border-radius:6px;flex-wrap:wrap">
+      <div style="width:7px;height:7px;border-radius:50%;background:#C00000;flex-shrink:0"></div>
+      <div style="flex:1;font-size:10px;font-weight:600;color:#4A1759;min-width:100px">${esc(p.name)}</div>
+      <span style="font-size:9px;color:#595959">${esc(p.lead)}</span>
+      ${pill(p.status,SS(p.status))}
+      ${dl!==null?`<span style="font-size:10px;font-weight:700;color:${dl<0?'#C00000':dl<14?'#C55A11':'#375623'}">${dl<0?`${Math.abs(dl)}d overdue`:`${dl}d left`}</span>`:`<span style="font-size:9px;color:#595959;font-style:italic">No end date</span>`}
+      <div style="min-width:70px">${pbar(p.pct)}</div>
     </div>`;
-  }).join('')||'<div style="color:#595959;font-size:11px;font-style:italic">No critical projects.</div>';
+  }).join('')||'<div style="color:#595959;font-size:10px;font-style:italic">No critical projects.</div>';
+}
+
+// ── Results & Benefits ────────────────────────────────────────────────────────
+function renderBenefits(){
+  const finKPIs=kpis.filter(k=>k.category==='Financial'&&k.unit==='R');
+  const totalTarget=finKPIs.reduce((a,k)=>a+k.target,0);
+  const totalActual=finKPIs.reduce((a,k)=>a+k.actual,0);
+  const onTrack=kpis.filter(k=>k.target>0&&k.actual/k.target>=1).length;
+  const amber=kpis.filter(k=>k.target>0&&k.actual/k.target>=.8&&k.actual/k.target<1).length;
+  const atRisk=kpis.filter(k=>k.target>0&&k.actual/k.target<.8).length;
+  const noKpi=projects.filter(p=>!kpis.some(k=>k.projId===p.id)).length;
+
+  document.getElementById('benrow').innerHTML=[
+    {l:'Total Financial Value',v:fmtR(totalActual),bg:'#68217D',fg:'#fff'},
+    {l:'vs Target',v:fmtR(totalTarget),bg:'#E8D5EE',fg:'#68217D'},
+    {l:'KPIs On Track',v:onTrack,bg:'#E2EFDA',fg:'#375623'},
+    {l:'Amber',v:amber,bg:'#FFF8DC',fg:'#6B5A10'},
+    {l:'At Risk',v:atRisk,bg:'#FFDCE0',fg:'#C00000'},
+    {l:'No KPIs Set',v:noKpi,bg:'#E8E8E8',fg:'#595959'},
+  ].map(k=>`<div class="bkpi" style="background:${k.bg}"><div class="bklbl" style="color:${k.fg}">${k.l}</div><div class="bkval" style="color:${k.fg}">${k.v}</div></div>`).join('');
+
+  // Value by category
+  const catVal=CATS.map(c=>{
+    const pk=kpis.filter(k=>k.unit==='R'&&k.category==='Financial'&&projects.find(p=>p.id===k.projId&&p.category===c));
+    const v=pk.reduce((a,k)=>a+k.actual,0);
+    return{cat:c,v};
+  }).filter(x=>x.v>0);
+  const maxV=Math.max(...catVal.map(x=>x.v),1);
+  document.getElementById('bencat').innerHTML=catVal.length?catVal.map(x=>{
+    const cs=CS(x.cat);
+    return`<div class="mbi"><div class="mbl"><span>${pill(x.cat,cs)}</span><strong style="font-size:10px;color:#4A1759">${fmtR(x.v)}</strong></div><div class="mbb"><div style="width:${Math.round(x.v/maxV*100)}%;height:100%;background:${cs.fg};border-radius:3px"></div></div></div>`;
+  }).join(''):'<div style="font-size:10px;color:#595959;font-style:italic;padding:8px">No financial KPIs recorded yet.</div>';
+
+  // Achievement by project
+  const projAch=projects.map(p=>{
+    const pk=kpis.filter(k=>k.projId===p.id&&k.target>0);
+    if(!pk.length)return null;
+    const avg=Math.round(pk.reduce((a,k)=>a+k.actual/k.target*100,0)/pk.length);
+    return{name:p.name,avg,count:pk.length};
+  }).filter(Boolean).sort((a,b)=>b.avg-a.avg);
+  document.getElementById('benach').innerHTML=projAch.length?projAch.map(x=>{
+    const col=x.avg>=100?'#375623':x.avg>=80?'#DBC25D':'#C00000';
+    return`<div class="mbi"><div class="mbl"><span style="font-size:10px;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${esc(x.name)}</span><strong style="font-size:10px;color:${col}">${x.avg}%</strong></div><div class="mbb"><div style="width:${Math.min(100,x.avg)}%;height:100%;background:${col};border-radius:3px"></div></div></div>`;
+  }).join(''):'<div style="font-size:10px;color:#595959;font-style:italic;padding:8px">No KPI targets set yet.</div>';
+
+  // League table
+  const league=projects.map(p=>{
+    const fk=kpis.filter(k=>k.projId===p.id&&k.category==='Financial'&&k.unit==='R');
+    const v=fk.reduce((a,k)=>a+k.actual,0);
+    return{p,v};
+  }).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const maxLV=Math.max(...league.map(x=>x.v),1);
+  document.getElementById('league').innerHTML=league.length?league.map((x,i)=>{
+    const allk=kpis.filter(k=>k.projId===x.p.id&&k.target>0);
+    const avg=allk.length?Math.round(allk.reduce((a,k)=>a+k.actual/k.target*100,0)/allk.length):0;
+    const col=avg>=100?'#375623':avg>=80?'#DBC25D':'#C00000';
+    return`<div class="lgrow" style="background:${i%2===0?'#FCF5E3':'#fff'}">
+      <div><div style="font-size:10px;font-weight:700;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.p.name)}</div><div class="lgbar-bg"><div style="width:${Math.round(x.v/maxLV*100)}%;height:100%;background:#68217D;border-radius:3px"></div></div></div>
+      <span style="font-size:12px;font-weight:800;color:#68217D">${fmtR(x.v)}</span>
+      <span class="pill" style="background:${col}22;color:${col}">${avg}%</span>
+    </div>`;
+  }).join(''):'<div style="padding:16px;text-align:center;font-size:10px;color:#595959;font-style:italic">No financial KPIs recorded yet. Add KPIs in the Activity Breakdown tab.</div>';
+
+  document.getElementById('nokpi-warn').innerHTML=noKpi>0?`<div style="padding:7px 13px;background:#F5F0F7;font-size:9px;color:#595959;border-top:1px solid #D6C8DB">${noKpi} project${noKpi>1?'s have':' has'} no KPIs defined — add targets to track full portfolio value</div>`:'';
+
+  // All KPI records
+  document.getElementById('allkpi').innerHTML=kpis.length?kpis.map(k=>{
+    const p=projects.find(x=>x.id===k.projId);
+    const kc=KCAT(k.category);
+    const pct2=k.target>0?Math.round(k.actual/k.target*100):0;
+    const rag=pct2>=100?'#375623':pct2>=80?'#DBC25D':'#C00000';
+    const fmt=v=>k.unit==='R'?fmtR(v):k.unit==='%'?`${v}%`:`${v} ${k.unit}`;
+    return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:9px;align-items:center;padding:9px 11px;background:#fff;border-radius:7px;border:1px solid #D6C8DB;cursor:pointer" onclick="openKPIModal(${k.projId},'${k.id}')">
+      <div><div style="font-size:10px;font-weight:700;color:#4A1759">${esc(k.name)}</div><div style="font-size:8px;color:#595959;margin-top:1px">${p?esc(p.name):'Unknown'}</div></div>
+      <div>${pill(k.category,kc)}</div>
+      <div style="font-size:10px;color:#595959">${fmt(k.actual)} / ${fmt(k.target)}</div>
+      <span class="pill" style="background:${rag}22;color:${rag}">${pct2}%</span>
+    </div>`;
+  }).join(''):'<div style="font-size:10px;color:#595959;font-style:italic">No KPIs recorded yet. Add them in the Activity Breakdown tab.</div>';
 }
 
 // ── Recommendations ───────────────────────────────────────────────────────────
-function generateRecs(){
-  const recs=[];
-  const today=new Date();
-  const diffD=(a,b)=>Math.round((b-a)/86400000);
-  const total=projects.length;
-
-  const wl=LEADS.map(l=>({lead:l,count:projects.filter(p=>p.lead===l).length}));
-  const unassigned=wl.filter(w=>w.count===0).map(w=>w.lead);
-  wl.filter(w=>w.count>3).forEach(w=>{
-    recs.push({id:`wl-${w.lead}`,severity:'high',category:'Workload',icon:'&#9888;',title:`${w.lead} is overloaded`,detail:`Carrying ${w.count} projects: ${projects.filter(p=>p.lead===w.lead).map(p=>p.name).join(', ')}.`,action:`Consider redistributing 1–2 projects to ${unassigned.join(' or ')||'another lead'}.`,affected:projects.filter(p=>p.lead===w.lead).map(p=>p.name)});
-  });
-  if(unassigned.length){
-    recs.push({id:'wl-un',severity:'info',category:'Workload',icon:'&#128100;',title:`${unassigned.join(', ')} ${unassigned.length===1?'has':'have'} no projects assigned`,detail:'Available capacity that could relieve pressure on overloaded leads.',action:'Assign upcoming or redistributed projects to balance the portfolio.',affected:[]});
-  }
-
-  const critNS=projects.filter(p=>p.priority==='Critical'&&p.status==='Not Started');
-  if(critNS.length) recs.push({id:'cp-ns',severity:'critical',category:'Critical Path',icon:'&#128308;',title:`${critNS.length} critical project${critNS.length>1?'s':''} not yet started`,detail:critNS.map(p=>p.name).join('; ')+'.',action:'Confirm approval and assign a kick-off date immediately.',affected:critNS.map(p=>p.name)});
-
-  const critOH=projects.filter(p=>p.priority==='Critical'&&p.status==='On Hold');
-  if(critOH.length) recs.push({id:'cp-oh',severity:'critical',category:'Critical Path',icon:'&#128308;',title:`Critical project${critOH.length>1?'s':''} on hold`,detail:critOH.map(p=>p.name).join('; ')+'.',action:'Escalate to leadership — a Critical project should not be paused without explicit sign-off.',affected:critOH.map(p=>p.name)});
-
-  const overdue=projects.filter(p=>p.endDate&&p.status!=='Complete'&&new Date(p.endDate)<today);
-  if(overdue.length) recs.push({id:'sch-od',severity:'critical',category:'Schedule',icon:'&#128197;',title:`${overdue.length} project${overdue.length>1?'s':''} past end date`,detail:overdue.map(p=>`${p.name} (${diffD(new Date(p.endDate),today)}d overdue)`).join('; ')+'.',action:'Update end dates or escalate to agree revised timelines.',affected:overdue.map(p=>p.name)});
-
-  const dueSoon=projects.filter(p=>p.endDate&&p.status!=='Complete'&&p.status!=='On Hold'&&diffD(today,new Date(p.endDate))>=0&&diffD(today,new Date(p.endDate))<=21&&p.pct<70);
-  if(dueSoon.length) recs.push({id:'sch-ds',severity:'high',category:'Schedule',icon:'&#9200;',title:`${dueSoon.length} project${dueSoon.length>1?'s':''} due within 3 weeks but under 70%`,detail:dueSoon.map(p=>`${p.name} (${diffD(today,new Date(p.endDate))}d left, ${p.pct}% done)`).join('; ')+'.',action:'Review capacity and assess whether delivery dates are still achievable.',affected:dueSoon.map(p=>p.name)});
-
-  const proposed=projects.filter(p=>p.approval==='Proposed'&&p.status==='In Progress');
-  if(proposed.length) recs.push({id:'gov-pr',severity:'high',category:'Governance',icon:'&#128203;',title:`${proposed.length} in-progress project${proposed.length>1?'s':''} awaiting approval`,detail:proposed.map(p=>p.name).join('; ')+'.',action:'Obtain sign-off retrospectively or pause until approved.',affected:proposed.map(p=>p.name)});
-
-  const deferred=projects.filter(p=>p.approval==='Deferred'&&p.status==='In Progress');
-  if(deferred.length) recs.push({id:'gov-df',severity:'high',category:'Governance',icon:'&#9940;',title:`Project${deferred.length>1?'s':''} in progress with deferred approval`,detail:deferred.map(p=>p.name).join('; ')+'.',action:'Stop work or seek urgent approval.',affected:deferred.map(p=>p.name)});
-
-  const stalled=projects.filter(p=>p.status==='In Progress'&&p.pct<10);
-  if(stalled.length) recs.push({id:'prog-st',severity:'medium',category:'Progress',icon:'&#128002;',title:`${stalled.length} in-progress project${stalled.length>1?'s':''} showing little progress`,detail:stalled.map(p=>p.name).join('; ')+'.',action:'Check if these are genuinely active. Update status if work has not begun.',affected:stalled.map(p=>p.name)});
-
-  const noDates=projects.filter(p=>(!p.startDate||!p.endDate)&&p.status!=='Complete');
-  if(noDates.length) recs.push({id:'pl-nd',severity:'medium',category:'Planning',icon:'&#128198;',title:`${noDates.length} project${noDates.length>1?'s have':" has"} no dates set`,detail:noDates.map(p=>p.name).join('; ')+'.',action:'Set target start and end dates to enable Gantt tracking.',affected:noDates.map(p=>p.name)});
-
-  const noProblem=projects.filter(p=>!p.problem&&p.status!=='Complete');
-  if(noProblem.length) recs.push({id:'dq-pr',severity:'low',category:'Data Quality',icon:'&#128221;',title:`${noProblem.length} project${noProblem.length>1?'s':''} missing a problem statement`,detail:'A clear problem statement strengthens the business case.',action:'Add a one-line problem statement to each project.',affected:noProblem.map(p=>p.name)});
-
-  const noOutcome=projects.filter(p=>!p.outcome&&p.status!=='Complete');
-  if(noOutcome.length) recs.push({id:'dq-oc',severity:'low',category:'Data Quality',icon:'&#127919;',title:`${noOutcome.length} project${noOutcome.length>1?'s':''} missing a success metric`,detail:'Without a defined outcome it is impossible to know when a project has succeeded.',action:"Define a measurable success metric (e.g. 'reduce downtime by 20%').",affected:noOutcome.map(p=>p.name)});
-
-  const noRisks=projects.filter(p=>!p.risks&&p.status!=='Complete'&&(p.priority==='Critical'||p.priority==='High'));
-  if(noRisks.length) recs.push({id:'risk-nr',severity:'medium',category:'Risk',icon:'&#9889;',title:`${noRisks.length} high-priority project${noRisks.length>1?'s':''} with no risks documented`,detail:noRisks.map(p=>p.name).join('; ')+'.',action:'Document at least the top 3 risks for each Critical and High priority project.',affected:noRisks.map(p=>p.name)});
-
-  const disq=projects.filter(p=>p.custValue==='Disqualifier'&&p.priority!=='Low');
-  if(disq.length) recs.push({id:'port-dq',severity:'info',category:'Portfolio Strategy',icon:'&#128161;',title:`${disq.length} non-low-priority Disqualifier project${disq.length>1?'s':''}`,detail:disq.map(p=>p.name).join('; ')+'.',action:'Review whether these should be reprioritised to free capacity for Order Winners.',affected:disq.map(p=>p.name)});
-
+function genRecs(){
+  const recs=[];const today=new Date();const dd=(a,b)=>Math.round((b-a)/86400000);
+  const wl=LEADS.map(l=>({lead:l,total:projects.filter(p=>p.lead===l).length+projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length}));
+  const unassigned=wl.filter(w=>w.total===0).map(w=>w.lead);
+  wl.filter(w=>w.total>4).forEach(w=>recs.push({id:`wl-${w.lead}`,severity:'high',category:'Workload',icon:'&#9888;',title:`${w.lead} total involvement exceeds 4`,detail:`${w.lead} leads or collaborates on ${w.total} projects.`,action:`Redistribute work to ${unassigned.join(' or ')||'a less involved lead'}.`,affected:projects.filter(p=>p.lead===w.lead||(p.collaborators||[]).includes(w.lead)).map(p=>p.name)}));
+  if(unassigned.length)recs.push({id:'wl-un',severity:'info',category:'Workload',icon:'&#128100;',title:`${unassigned.join(', ')} ${unassigned.length===1?'has':'have'} no involvement`,detail:'Available capacity exists.',action:'Assign projects or collaborator roles to balance the portfolio.',affected:[]});
+  const cns=projects.filter(p=>p.priority==='Critical'&&p.status==='Not Started');
+  if(cns.length)recs.push({id:'cp-ns',severity:'critical',category:'Critical Path',icon:'&#128308;',title:`${cns.length} critical project${cns.length>1?'s':''} not started`,detail:cns.map(p=>p.name).join('; ')+'.',action:'Confirm approval and assign a kick-off date.',affected:cns.map(p=>p.name)});
+  const cod=projects.filter(p=>p.endDate&&p.status!=='Complete'&&new Date(p.endDate)<today);
+  if(cod.length)recs.push({id:'sch-od',severity:'critical',category:'Schedule',icon:'&#128197;',title:`${cod.length} project${cod.length>1?'s':''} past end date`,detail:cod.map(p=>`${p.name} (${dd(new Date(p.endDate),today)}d overdue)`).join('; ')+'.',action:'Update end dates or escalate.',affected:cod.map(p=>p.name)});
+  const ds=projects.filter(p=>p.endDate&&p.status!=='Complete'&&p.status!=='On Hold'&&dd(today,new Date(p.endDate))>=0&&dd(today,new Date(p.endDate))<=21&&p.pct<70);
+  if(ds.length)recs.push({id:'sch-ds',severity:'high',category:'Schedule',icon:'&#9200;',title:`${ds.length} project${ds.length>1?'s':''} due within 3 weeks under 70%`,detail:ds.map(p=>`${p.name} (${dd(today,new Date(p.endDate))}d left, ${p.pct}%)`).join('; ')+'.',action:'Review capacity and delivery dates.',affected:ds.map(p=>p.name)});
+  const prop=projects.filter(p=>p.approval==='Proposed'&&p.status==='In Progress');
+  if(prop.length)recs.push({id:'gov-pr',severity:'high',category:'Governance',icon:'&#128203;',title:`${prop.length} in-progress project${prop.length>1?'s':''} awaiting approval`,detail:prop.map(p=>p.name).join('; ')+'.',action:'Obtain sign-off retrospectively or pause until approved.',affected:prop.map(p=>p.name)});
+  const stall=projects.filter(p=>p.status==='In Progress'&&p.pct<10);
+  if(stall.length)recs.push({id:'prog-st',severity:'medium',category:'Progress',icon:'&#128002;',title:`${stall.length} in-progress project${stall.length>1?'s':''} under 10%`,detail:stall.map(p=>p.name).join('; ')+'.',action:'Confirm these are genuinely active.',affected:stall.map(p=>p.name)});
+  const nd=projects.filter(p=>(!p.startDate||!p.endDate)&&p.status!=='Complete');
+  if(nd.length)recs.push({id:'pl-nd',severity:'medium',category:'Planning',icon:'&#128198;',title:`${nd.length} project${nd.length>1?'s have':' has'} no dates`,detail:nd.map(p=>p.name).join('; ')+'.',action:'Set start and end dates to enable Gantt tracking.',affected:nd.map(p=>p.name)});
+  const np=projects.filter(p=>!p.problem&&p.status!=='Complete');
+  if(np.length)recs.push({id:'dq-pr',severity:'low',category:'Data Quality',icon:'&#128221;',title:`${np.length} project${np.length>1?'s':''} missing problem statement`,detail:'',action:'Add a one-line problem statement to each project.',affected:np.map(p=>p.name)});
+  const nr=projects.filter(p=>!p.risks&&p.status!=='Complete'&&(p.priority==='Critical'||p.priority==='High'));
+  if(nr.length)recs.push({id:'risk-nr',severity:'medium',category:'Risk',icon:'&#9889;',title:`${nr.length} high-priority project${nr.length>1?'s':''} with no risks documented`,detail:nr.map(p=>p.name).join('; ')+'.',action:'Document top 3 risks for each Critical/High project.',affected:nr.map(p=>p.name)});
+  const nkpi=projects.filter(p=>p.status==='Complete'&&!kpis.some(k=>k.projId===p.id));
+  if(nkpi.length)recs.push({id:'kpi-miss',severity:'medium',category:'Benefits',icon:'&#9733;',title:`${nkpi.length} completed project${nkpi.length>1?'s':''} with no KPIs recorded`,detail:nkpi.map(p=>p.name).join('; ')+'.',action:'Add KPIs to completed projects to capture value delivered.',affected:nkpi.map(p=>p.name)});
   const order={critical:0,high:1,medium:2,low:3,info:4};
   return recs.sort((a,b)=>order[a.severity]-order[b.severity]);
 }
+function urgentRecs(){return genRecs().filter(r=>r.severity==='critical'||r.severity==='high').length;}
+function updateBadge(){const n=urgentRecs();document.getElementById('rbadge').textContent=n;document.getElementById('rbadge2').textContent=n;}
 
-function getUrgentRecCount(){return generateRecs().filter(r=>r.severity==='critical'||r.severity==='high').length;}
-function updateRecBadge(){
-  const n=getUrgentRecCount();
-  document.getElementById('rec-count-badge').textContent=n;
-  document.getElementById('rec-count-badge2').textContent=n;
-}
-
-const SEV={
-  critical:{bg:'#FFDCE0',border:'#C00000',fg:'#C00000',dot:'#C00000',label:'Critical'},
-  high:    {bg:'#FCE4D6',border:'#C55A11',fg:'#C55A11',dot:'#C55A11',label:'High'},
-  medium:  {bg:'#FFF8DC',border:'#DBC25D',fg:'#6B5A10',dot:'#DBC25D',label:'Medium'},
-  low:     {bg:'#E2EFDA',border:'#89AB90',fg:'#375623',dot:'#89AB90',label:'Low'},
-  info:    {bg:'#DDE4EC',border:'#7A92AC',fg:'#3A3F60',dot:'#7A92AC',label:'Info'},
-};
-
+const SEVC={critical:{bg:'#FFDCE0',border:'#C00000',fg:'#C00000',dot:'#C00000',label:'Critical'},high:{bg:'#FCE4D6',border:'#C55A11',fg:'#C55A11',dot:'#C55A11',label:'High'},medium:{bg:'#FFF8DC',border:'#DBC25D',fg:'#6B5A10',dot:'#DBC25D',label:'Medium'},low:{bg:'#E2EFDA',border:'#89AB90',fg:'#375623',dot:'#89AB90',label:'Low'},info:{bg:'#DDE4EC',border:'#7A92AC',fg:'#3A3F60',dot:'#7A92AC',label:'Info'}};
+let rcatf='All';
 function renderRecs(){
-  const recs=generateRecs();
+  const recs=genRecs();
   const score=Math.max(0,100-recs.filter(r=>r.severity==='critical').length*20-recs.filter(r=>r.severity==='high').length*10-recs.filter(r=>r.severity==='medium').length*5-recs.filter(r=>r.severity==='low').length*2);
   const sc=score>=80?{color:'#375623',bg:'#E2EFDA',label:'Healthy'}:score>=60?{color:'#C55A11',bg:'#FCE4D6',label:'Needs Attention'}:{color:'#C00000',bg:'#FFDCE0',label:'At Risk'};
-
-  document.getElementById('health-box-wrap').innerHTML=`
-    <div class="health-box" style="background:${sc.bg};border:1px solid ${sc.color}22">
-      <div style="min-width:70px;text-align:center"><div class="health-score-num" style="color:${sc.color}">${score}</div><div class="health-score-lbl" style="color:${sc.color}">Health Score</div></div>
-      <div style="flex:1"><div style="font-weight:800;color:${sc.color};font-size:15px;margin-bottom:5px">${sc.label}</div>
-      <div class="health-bar-bg"><div class="health-bar-fill" style="width:${score}%;background:${sc.color}"></div></div>
-      <div style="font-size:11px;color:${sc.color};opacity:.85">${score>=80?'Your portfolio is in good shape. Address remaining items to maintain momentum.':score>=60?'Several issues need attention. Focus on critical and high severity items first.':'Immediate action required. Multiple critical issues are putting the portfolio at risk.'}</div></div>
-    </div>`;
-
-  const counts={critical:0,high:0,medium:0,low:0,info:0};
-  recs.forEach(r=>counts[r.severity]++);
-  document.getElementById('sev-cards').innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([s,n])=>{
-    const sc2=SEV[s];
-    return`<div class="sev-card" style="background:${sc2.bg};border-color:${sc2.border}22"><div class="sev-dot" style="background:${sc2.dot}"></div><div><div style="font-size:22px;font-weight:800;color:${sc2.fg};line-height:1">${n}</div><div style="font-size:9px;color:${sc2.fg};opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.4px">${sc2.label}</div></div></div>`;
-  }).join('')+`<div class="sev-card" style="background:#fff"><div><div style="font-size:22px;font-weight:800;color:#4A1759;line-height:1">${recs.length}</div><div style="font-size:9px;color:#595959;font-weight:700;text-transform:uppercase;letter-spacing:.4px">Total</div></div></div>`;
-
+  document.getElementById('hbox').innerHTML=`<div class="hbox" style="background:${sc.bg};border:1px solid ${sc.color}22">
+    <div style="min-width:60px;text-align:center"><div class="hsnum" style="color:${sc.color}">${score}</div><div class="hslbl" style="color:${sc.color}">Health</div></div>
+    <div style="flex:1"><div style="font-weight:800;color:${sc.color};font-size:14px;margin-bottom:4px">${sc.label}</div>
+    <div class="hbbg"><div class="hbfill" style="width:${score}%;background:${sc.color}"></div></div>
+    <div style="font-size:10px;color:${sc.color};opacity:.85">${score>=80?'Portfolio is in good shape.':score>=60?'Several issues need attention — focus on critical items first.':'Immediate action required on multiple critical issues.'}</div></div>
+  </div>`;
+  const counts={critical:0,high:0,medium:0,low:0,info:0};recs.forEach(r=>counts[r.severity]++);
+  document.getElementById('scards').innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([s,n])=>{const sc2=SEVC[s];return`<div class="sc2" style="background:${sc2.bg};border-color:${sc2.border}22"><div class="sdot" style="background:${sc2.dot}"></div><div><div style="font-size:20px;font-weight:800;color:${sc2.fg};line-height:1">${n}</div><div style="font-size:8px;color:${sc2.fg};opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.4px">${sc2.label}</div></div></div>`;}).join('')+`<div class="sc2" style="background:#fff"><div><div style="font-size:20px;font-weight:800;color:#4A1759;line-height:1">${recs.length}</div><div style="font-size:8px;color:#595959;font-weight:700;text-transform:uppercase;letter-spacing:.4px">Total</div></div></div>`;
   const cats=['All',...new Set(recs.map(r=>r.category))];
-  document.getElementById('cat-filters').innerHTML=cats.map(c=>`<button class="cat-filter-btn${c===recCatFilter?' active':''}" onclick="setRecFilter('${c}')">${c}${c!=='All'?` (${recs.filter(r=>r.category===c).length})`:''}</button>`).join('');
-
-  const shown=recCatFilter==='All'?recs:recs.filter(r=>r.category===recCatFilter);
-  if(shown.length===0){
-    document.getElementById('rec-list').innerHTML=`<div style="background:#E2EFDA;border-radius:10px;padding:24px;text-align:center;border:1px solid #89AB90"><div style="font-size:28px;margin-bottom:8px">&#10003;</div><div style="font-weight:800;color:#375623;font-size:15px">All clear for ${recCatFilter}</div></div>`;
-    return;
-  }
-  document.getElementById('rec-list').innerHTML=shown.map(r=>{
-    const sc3=SEV[r.severity];
-    return`<div class="rec-card" style="background:${sc3.bg};border-color:${sc3.border}33;margin-bottom:8px">
-      <div class="rec-head" onclick="toggleRec('rb-${r.id}','ra-${r.id}')">
-        <span style="font-size:18px;flex-shrink:0;margin-top:1px">${r.icon}</span>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-            <span class="rec-title">${r.title}</span>
-            <span class="pill" style="background:${sc3.dot};color:#fff;font-size:9px">${sc3.label}</span>
-            <span class="pill" style="background:${sc3.dot}22;color:${sc3.fg};font-size:9px">${r.category}</span>
-          </div>
-          <div class="rec-detail">${r.detail}</div>
-        </div>
-        <span style="color:#595959;font-size:12px;flex-shrink:0;margin-left:8px" id="ra-${r.id}">&#9660;</span>
+  document.getElementById('cfilters').innerHTML=cats.map(c=>`<button class="cfb${c===rcatf?' active':''}" onclick="setRCat('${c}')">${c}${c!=='All'?` (${recs.filter(r=>r.category===c).length})`:''}</button>`).join('');
+  const shown=rcatf==='All'?recs:recs.filter(r=>r.category===rcatf);
+  if(!shown.length){document.getElementById('rlist').innerHTML=`<div style="background:#E2EFDA;border-radius:9px;padding:20px;text-align:center;border:1px solid #89AB90"><div style="font-size:24px;margin-bottom:6px">&#10003;</div><div style="font-weight:800;color:#375623;font-size:14px">All clear for ${rcatf}</div></div>`;return;}
+  document.getElementById('rlist').innerHTML=shown.map(r=>{const sc3=SEVC[r.severity];return`<div class="rc" style="background:${sc3.bg};border-color:${sc3.border}33">
+    <div class="rh" onclick="toggleRec('rb-${r.id}','ra-${r.id}')">
+      <span style="font-size:16px;flex-shrink:0;margin-top:1px">${r.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px"><span class="rt">${r.title}</span><span class="pill" style="background:${sc3.dot};color:#fff;font-size:8px">${sc3.label}</span><span class="pill" style="background:${sc3.dot}22;color:${sc3.fg};font-size:8px">${r.category}</span></div>
+        <div class="rd">${r.detail}</div>
       </div>
-      <div class="rec-body" id="rb-${r.id}" style="display:none">
-        <div class="rec-action-lbl" style="color:${sc3.dot}">Recommended Action</div>
-        <div class="rec-action">${r.action}</div>
-        ${r.affected.length?`<div style="font-size:9px;font-weight:800;color:#595959;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;margin-bottom:5px">Affected Projects (${r.affected.length})</div><div class="rec-chips">${r.affected.map(n=>`<span class="rec-chip">${esc(n)}</span>`).join('')}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
+      <span style="color:#595959;font-size:11px;flex-shrink:0;margin-left:7px" id="ra-${r.id}">&#9660;</span>
+    </div>
+    <div class="rb" id="rb-${r.id}" style="display:none">
+      <div class="ral" style="color:${sc3.dot}">Recommended Action</div>
+      <div class="ra">${r.action}</div>
+      ${r.affected.length?`<div style="font-size:8px;font-weight:800;color:#595959;text-transform:uppercase;letter-spacing:.5px;margin-top:9px;margin-bottom:4px">Affected (${r.affected.length})</div><div class="rcs">${r.affected.map(n=>`<span class="rch">${esc(n)}</span>`).join('')}</div>`:''}
+    </div>
+  </div>`;}).join('');
 }
+function setRCat(c){rcatf=c;renderRecs();}
+function toggleRec(bid,aid){const b=document.getElementById(bid);const a=document.getElementById(aid);if(!b)return;const op=b.style.display==='none';b.style.display=op?'block':'none';if(a)a.innerHTML=op?'&#9650;':'&#9660;';}
 
-function setRecFilter(cat){recCatFilter=cat;renderRecs();}
-function toggleRec(bodyId,arrId){
-  const b=document.getElementById(bodyId);const a=document.getElementById(arrId);
-  if(!b)return;
-  const open=b.style.display==='none';
-  b.style.display=open?'block':'none';
-  if(a)a.innerHTML=open?'&#9650;':'&#9660;';
-}
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openMo(id){document.getElementById(id).classList.add('open');}
+function closeMo(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-renderTracker();
-updateSub();
-updateRecBadge();
+renderTracker();updateSub();updateBadge();
 </script>
 </body>
 </html>
