@@ -505,7 +505,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// -- Constants -----------------------------------------------------------------
 const PHASES=['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
 const PTASKS={'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],'Planning':['Project plan','Resource plan','Risk register','Communication plan'],'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']};
 const LEADS=['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
@@ -522,7 +522,7 @@ function buildTasks(pid){
   return t;
 }
 
-// ── Default data ──────────────────────────────────────────────────────────────
+// -- Default data --------------------------------------------------------------
 const DP=[
   {id:1,name:'Supervisory training for Prestige',lead:'Berenicia',category:'People & Training',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:20,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-01',endDate:'2025-06-30'},
   {id:2,name:'Automations at factories - not used, switched off',lead:'Jacques',category:'Technology & Assets',priority:'High',bizImpact:'Efficiency Gain',custValue:'Disqualifier',status:'In Progress',approval:'Approved',pct:35,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-15',endDate:'2025-05-31'},
@@ -557,7 +557,7 @@ let kpis=ld('bd-kpis',DEFAULT_KPIS);
 
 function saveAll(){sd('bd-projs',projects);sd('bd-tasks',tasks);sd('bd-adhoc',adHocTasks);sd('bd-kpis',kpis);}
 
-// ── Style helpers ─────────────────────────────────────────────────────────────
+// -- Style helpers -------------------------------------------------------------
 const PS=p=>({Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#DBC25D',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}}[p]||{bg:'#F0F0F0',fg:'#595959'});
 const SS=s=>({'In Progress':{bg:'#E8D5EE',fg:'#68217D'},'Not Started':{bg:'#E8E8E8',fg:'#595959'},'On Hold':{bg:'#D5A99C',fg:'#7A4A40'},'Complete':{bg:'#E2EFDA',fg:'#375623'}}[s]||{bg:'#F0F0F0',fg:'#595959'});
 const AS=a=>({Approved:{bg:'#89AB90',fg:'#2E4F34'},Proposed:{bg:'#DBC25D',fg:'#6B5A10'},Deferred:{bg:'#D5A99C',fg:'#7A4A40'},Rejected:{bg:'#FFDCE0',fg:'#C00000'}}[a]||{bg:'#F0F0F0',fg:'#595959'});
@@ -570,7 +570,7 @@ function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase()
 function avHtml(name,sm){return`<div class="av${sm?' av-sm':''}" title="${esc(name)}">${initials(name)}</div>`;}
 function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)return`R ${Math.round(v/1000)}k`;return`R ${Math.round(v)}`;}
 
-// ── View switching ─────────────────────────────────────────────────────────────
+// -- View switching -------------------------------------------------------------
 const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',recs:'Recommendations'};
 let curView='tracker';
 function sv(v){
@@ -594,10 +594,10 @@ function updateSub(){
   const ip=projects.filter(p=>p.status==='In Progress').length;
   const cr=projects.filter(p=>p.priority==='Critical').length;
   const rn=urgentRecs();
-  document.getElementById('psub').textContent=`${projects.length} projects · ${ip} in progress · ${cr} critical${rn>0?` · ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
+  document.getElementById('psub').textContent=`${projects.length} projects . ${ip} in progress . ${cr} critical${rn>0?` . ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
 }
 
-// ── Tracker ───────────────────────────────────────────────────────────────────
+// -- Tracker -------------------------------------------------------------------
 function renderTracker(){
   const s=(document.getElementById('si').value||'').toLowerCase();
   const fc=document.getElementById('fc').value;
@@ -627,7 +627,7 @@ function renderTracker(){
     const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
     return`<div class="trow tcols" style="background:${i%2===0?'#FCF5E3':'#fff'}">
       <div><div class="pname">${esc(p.name)}${kpiDot(p.id)}</div>
-        <div class="psub">${esc(p.bizImpact)} · ${esc(p.custValue)}</div>
+        <div class="psub">${esc(p.bizImpact)} . ${esc(p.custValue)}</div>
         ${collabs.length?`<div class="collab-wrap">${collabs.map(c=>`<div class="collab-chip">${avHtml(c,true)}<span>${esc(c)}</span></div>`).join('')}</div>`:''}
       </div>
       <div class="hm" style="font-size:10px;color:var(--gt)">${esc(p.lead)}</div>
@@ -641,7 +641,7 @@ function renderTracker(){
   document.getElementById('tbody').innerHTML=html||'<div style="padding:22px;text-align:center;color:var(--gt)">No projects match the filters.</div>';
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// -- Modal ---------------------------------------------------------------------
 let editId=null;
 function openModal(id){
   editId=id;
@@ -712,7 +712,7 @@ function delProj(){
   saveAll();closeMo('pmodal');renderTracker();updateSub();updateBadge();
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────────
+// -- Dashboard -----------------------------------------------------------------
 function renderDash(){
   const total=projects.length;
   const ip=projects.filter(p=>p.status==='In Progress').length;
@@ -769,7 +769,7 @@ function renderDash(){
     </div>`).join('');
 }
 
-// ── Activity Breakdown ────────────────────────────────────────────────────────
+// -- Activity Breakdown --------------------------------------------------------
 function renderActivity(){
   document.getElementById('actbody').innerHTML=projects.map(p=>{
     const cs=CS(p.category);
@@ -781,7 +781,7 @@ function renderActivity(){
           <div style="color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div>
           <div style="color:rgba(255,255,255,.6);font-size:8px;margin-top:1px;display:flex;align-items:center;gap:5px">
             <span>Lead: ${esc(p.lead)}</span>
-            ${collabs.length?`<span>· Collaborators: ${collabs.map(c=>`<span style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:8px;font-size:8px">${esc(c)}</span>`).join(' ')}</span>`:''}
+            ${collabs.length?`<span>. Collaborators: ${collabs.map(c=>`<span style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:8px;font-size:8px">${esc(c)}</span>`).join(' ')}</span>`:''}
           </div>
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">${pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})}${pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})}</div>
@@ -856,7 +856,7 @@ function renderKPISection(p){
             <div class="kpi-vbox" style="background:${ragbg}"><div class="kpi-vlbl" style="color:${rag}">Actual</div><div class="kpi-vnum" style="color:${rag}">${fmt(k.actual)}</div></div>
           </div>
           <div class="kpi-bbg"><div class="kpi-bfill" style="width:${Math.min(100,pct)}%;background:${rag}"></div></div>
-          <div class="kpi-pct" style="color:${rag}"><span class="rag" style="background:${rag}"></span>${pct}% of target${k.notes?` · ${esc(k.notes)}`:''}</div>
+          <div class="kpi-pct" style="color:${rag}"><span class="rag" style="background:${rag}"></span>${pct}% of target${k.notes?` . ${esc(k.notes)}`:''}</div>
         </div>`;
       }).join('')}
     </div>
@@ -875,7 +875,7 @@ function toggleEl(bid,aid){
   if(a)a.innerHTML=open?'&#9660;':'&#9654;';
 }
 
-// ── KPI Modal ─────────────────────────────────────────────────────────────────
+// -- KPI Modal -----------------------------------------------------------------
 let kpiEditId=null,kpiProjId=null;
 function openKPIModal(projId,kpiId){
   kpiProjId=projId;kpiEditId=kpiId;
@@ -915,7 +915,7 @@ function delKPI(){
   if(curView==='benefits')renderBenefits();
 }
 
-// ── Task Board ────────────────────────────────────────────────────────────────
+// -- Task Board ----------------------------------------------------------------
 let togView='board';
 function setTog(v){
   togView=v;
@@ -1002,7 +1002,7 @@ function renderTaskBoard(){
         <div style="display:flex;align-items:center;gap:3px">${avHtml(t.owner||'',true)}<span style="font-size:9px;color:#595959">${esc(t.owner||'')}</span></div>
         ${pill(pri,PS(pri))}
         ${pill(t.status,SS(t.status))}
-        <span style="font-size:9px;color:${overdue?'#C00000':'#595959'};font-weight:${overdue?700:400}">${dueStr||'—'}</span>
+        <span style="font-size:9px;color:${overdue?'#C00000':'#595959'};font-weight:${overdue?700:400}">${dueStr||'-'}</span>
       </div>`;
     }).join('');
     document.getElementById('tblist').innerHTML=`<div class="card">
@@ -1014,7 +1014,7 @@ function renderTaskBoard(){
   }
 }
 
-// ── Task status quick-edit ────────────────────────────────────────────────────
+// -- Task status quick-edit ----------------------------------------------------
 function openTaskStatusModal(taskId){
   const t=tasks.find(x=>x.id===taskId);if(!t)return;
   const s=prompt(`Update status for "${t.name}":\n1. Not Started\n2. In Progress\n3. On Hold\n4. Complete\n\nType the number or status name:`,'');
@@ -1024,7 +1024,7 @@ function openTaskStatusModal(taskId){
   if(newStat){t.status=newStat;saveAll();renderTaskBoard();if(curView==='activity')renderActivity();}
 }
 
-// ── Ad Hoc Modal ──────────────────────────────────────────────────────────────
+// -- Ad Hoc Modal --------------------------------------------------------------
 let ahEditId=null;
 function openAdHocModal(id){
   ahEditId=id||null;
@@ -1060,7 +1060,7 @@ function delAdHoc(){
   saveAll();closeMo('ahmodal');renderTaskBoard();
 }
 
-// ── Gantt ─────────────────────────────────────────────────────────────────────
+// -- Gantt ---------------------------------------------------------------------
 let gz='month';
 function setZoom(z){
   gz=z;
@@ -1110,7 +1110,7 @@ function renderGantt(){
   }).join('')||'<div style="color:#595959;font-size:10px;font-style:italic">No critical projects.</div>';
 }
 
-// ── Results & Benefits ────────────────────────────────────────────────────────
+// -- Results & Benefits --------------------------------------------------------
 function renderBenefits(){
   const finKPIs=kpis.filter(k=>k.category==='Financial'&&k.unit==='R');
   const totalTarget=finKPIs.reduce((a,k)=>a+k.target,0);
@@ -1171,7 +1171,7 @@ function renderBenefits(){
     </div>`;
   }).join(''):'<div style="padding:16px;text-align:center;font-size:10px;color:#595959;font-style:italic">No financial KPIs recorded yet. Add KPIs in the Activity Breakdown tab.</div>';
 
-  document.getElementById('nokpi-warn').innerHTML=noKpi>0?`<div style="padding:7px 13px;background:#F5F0F7;font-size:9px;color:#595959;border-top:1px solid #D6C8DB">${noKpi} project${noKpi>1?'s have':' has'} no KPIs defined — add targets to track full portfolio value</div>`:'';
+  document.getElementById('nokpi-warn').innerHTML=noKpi>0?`<div style="padding:7px 13px;background:#F5F0F7;font-size:9px;color:#595959;border-top:1px solid #D6C8DB">${noKpi} project${noKpi>1?'s have':' has'} no KPIs defined - add targets to track full portfolio value</div>`:'';
 
   // All KPI records
   document.getElementById('allkpi').innerHTML=kpis.length?kpis.map(k=>{
@@ -1189,7 +1189,7 @@ function renderBenefits(){
   }).join(''):'<div style="font-size:10px;color:#595959;font-style:italic">No KPIs recorded yet. Add them in the Activity Breakdown tab.</div>';
 }
 
-// ── Recommendations ───────────────────────────────────────────────────────────
+// -- Recommendations -----------------------------------------------------------
 function genRecs(){
   const recs=[];const today=new Date();const dd=(a,b)=>Math.round((b-a)/86400000);
   const wl=LEADS.map(l=>({lead:l,total:projects.filter(p=>p.lead===l).length+projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length}));
@@ -1230,7 +1230,7 @@ function renderRecs(){
     <div style="min-width:60px;text-align:center"><div class="hsnum" style="color:${sc.color}">${score}</div><div class="hslbl" style="color:${sc.color}">Health</div></div>
     <div style="flex:1"><div style="font-weight:800;color:${sc.color};font-size:14px;margin-bottom:4px">${sc.label}</div>
     <div class="hbbg"><div class="hbfill" style="width:${score}%;background:${sc.color}"></div></div>
-    <div style="font-size:10px;color:${sc.color};opacity:.85">${score>=80?'Portfolio is in good shape.':score>=60?'Several issues need attention — focus on critical items first.':'Immediate action required on multiple critical issues.'}</div></div>
+    <div style="font-size:10px;color:${sc.color};opacity:.85">${score>=80?'Portfolio is in good shape.':score>=60?'Several issues need attention - focus on critical items first.':'Immediate action required on multiple critical issues.'}</div></div>
   </div>`;
   const counts={critical:0,high:0,medium:0,low:0,info:0};recs.forEach(r=>counts[r.severity]++);
   document.getElementById('scards').innerHTML=Object.entries(counts).filter(([,v])=>v>0).map(([s,n])=>{const sc2=SEVC[s];return`<div class="sc2" style="background:${sc2.bg};border-color:${sc2.border}22"><div class="sdot" style="background:${sc2.dot}"></div><div><div style="font-size:20px;font-weight:800;color:${sc2.fg};line-height:1">${n}</div><div style="font-size:8px;color:${sc2.fg};opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:.4px">${sc2.label}</div></div></div>`;}).join('')+`<div class="sc2" style="background:#fff"><div><div style="font-size:20px;font-weight:800;color:#4A1759;line-height:1">${recs.length}</div><div style="font-size:8px;color:#595959;font-weight:700;text-transform:uppercase;letter-spacing:.4px">Total</div></div></div>`;
@@ -1257,15 +1257,15 @@ function renderRecs(){
 function setRCat(c){rcatf=c;renderRecs();}
 function toggleRec(bid,aid){const b=document.getElementById(bid);const a=document.getElementById(aid);if(!b)return;const op=b.style.display==='none';b.style.display=op?'block':'none';if(a)a.innerHTML=op?'&#9650;':'&#9660;';}
 
-// ── Modal helpers ─────────────────────────────────────────────────────────────
+// -- Modal helpers -------------------------------------------------------------
 function openMo(id){document.getElementById(id).classList.add('open');}
 function closeMo(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// -- Init ----------------------------------------------------------------------
 
-// ══════════════════════════════════════════════
+// ==============================================
 // COMMENTS (localStorage)
-// ══════════════════════════════════════════════
+// ==============================================
 let comments = [];
 try { comments = JSON.parse(localStorage.getItem('bd-comments') || '[]'); } catch(e){}
 function saveComments(){ try{ localStorage.setItem('bd-comments', JSON.stringify(comments)); }catch(e){} }
@@ -1284,13 +1284,13 @@ function openPanel(taskId, isAdHoc) {
   if (!task) return;
   var proj = panelIsAdHoc ? null : projects.find(function(p){ return p.id === task.projId; });
   document.getElementById('panel-tname').textContent = task.name;
-  document.getElementById('panel-tmeta').textContent = (proj ? proj.name : 'Ad Hoc') + ' · ' + (task.owner || task.lead || 'Unassigned');
+  document.getElementById('panel-tmeta').textContent = (proj ? proj.name : 'Ad Hoc') + ' . ' + (task.owner || task.lead || 'Unassigned');
   document.getElementById('panel-stat').value = task.status || 'Not Started';
   var due = task.end || task.due || '';
   document.getElementById('panel-detail').innerHTML =
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px">' +
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Project</div><div style="font-weight:600">' + esc(proj ? proj.name : 'Ad Hoc') + '</div></div>' +
-    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Owner</div><div style="font-weight:600">' + esc(task.owner || '—') + '</div></div>' +
+    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Owner</div><div style="font-weight:600">' + esc(task.owner || '-') + '</div></div>' +
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Priority</div>' + pill(proj ? proj.priority : (task.projPriority||'Medium'), PS(proj ? proj.priority : (task.projPriority||'Medium'))) + '</div>' +
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Due</div><div style="font-weight:600">' + (due || 'Not set') + '</div></div>' +
     '</div>';
@@ -1361,9 +1361,9 @@ function updatePanelStatus(newStatus) {
   if (curView === 'activity') renderActivity();
 }
 
-// ══════════════════════════════════════════════
+// ==============================================
 // CHARTS & REPORTS
-// ══════════════════════════════════════════════
+// ==============================================
 var chartInst = {};
 var tsChartTypes = {}, tsPeriodTypes = {};
 
@@ -1380,7 +1380,7 @@ function renderCharts() {
   var catF  = (document.getElementById('chart-cat-filter') || {}).value || '';
   var fk = kpis.filter(function(k){ return (!projF || String(k.projId) === projF) && (!catF || k.category === catF); });
 
-  // ── Donut: projects by status ──────────────────────────────────
+  // -- Donut: projects by status ----------------------------------
   var STS = ['Not Started','In Progress','On Hold','Complete'];
   var sCounts = STS.map(function(s){ return projects.filter(function(p){ return p.status === s; }).length; });
   var sCols = ['#D6C8DB','#A98FA8','#D5A99C','#E2EFDA'];
@@ -1394,7 +1394,7 @@ function renderCharts() {
     options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
   });
 
-  // ── Bar: projects by category ──────────────────────────────────
+  // -- Bar: projects by category ----------------------------------
   var CATS_LIST = ['Operations','People & Training','Technology & Assets','Finance'];
   var CATS_SHORT = ['Operations','People & Training','Technology & Assets','Finance'];
   var cCounts = CATS_LIST.map(function(c){ return projects.filter(function(p){ return p.category === c; }).length; });
@@ -1409,7 +1409,7 @@ function renderCharts() {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 9 } }, grid: { color: 'rgba(0,0,0,.05)' } }, x: { ticks: { font: { size: 8 } }, grid: { display: false } } } }
   });
 
-  // ── Bar: KPI achievement by project ───────────────────────────
+  // -- Bar: KPI achievement by project ---------------------------
   var kpiProjs = projects.filter(function(p){ return fk.some(function(k){ return k.projId === p.id && k.target > 0; }); });
   var kpiA = kpiProjs.map(function(p){
     var pk = fk.filter(function(k){ return k.projId === p.id && k.target > 0; });
@@ -1428,7 +1428,7 @@ function renderCharts() {
     document.getElementById('bar-kpi').parentElement.innerHTML = '<div style="padding:16px;text-align:center;font-size:10px;color:#595959;font-style:italic">No KPIs with targets defined. Add KPIs in Activity Breakdown.</div>';
   }
 
-  // ── Gauges ─────────────────────────────────────────────────────
+  // -- Gauges -----------------------------------------------------
   var gw = document.getElementById('gauge-wrap');
   gw.innerHTML = '';
   var gkpis = fk.filter(function(k){ return k.target > 0; }).slice(0,8);
@@ -1460,10 +1460,10 @@ function renderCharts() {
     });
   }
 
-  // ── Heatmap ────────────────────────────────────────────────────
+  // -- Heatmap ----------------------------------------------------
   var hmP = projF ? projects.filter(function(p){ return String(p.id)===projF; }) : projects.filter(function(p){ return fk.some(function(k){ return k.projId===p.id; }); });
   var kCats = ['Financial','Efficiency','People','Quality','Custom'];
-  function ragC(v){ if(v===null)return{bg:'#F0F0F0',fg:'#9A9A9A',lbl:'—'}; if(v>=100)return{bg:'#C0DDAA',fg:'#2E4F34',lbl:v+'%'}; if(v>=80)return{bg:'#FFF2CC',fg:'#6B5A10',lbl:v+'%'}; return{bg:'#FFDCE0',fg:'#C00000',lbl:v+'%'}; }
+  function ragC(v){ if(v===null)return{bg:'#F0F0F0',fg:'#9A9A9A',lbl:'-'}; if(v>=100)return{bg:'#C0DDAA',fg:'#2E4F34',lbl:v+'%'}; if(v>=80)return{bg:'#FFF2CC',fg:'#6B5A10',lbl:v+'%'}; return{bg:'#FFDCE0',fg:'#C00000',lbl:v+'%'}; }
   var lW=130, cW=72;
   var hm = '<div style="display:grid;grid-template-columns:'+lW+'px '+kCats.map(function(){return cW+'px';}).join(' ')+';gap:2px;min-width:'+(lW+kCats.length*(cW+2))+'px">';
   hm += '<div></div>' + kCats.map(function(c){ return '<div style="font-size:9px;font-weight:700;color:#4A1759;text-align:center;padding:3px 2px">'+c+'</div>'; }).join('');
@@ -1481,14 +1481,14 @@ function renderCharts() {
   if (!hmP.length) hm = '<div style="font-size:10px;color:#595959;font-style:italic">No projects with KPIs.</div>';
   document.getElementById('heatmap-wrap').innerHTML = hm;
 
-  // ── Time-series charts ─────────────────────────────────────────
+  // -- Time-series charts -----------------------------------------
   var tsW = document.getElementById('ts-charts-wrap');
   tsW.innerHTML = '';
   var kpiWithTS = fk.filter(function(k){ return k.timeSeries && k.timeSeries.length > 0; });
   if (!kpiWithTS.length) {
     var info = document.createElement('div');
     info.className = 'info-box';
-    info.innerHTML = '<strong>Time-Series Charts</strong> — Click a KPI tile in Activity Breakdown and use "Add Period" to record monthly or quarterly data. Charts will appear here automatically.';
+    info.innerHTML = '<strong>Time-Series Charts</strong> - Click a KPI tile in Activity Breakdown and use "Add Period" to record monthly or quarterly data. Charts will appear here automatically.';
     tsW.appendChild(info);
     return;
   }
@@ -1500,7 +1500,7 @@ function renderCharts() {
     var hdr = document.createElement('div');
     hdr.className = 'ch';
     var titleSpan = document.createElement('span');
-    titleSpan.textContent = k.name + (proj ? ' — ' + proj.name : '');
+    titleSpan.textContent = k.name + (proj ? ' - ' + proj.name : '');
     hdr.appendChild(titleSpan);
     var btnWrap = document.createElement('div');
     btnWrap.style.cssText = 'display:flex;gap:4px';
@@ -1537,7 +1537,7 @@ function renderCharts() {
 
 function renderTSRows(k, pt) {
   var rows = (k.timeSeries||[]).filter(function(r){ return r.periodType === pt; });
-  if (!rows.length) return '<tr><td colspan="3" style="font-style:italic;color:#595959;font-size:9px;padding:5px 8px">No data yet — click + Add Period</td></tr>';
+  if (!rows.length) return '<tr><td colspan="3" style="font-style:italic;color:#595959;font-size:9px;padding:5px 8px">No data yet - click + Add Period</td></tr>';
   return rows.map(function(r){ return '<tr><td>'+esc(r.period)+'</td><td>'+r.value+'</td><td style="color:#595959">'+esc(r.notes||'')+'</td></tr>'; }).join('');
 }
 
