@@ -1492,26 +1492,44 @@ function renderCharts() {
     tsW.appendChild(info);
     return;
   }
-  kpiWithTS.forEach(function(k) {
+    kpiWithTS.forEach(function(k) {
     var proj = projects.find(function(p){ return p.id === k.projId; });
     var cid = 'tsc-' + k.id;
     var div = document.createElement('div');
     div.className = 'card';
-    div.innerHTML =
-      '<div class="ch"><span>' + esc(k.name) + (proj?' — '+esc(proj.name):'') + '</span>' +
-      '<div style="display:flex;gap:4px">' +
-        '<button id="tsgl-'+k.id+'" class="togb active" onclick="setTSType(''+k.id+'','line')" style="padding:2px 8px;font-size:8px">Line</button>' +
-        '<button id="tsgb-'+k.id+'" class="togb" onclick="setTSType(''+k.id+'','bar')" style="padding:2px 8px;font-size:8px">Bar</button>' +
-        '<button id="tsgm-'+k.id+'" class="togb active" onclick="setTSPeriod(''+k.id+'','monthly')" style="padding:2px 8px;font-size:8px">Monthly</button>' +
-        '<button id="tsgq-'+k.id+'" class="togb" onclick="setTSPeriod(''+k.id+'','quarterly')" style="padding:2px 8px;font-size:8px">Quarterly</button>' +
-      '</div></div>' +
-      '<div style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">' +
-        '<div><div style="position:relative;width:100%;height:200px"><canvas id="'+cid+'"></canvas></div></div>' +
-        '<div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
-          '<span style="font-size:9px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px">Data Table</span>' +
-          '<button onclick="addTSRow(''+k.id+'')" class="add-row-btn">+ Add Period</button>' +
-        '</div><table class="ts-tbl"><thead><tr><th>Period</th><th>Value</th><th>Notes</th></tr></thead><tbody id="tst-'+k.id+'">' + renderTSRows(k,'monthly') + '</tbody></table></div>' +
-      '</div>';
+    var hdr = document.createElement('div');
+    hdr.className = 'ch';
+    var titleSpan = document.createElement('span');
+    titleSpan.textContent = k.name + (proj ? ' — ' + proj.name : '');
+    hdr.appendChild(titleSpan);
+    var btnWrap = document.createElement('div');
+    btnWrap.style.cssText = 'display:flex;gap:4px';
+    var bLine = document.createElement('button'); bLine.className='togb active'; bLine.style.cssText='padding:2px 8px;font-size:8px'; bLine.textContent='Line'; bLine.id='tsgl-'+k.id; bLine.onclick=function(){ setTSType(k.id,'line'); };
+    var bBar  = document.createElement('button'); bBar.className='togb';        bBar.style.cssText='padding:2px 8px;font-size:8px'; bBar.textContent='Bar';  bBar.id='tsgb-'+k.id; bBar.onclick=function(){ setTSType(k.id,'bar'); };
+    var bMon  = document.createElement('button'); bMon.className='togb active'; bMon.style.cssText='padding:2px 8px;font-size:8px'; bMon.textContent='Monthly'; bMon.id='tsgm-'+k.id; bMon.onclick=function(){ setTSPeriod(k.id,'monthly'); };
+    var bQtr  = document.createElement('button'); bQtr.className='togb';        bQtr.style.cssText='padding:2px 8px;font-size:8px'; bQtr.textContent='Quarterly'; bQtr.id='tsgq-'+k.id; bQtr.onclick=function(){ setTSPeriod(k.id,'quarterly'); };
+    btnWrap.appendChild(bLine); btnWrap.appendChild(bBar); btnWrap.appendChild(bMon); btnWrap.appendChild(bQtr);
+    hdr.appendChild(btnWrap);
+    div.appendChild(hdr);
+    var body = document.createElement('div');
+    body.style.cssText = 'padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start';
+    var chartDiv = document.createElement('div');
+    chartDiv.innerHTML = '<div style="position:relative;width:100%;height:200px"><canvas id="'+cid+'"></canvas></div>';
+    var tableDiv = document.createElement('div');
+    var tableHdr = document.createElement('div');
+    tableHdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:6px';
+    var tableLabel = document.createElement('span');
+    tableLabel.style.cssText = 'font-size:9px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px';
+    tableLabel.textContent = 'Data Table';
+    var addBtn = document.createElement('button');
+    addBtn.className = 'add-row-btn'; addBtn.textContent = '+ Add Period';
+    addBtn.onclick = function(){ addTSRow(k.id); };
+    tableHdr.appendChild(tableLabel); tableHdr.appendChild(addBtn);
+    var tbl = document.createElement('table'); tbl.className='ts-tbl';
+    tbl.innerHTML = '<thead><tr><th>Period</th><th>Value</th><th>Notes</th></tr></thead><tbody id="tst-'+k.id+'">' + renderTSRows(k,'monthly') + '</tbody>';
+    tableDiv.appendChild(tableHdr); tableDiv.appendChild(tbl);
+    body.appendChild(chartDiv); body.appendChild(tableDiv);
+    div.appendChild(body);
     tsW.appendChild(div);
     buildTSChart(k, 'line', 'monthly');
   });
