@@ -181,7 +181,30 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 /* ── Footer ── */
 .footer{text-align:center;padding:18px;font-size:9px;color:var(--gt)}
 @media(max-width:750px){.hm{display:none}}
+
+@media print{
+  .nav,.phdr,.footer,.frow,.tog-bar,.abtn,.nb,.role-wrap,#slide-panel,#panel-overlay{display:none!important}
+  .view.active{padding:0}
+  .card{break-inside:avoid}
+  body{background:#fff}
+}
+
+
+.cmt-badge{position:absolute;top:5px;right:5px;background:var(--pd);color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px}
+.tcard{position:relative}
+.cmt-item{display:flex;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--gm)}
+.cmt-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.cmt-line{width:2px;background:var(--pl);border-radius:1px;flex-shrink:0;min-height:36px}
+.tog-sm{border-radius:5px;padding:2px 8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:9px;cursor:pointer;font-family:inherit}
+.tog-sm.active{background:#fff;color:var(--pd);font-weight:700}
+.ts-tbl{width:100%;border-collapse:collapse;font-size:10px}
+.ts-tbl th{background:var(--pl);color:var(--pd);padding:5px 8px;text-align:left;font-weight:700;font-size:9px;text-transform:uppercase}
+.ts-tbl td{padding:5px 8px;border-top:1px solid var(--gm);color:var(--pd)}
+.ts-tbl tr:nth-child(even) td{background:var(--sc)}
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -218,6 +241,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
       <button class="tb" onclick="sv('taskboard')">Task Board</button>
       <button class="tb" onclick="sv('gantt')">Gantt Chart</button>
       <button class="tb" onclick="sv('benefits')">Results &amp; Benefits</button>
+      <button class="tb" onclick="sv('charts')">Charts &amp; Reports</button>
       <button class="tb" onclick="sv('recs')">Recommendations <span class="nbadge" id="rbadge2">0</span></button>
     </div>
   </div>
@@ -310,6 +334,43 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <div id="nokpi-warn"></div>
   </div>
   <div class="card"><div class="ch"><span>All KPI Records</span></div><div style="padding:13px;display:grid;gap:8px" id="allkpi"></div></div>
+</div>
+
+
+<!-- CHARTS & REPORTS -->
+<div class="view" id="view-charts">
+  <div style="background:#fff;border-radius:10px;border:1px solid var(--gm);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select class="fsel" id="chart-proj-filter" onchange="renderCharts()"><option value="">All Projects</option></select>
+      <select class="fsel" id="chart-cat-filter" onchange="renderCharts()"><option value="">All KPI Categories</option><option>Financial</option><option>Efficiency</option><option>People</option><option>Quality</option><option>Custom</option></select>
+    </div>
+    <button onclick="window.print()" style="background:var(--pd);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:10px;cursor:pointer;font-weight:700;font-family:inherit">&#128438; Export to PDF</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="chart-donut-row">
+    <div class="card"><div class="ch"><span>Projects by Status</span></div><div style="padding:12px"><div style="position:relative;height:200px"><canvas id="ch-status"></canvas></div><div id="ch-status-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:9px"></div></div></div>
+    <div class="card"><div class="ch"><span>Projects by Category</span></div><div style="padding:12px"><div style="position:relative;height:200px"><canvas id="ch-cat"></canvas></div><div id="ch-cat-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:9px"></div></div></div>
+  </div>
+  <div class="card"><div class="ch"><span>KPI Achievement by Project</span></div><div style="padding:12px"><div style="position:relative;height:220px" id="ch-kpi-bar-wrap"><canvas id="ch-kpi-bar"></canvas></div></div></div>
+  <div class="card">
+    <div class="ch"><span>KPI Gauges</span>
+      <select id="gauge-proj-sel" onchange="renderGauges()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:5px;padding:2px 7px;font-size:9px;cursor:pointer;font-family:inherit"><option value="">All Projects</option></select>
+    </div>
+    <div style="padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px" id="gauge-wrap"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span>KPI Achievement Heatmap</span></div>
+    <div style="padding:12px;overflow-x:auto">
+      <div id="heatmap-wrap"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:9px;color:var(--gt)">Achievement:</span>
+        <span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#C0DDAA;display:inline-block"></span>&#8805;100%</span>
+        <span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#FFF2CC;display:inline-block"></span>80-99%</span>
+        <span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#FFDCE0;display:inline-block"></span>&lt;80%</span>
+        <span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#F0F0F0;display:inline-block"></span>No KPI</span>
+      </div>
+    </div>
+  </div>
+  <div id="ts-charts-wrap"></div>
 </div>
 
 <!-- RECS -->
@@ -440,6 +501,37 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
         <button class="bsav" onclick="saveKPI()">Save KPI</button>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- SLIDE-OUT COMMENT PANEL -->
+<div id="panel-overlay" style="position:fixed;inset:0;background:rgba(74,23,89,.3);z-index:500;display:none" onclick="closePanel()"></div>
+<div id="slide-panel" style="position:fixed;top:0;right:-480px;width:480px;max-width:95vw;height:100vh;background:#fff;z-index:501;transition:right .3s ease;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(74,23,89,.15)">
+  <div style="background:var(--primary);padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0">
+    <div style="min-width:0">
+      <div style="color:#fff;font-weight:800;font-size:12px;margin-bottom:3px" id="sp-task-name">Task</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center" id="sp-task-meta"></div>
+    </div>
+    <button onclick="closePanel()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:15px;flex-shrink:0;margin-left:10px">&#215;</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px">
+    <div style="margin-bottom:12px">
+      <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Quick Status Update</div>
+      <select id="sp-status-sel" onchange="updateTaskStatusFromPanel()" style="font-size:10px;border:1px solid var(--gm);border-radius:5px;padding:4px 8px;color:var(--pd);font-family:inherit;width:100%">
+        <option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option>
+      </select>
+    </div>
+    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Comment Log</div>
+    <div id="cmt-log"><div style="font-size:10px;color:var(--gt);font-style:italic;padding:10px 0">No comments yet.</div></div>
+  </div>
+  <div style="border-top:1px solid var(--gm);padding:12px 14px;background:#fff;flex-shrink:0">
+    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Add Comment</div>
+    <select id="cmt-author" style="font-size:10px;border:1px solid var(--gm);border-radius:5px;padding:4px 8px;color:var(--pd);width:100%;font-family:inherit;margin-bottom:6px">
+      <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
+    </select>
+    <textarea id="cmt-text" rows="2" placeholder="Add a comment…" style="width:100%;border:1px solid var(--gm);border-radius:5px;padding:6px 9px;font-size:11px;color:var(--pd);resize:none;font-family:inherit;margin-bottom:6px"></textarea>
+    <button onclick="postComment()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:11px;font-weight:700;cursor:pointer;width:100%;font-family:inherit">Post Comment</button>
   </div>
 </div>
 
@@ -1201,8 +1293,270 @@ function toggleRec(bid,aid){const b=document.getElementById(bid);const a=documen
 function openMo(id){document.getElementById(id).classList.add('open');}
 function closeMo(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
 
+// ── Supabase client ──────────────────────────────────────────────────────────
+const SUPA_URL='https://gmpffdahvqhgfchinwdl.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcGZmZGFodnFoZ2ZjaGlud2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDcxMzYsImV4cCI6MjA5MDEyMzEzNn0.M0bhv-3q4UtQKqkVVmG6fvJA_-bH5bbhiw3EL-Fap4I';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+// ── Supabase data loaders ─────────────────────────────────────────────────────
+let kpiTS=[];
+let comments=[];
+let chartInstances={};
+let tsChartState={};
+let panelTaskId=null,panelTaskType=null;
+
+async function loadFromDB(){
+  try{
+    const [pr,co,kp,ts,cm]=await Promise.all([
+      sb.from('projects').select('*').order('id'),
+      sb.from('collaborators').select('*'),
+      sb.from('kpis').select('*').order('id'),
+      sb.from('kpi_timeseries').select('*').order('id'),
+      sb.from('comments').select('*').order('created_at'),
+    ]);
+    if(pr.data){
+      projects=pr.data.map(p=>({...p,collaborators:(co.data||[]).filter(c=>c.project_id===p.id).map(c=>c.collaborator_name),extCollabs:p.ext_collabs||''}));
+    }
+    kpis=(kp.data||[]).map(k=>({...k,projId:k.project_id}));
+    kpiTS=ts.data||[];
+    comments=cm.data||[];
+    renderTracker();updateSub();updateBadge();populateProjFilter();
+    document.getElementById('tbody').style.opacity='1';
+  }catch(e){
+    console.error('DB load error:',e);
+    renderTracker();updateSub();updateBadge();
+  }
+}
+
+// Override saveData to also push to Supabase
+const _origSaveData=saveData;
+async function syncProjectToDB(proj){
+  const d={
+    name:proj.name,lead:proj.lead,category:proj.category,priority:proj.priority,
+    status:proj.status,approval:proj.approval,pct:proj.pct,
+    biz_impact:proj.bizImpact,cust_value:proj.custValue,
+    start_date:proj.startDate||null,end_date:proj.endDate||null,
+    ext_collabs:proj.extCollabs||'',problem:proj.problem,outcome:proj.outcome,
+    risks:proj.risks,deps:proj.deps,notes:proj.notes
+  };
+  if(proj.id&&proj.id>0){
+    await sb.from('projects').upsert({id:proj.id,...d});
+    await sb.from('collaborators').delete().eq('project_id',proj.id);
+    if(proj.collaborators&&proj.collaborators.length){
+      await sb.from('collaborators').insert(proj.collaborators.map(c=>({project_id:proj.id,collaborator_name:c})));
+    }
+  }
+}
+
+// Comment functions
+function getCmtCount(taskKey){return comments.filter(c=>c.task_id===taskKey).length;}
+
+function openPanel(taskKey,taskType){
+  panelTaskId=taskKey;panelTaskType=taskType;
+  const isAdHoc=taskType==='adhoc';
+  const taskId=isAdHoc?taskKey.replace('ah',''):parseInt(taskKey.replace('proj-',''));
+  const task=isAdHoc?adHocTasks.find(t=>String(t.id)===String(taskId)):tasks.find(t=>t.id===parseInt(taskId));
+  if(!task)return;
+  const proj=!isAdHoc?projects.find(p=>p.id===task.projId):null;
+  document.getElementById('sp-task-name').textContent=task.name||'Task';
+  document.getElementById('sp-task-meta').innerHTML=pill(task.status,SS(task.status))+(proj?'<span style="font-size:9px;color:rgba(255,255,255,.7);margin-left:5px">'+esc(proj.name)+'</span>':'<span class="adhoc-badge" style="margin-left:5px">Ad Hoc</span>');
+  document.getElementById('sp-status-sel').value=task.status;
+  renderComments(taskKey);
+  document.getElementById('panel-overlay').style.display='block';
+  document.getElementById('slide-panel').style.right='0';
+}
+function closePanel(){
+  document.getElementById('panel-overlay').style.display='none';
+  document.getElementById('slide-panel').style.right='-480px';
+  panelTaskId=null;panelTaskType=null;
+}
+function renderComments(taskKey){
+  const tc=comments.filter(c=>c.task_id===taskKey).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  if(!tc.length){document.getElementById('cmt-log').innerHTML='<div style="font-size:10px;color:var(--gt);font-style:italic;padding:10px 0">No comments yet.</div>';return;}
+  document.getElementById('cmt-log').innerHTML=tc.map(c=>{
+    const ss2=SS(c.task_status_at_time||'Not Started');
+    return`<div class="cmt-item"><div class="cmt-line"></div><div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:4px">
+        ${avHtml(c.author,false)}
+        <span style="font-size:10px;font-weight:700;color:var(--pd)">${esc(c.author)}</span>
+        <span style="font-size:9px;color:var(--gt)">${new Date(c.created_at).toLocaleString('en-ZA',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+        ${c.task_status_at_time?pill(c.task_status_at_time,ss2):''}
+      </div>
+      <div style="font-size:11px;color:var(--pd);line-height:1.5">${esc(c.comment_text)}</div>
+    </div></div>`;
+  }).join('');
+}
+async function updateTaskStatusFromPanel(){
+  if(!panelTaskId)return;
+  const newStatus=document.getElementById('sp-status-sel').value;
+  const isAdHoc=panelTaskType==='adhoc';
+  const taskId=isAdHoc?panelTaskId.replace('ah',''):parseInt(panelTaskId.replace('proj-',''));
+  if(isAdHoc){
+    await sb.from('adhoc_tasks').update({status:newStatus}).eq('id',taskId);
+    const t=adHocTasks.find(x=>String(x.id)===String(taskId));if(t)t.status=newStatus;
+  }else{
+    await sb.from('tasks').update({status:newStatus}).eq('id',taskId);
+    const t=tasks.find(x=>x.id===parseInt(taskId));if(t)t.status=newStatus;
+  }
+  renderTaskBoard();
+}
+async function postComment(){
+  const text=document.getElementById('cmt-text').value.trim();
+  if(!text||!panelTaskId)return;
+  const author=document.getElementById('cmt-author').value;
+  const isAdHoc=panelTaskType==='adhoc';
+  const taskId=isAdHoc?panelTaskId.replace('ah',''):parseInt(panelTaskId.replace('proj-',''));
+  const task=isAdHoc?adHocTasks.find(t=>String(t.id)===String(taskId)):tasks.find(t=>t.id===parseInt(taskId));
+  const cmt={task_id:panelTaskId,task_type:panelTaskType,author,comment_text:text,task_status_at_time:task?task.status:'',created_at:new Date().toISOString()};
+  const{data}=await sb.from('comments').insert(cmt).select().single();
+  if(data)comments.push(data);
+  document.getElementById('cmt-text').value='';
+  renderComments(panelTaskId);renderTaskBoard();
+}
+
+// Charts functions
+function populateChartProjFilter(){
+  const sel=document.getElementById('chart-proj-filter');
+  if(!sel)return;
+  sel.innerHTML='<option value="">All Projects</option>'+projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  const gs=document.getElementById('gauge-proj-sel');
+  if(gs)gs.innerHTML='<option value="">All Projects</option>'+projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+}
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}}
+function renderCharts(){
+  populateChartProjFilter();
+  const pf=document.getElementById('chart-proj-filter').value;
+  const cf=document.getElementById('chart-cat-filter').value;
+  const fk=kpis.filter(k=>(pf?k.projId==pf:true)&&(cf?k.category===cf:true));
+  // Status donut
+  destroyChart('ch-status');
+  const sc2=['#A98FA8','#E8E8E8','#D5A99C','#89AB90'];
+  const scnts=['In Progress','Not Started','On Hold','Complete'].map(s=>projects.filter(p=>p.status===s).length);
+  chartInstances['ch-status']=new Chart(document.getElementById('ch-status'),{type:'doughnut',data:{labels:['In Progress','Not Started','On Hold','Complete'],datasets:[{data:scnts,backgroundColor:sc2,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+  document.getElementById('ch-status-legend').innerHTML=['In Progress','Not Started','On Hold','Complete'].map((s,i)=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${sc2[i]};display:inline-block"></span><span style="color:${SS(s).fg}">${s} (${scnts[i]})</span></span>`).join('');
+  // Category bar
+  destroyChart('ch-cat');
+  const cc2=['#A6C4CF','#A98FA8','#CFCFB7','#DBC25D'];
+  chartInstances['ch-cat']=new Chart(document.getElementById('ch-cat'),{type:'bar',data:{labels:CATS,datasets:[{data:CATS.map(c=>projects.filter(p=>p.category===c).length),backgroundColor:cc2,borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},x:{ticks:{font:{size:8}},grid:{display:false}}}}});
+  document.getElementById('ch-cat-legend').innerHTML=CATS.map((c,i)=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${cc2[i]};display:inline-block"></span><span style="color:#595959;font-size:9px">${c}</span></span>`).join('');
+  // KPI achievement bar
+  destroyChart('ch-kpi-bar');
+  const pa=projects.map(p=>{const pk=fk.filter(k=>k.projId===p.id&&k.target>0);if(!pk.length)return null;const avg=Math.round(pk.reduce((a,k)=>a+k.actual/k.target*100,0)/pk.length);return{name:p.name,avg};}).filter(Boolean).sort((a,b)=>b.avg-a.avg);
+  const wrap=document.getElementById('ch-kpi-bar-wrap');
+  if(pa.length){
+    wrap.style.height=Math.max(200,pa.length*36+60)+'px';
+    chartInstances['ch-kpi-bar']=new Chart(document.getElementById('ch-kpi-bar'),{type:'bar',data:{labels:pa.map(x=>x.name.length>22?x.name.slice(0,22)+'...':x.name),datasets:[{data:pa.map(x=>x.avg),backgroundColor:pa.map(x=>x.avg>=100?'#375623':x.avg>=80?'#DBC25D':'#C00000'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%',font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});
+  }else{wrap.innerHTML='<div style="font-size:10px;color:#595959;font-style:italic;padding:16px">No KPI targets defined yet.</div>';}
+  renderGauges();renderHeatmap();renderTSCharts(fk);
+}
+function renderGauges(){
+  const ps=document.getElementById('gauge-proj-sel');if(!ps)return;
+  const psel=ps.value;
+  const fk2=kpis.filter(k=>psel?k.projId==psel:true);
+  if(!fk2.length){document.getElementById('gauge-wrap').innerHTML='<div style="font-size:10px;color:#595959;font-style:italic;padding:8px">No KPIs found.</div>';return;}
+  document.getElementById('gauge-wrap').innerHTML=fk2.map(k=>{
+    const pct3=k.target>0?Math.min(150,Math.round(k.actual/k.target*100)):0;
+    const rag=pct3>=100?'#375623':pct3>=80?'#DBC25D':'#C00000';
+    const ragbg=pct3>=100?'#E2EFDA':pct3>=80?'#FFF8DC':'#FFDCE0';
+    const arc=125.66;const offset=arc*(1-Math.min(1,pct3/100));
+    const fmt=v=>k.unit==='R'?fmtR(v):k.unit==='%'?v+'%':v+(k.unit?' '+k.unit:'');
+    const p2=projects.find(x=>x.id===k.projId);
+    return`<div style="display:flex;flex-direction:column;align-items:center;padding:10px 6px;background:${ragbg};border-radius:9px;border:1px solid ${rag}22">
+      <svg width="100" height="65" viewBox="0 0 100 65" style="overflow:visible">
+        <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="rgba(0,0,0,.1)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M10,55 A40,40 0 0,1 90,55" fill="none" stroke="${rag}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${arc}" stroke-dashoffset="${offset}"/>
+        <text x="50" y="52" text-anchor="middle" font-size="13" font-weight="800" fill="${rag}">${pct3}%</text>
+      </svg>
+      <div style="font-size:9px;color:#4A1759;text-align:center;font-weight:700;margin-top:2px">${esc(k.name)}</div>
+      <div style="font-size:8px;color:#595959">${fmt(k.actual)} / ${fmt(k.target)}</div>
+      ${p2?`<div style="font-size:8px;color:#595959;font-style:italic">${esc(p2.name.slice(0,18))}</div>`:''}
+    </div>`;
+  }).join('');
+}
+function renderHeatmap(){
+  const KCS=['Financial','Efficiency','People','Quality','Custom'];
+  const pw=projects.filter(p=>kpis.some(k=>k.projId===p.id));
+  if(!pw.length){document.getElementById('heatmap-wrap').innerHTML='<div style="font-size:10px;color:#595959;font-style:italic;padding:8px">No KPIs yet.</div>';return;}
+  let h=`<div style="display:grid;grid-template-columns:130px ${KCS.map(()=>'80px').join(' ')};gap:2px;min-width:${130+KCS.length*82}px">`;
+  h+=`<div></div>${KCS.map(c=>`<div style="font-size:9px;font-weight:700;color:#4A1759;text-align:center;padding:3px 2px">${c}</div>`).join('')}`;
+  pw.forEach(p=>{
+    h+=`<div style="font-size:9px;color:#4A1759;font-weight:600;padding:4px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.name)}">${esc(p.name.slice(0,18))}</div>`;
+    KCS.forEach(cat=>{
+      const pk=kpis.filter(k=>k.projId===p.id&&k.category===cat&&k.target>0);
+      if(!pk.length){h+=`<div style="background:#F0F0F0;border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9A9A9A">—</div>`;return;}
+      const avg=Math.round(pk.reduce((a,k)=>a+k.actual/k.target*100,0)/pk.length);
+      const bg=avg>=100?'#C0DDAA':avg>=80?'#FFF2CC':'#FFDCE0';const fg=avg>=100?'#2E4F34':avg>=80?'#6B5A10':'#C00000';
+      h+=`<div style="background:${bg};border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${fg}">${avg}%</div>`;
+    });
+  });
+  h+='</div>';
+  document.getElementById('heatmap-wrap').innerHTML=h;
+}
+function renderTSCharts(fk){
+  const kws=fk.filter(k=>kpiTS.some(ts=>ts.kpi_id===k.id));
+  const wrap=document.getElementById('ts-charts-wrap');if(!wrap)return;
+  if(!kws.length){wrap.innerHTML='<div class="card"><div class="ch"><span>Time-Series Charts</span></div><div style="padding:14px;font-size:10px;color:#595959;font-style:italic">No time-series data yet. Add data in the Activity Breakdown tab.</div></div>';return;}
+  wrap.innerHTML=kws.map((k,ki)=>{
+    const proj=projects.find(p=>p.id===k.projId);
+    return`<div class="card" style="margin-bottom:0">
+      <div class="ch">
+        <span>${esc(k.name)}${proj?' — '+esc(proj.name):''}</span>
+        <div style="display:flex;gap:3px">
+          <button class="tog-sm active" id="ts-line-${ki}" onclick="setTSType(${ki},'line')">Line</button>
+          <button class="tog-sm" id="ts-bar-${ki}" onclick="setTSType(${ki},'bar')">Bar</button>
+          <button class="tog-sm active" id="ts-m-${ki}" onclick="setTSPeriod(${ki},'monthly')">Monthly</button>
+          <button class="tog-sm" id="ts-q-${ki}" onclick="setTSPeriod(${ki},'quarterly')">Quarterly</button>
+        </div>
+      </div>
+      <div style="padding:12px">
+        <div style="position:relative;height:200px"><canvas id="ts-chart-${ki}"></canvas></div>
+        <div style="margin-top:12px">
+          <div style="font-size:9px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Data Table — ${esc(k.name)} (${esc(k.unit||'')})</div>
+          <table class="ts-tbl"><thead><tr><th>Period</th><th>Value</th><th>Notes</th><th></th></tr></thead><tbody id="ts-tbody-${ki}"></tbody></table>
+          <button onclick="addTSRow(${k.id},${ki})" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;margin-top:6px">+ Add Row</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  kws.forEach((k,ki)=>{tsChartState[ki]={type:'line',period:'monthly',kpiId:k.id};renderTSChart(ki);renderTSTable(ki,k.id);});
+}
+function setTSType(ki,t){tsChartState[ki].type=t;document.getElementById('ts-line-'+ki).classList.toggle('active',t==='line');document.getElementById('ts-bar-'+ki).classList.toggle('active',t==='bar');renderTSChart(ki);}
+function setTSPeriod(ki,p){tsChartState[ki].period=p;document.getElementById('ts-m-'+ki).classList.toggle('active',p==='monthly');document.getElementById('ts-q-'+ki).classList.toggle('active',p==='quarterly');renderTSChart(ki);}
+function renderTSChart(ki){
+  const st=tsChartState[ki];if(!st)return;
+  const data=kpiTS.filter(ts=>ts.kpi_id===st.kpiId&&ts.period_type===st.period).sort((a,b)=>a.id-b.id);
+  destroyChart('ts-chart-'+ki);if(!data.length)return;
+  chartInstances['ts-chart-'+ki]=new Chart(document.getElementById('ts-chart-'+ki),{type:st.type,data:{labels:data.map(d=>d.period),datasets:[{label:'Value',data:data.map(d=>d.value),borderColor:'#68217D',backgroundColor:st.type==='line'?'rgba(104,33,125,.08)':'#A98FA8',borderWidth:2,pointRadius:4,pointBackgroundColor:'#68217D',tension:.3,fill:st.type==='line',borderRadius:st.type==='bar'?4:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},x:{ticks:{font:{size:9},maxRotation:30},grid:{display:false}}}}});
+}
+function renderTSTable(ki,kpiId){
+  const data=kpiTS.filter(ts=>ts.kpi_id===kpiId).sort((a,b)=>a.id-b.id);
+  const el=document.getElementById('ts-tbody-'+ki);if(!el)return;
+  el.innerHTML=data.map(r=>`<tr><td>${esc(r.period)}</td><td>${r.value.toLocaleString()}</td><td style="color:#595959">${esc(r.notes||'')}</td><td><button onclick="delTSRow(${r.id},${ki},${kpiId})" style="background:#FFDCE0;color:#C00000;border:none;border-radius:3px;padding:1px 5px;font-size:8px;cursor:pointer;font-family:inherit">&#10005;</button></td></tr>`).join('');
+}
+async function addTSRow(kpiId,ki){
+  const period=prompt('Period (e.g. Jul 2025 or Q3 2025):');if(!period)return;
+  const value=parseFloat(prompt('Value:'));if(isNaN(value))return;
+  const notes=prompt('Notes (optional):')||'';
+  const ptype=period.startsWith('Q')?'quarterly':'monthly';
+  const{data}=await sb.from('kpi_timeseries').insert({kpi_id:kpiId,period,period_type:ptype,value,notes}).select().single();
+  if(data)kpiTS.push(data);
+  renderTSTable(ki,kpiId);renderTSChart(ki);
+}
+async function delTSRow(id,ki,kpiId){
+  await sb.from('kpi_timeseries').delete().eq('id',id);
+  kpiTS=kpiTS.filter(ts=>ts.id!==id);
+  renderTSTable(ki,kpiId);renderTSChart(ki);
+}
+
+// Override sv to handle charts tab
+const _origSv=sv;
+function sv(v){
+  _origSv(v);
+  if(v==='charts'){populateChartProjFilter();renderCharts();}
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
-renderTracker();updateSub();updateBadge();
+loadFromDB();
 </script>
 </body>
 </html>
