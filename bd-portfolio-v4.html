@@ -273,7 +273,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 
 <!-- TASK BOARD -->
 <div class="view" id="view-taskboard">
-  <div class="tog-bar">
+  <div class="info-box" style="display:flex;align-items:center;gap:8px">
+  <span style="font-size:16px">&#128172;</span>
+  <span><strong>To add a comment:</strong> click any task card on the board below. A panel will slide out from the right where you can post dated, authored comments and update the task status.</span>
+</div>
+<div class="tog-bar">
     <button class="togb active" id="tog-board" onclick="setTog('board')">Board</button>
     <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
     <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
@@ -488,7 +492,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px">
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Details</div>
     <div id="panel-detail" style="background:var(--gl);border-radius:8px;padding:10px;border:1px solid var(--gm)"></div>
-    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Comment Log</div>
+    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Comment Log <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— all comments are dated and saved automatically</span></div>
     <div id="panel-comments" style="display:flex;flex-direction:column;gap:8px"></div>
     <div id="panel-nocomments" style="font-size:10px;color:var(--gt);font-style:italic;display:none">No comments yet. Be the first to add one.</div>
   </div>
@@ -937,6 +941,19 @@ function getAllBoardTasks(){
   const ah=adHocTasks.map(t=>({...t,projId:'adhoc',projName:'Ad Hoc',projPriority:t.priority,isAdHoc:true}));
   return[...projTasks,...ah];
 }
+function changeTaskStatus(taskId, isAdHoc, newStatus) {
+  isAdHoc = isAdHoc === true || isAdHoc === 'true';
+  if (isAdHoc) {
+    var t = adHocTasks.find(function(x){ return String(x.id) === String(taskId); });
+    if (t) { t.status = newStatus; saveAll(); }
+  } else {
+    var t2 = tasks.find(function(x){ return String(x.id) === String(taskId); });
+    if (t2) { t2.status = newStatus; saveAll(); }
+  }
+  renderTaskBoard();
+  if (curView === 'activity') renderActivity();
+}
+
 function renderTaskBoard(){
   const lead=document.getElementById('tb-lead').value;
   const proj=document.getElementById('tb-proj').value;
@@ -963,17 +980,24 @@ function renderTaskBoard(){
         const dueSoon=due&&!overdue&&(due-today)/(86400000)<=3;
         const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
         const cc=(comments||[]).filter(c=>c.taskId===String(t.id)&&c.isAdHoc===t.isAdHoc).length;
-        return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" onclick="openPanel('${t.id}',${t.isAdHoc})" style="position:relative">
+        return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" style="position:relative">
           ${cc>0?'<span style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">'+cc+'</span>':''}
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
-            <div class="tcard-name">${esc(t.name)}</div>
-            ${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
+            <div class="tcard-name" style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">${esc(t.name)}</div>
+            ${t.isAdHoc?'<span class="adhoc-badge" style="cursor:pointer" onclick="openAdHocModal(''+t.id+'')">Ad Hoc &#9998;</span>':''}
           </div>
           <div class="tcard-proj">${esc(t.projName)}</div>
-          <div class="tcard-meta">
+          <div class="tcard-meta" style="margin-bottom:6px">
             ${avHtml(t.owner||t.projName,true)}
             ${pill(pri,PS(pri))}
             ${dueStr?`<span style="font-size:8px;color:${overdue?'#C00000':dueSoon?'#C55A11':'#595959'};font-weight:${overdue||dueSoon?700:400}">${overdue?'Overdue':dueStr}</span>`:''}
+          </div>
+          <select onchange="changeTaskStatus('${t.id}',${t.isAdHoc},this.value)" onclick="event.stopPropagation()" style="width:100%;font-size:9px;border:1px solid #D6C8DB;border-radius:5px;padding:3px 6px;color:#4A1759;background:#fff;font-family:inherit;cursor:pointer;margin-bottom:5px">
+            ${['Not Started','In Progress','On Hold','Complete'].map(s=>'<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+s+'</option>').join('')}
+          </select>
+          <div style="padding-top:5px;border-top:1px solid #E8D5EE;display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
+            <span style="font-size:9px;color:#68217D;font-weight:700">&#128172; ${cc>0?cc+' comment'+(cc>1?'s':''):'Add comment'}</span>
+            <span style="font-size:9px;color:#68217D;font-weight:600">View &rsaquo;</span>
           </div>
         </div>`;
       }).join('');
@@ -992,8 +1016,9 @@ function renderTaskBoard(){
       const due=dueStr?new Date(dueStr):null;
       const overdue=due&&due<today&&t.status!=='Complete';
       const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
-      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
-        <div>
+      const ss=SS(t.status);
+      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;">
+        <div style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
           <div style="font-size:10px;font-weight:700;color:#4A1759;margin-bottom:1px">${esc(t.name)}</div>
           <div style="font-size:8px;color:#595959;display:flex;align-items:center;gap:4px">
             ${esc(t.projName)}${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
@@ -1001,13 +1026,16 @@ function renderTaskBoard(){
         </div>
         <div style="display:flex;align-items:center;gap:3px">${avHtml(t.owner||'',true)}<span style="font-size:9px;color:#595959">${esc(t.owner||'')}</span></div>
         ${pill(pri,PS(pri))}
-        ${pill(t.status,SS(t.status))}
+        <select onchange="changeTaskStatus('${t.id}',${t.isAdHoc},this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:5px;padding:2px 5px;font-family:inherit;cursor:pointer;background:${ss.bg};color:${ss.fg};font-weight:700">
+          ${['Not Started','In Progress','On Hold','Complete'].map(s=>'<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+s+'</option>').join('')}
+        </select>
         <span style="font-size:9px;color:${overdue?'#C00000':'#595959'};font-weight:${overdue?700:400}">${dueStr||'-'}</span>
+        ${t.isAdHoc?'<button onclick="event.stopPropagation();openAdHocModal(''+t.id+'')" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Edit</button>':'<span></span>'}
       </div>`;
     }).join('');
     document.getElementById('tblist').innerHTML=`<div class="card">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;background:#68217D;padding:8px 13px;gap:7px">
-        ${['Task','Owner','Priority','Status','Due Date'].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
+        ${['Task','Owner','Priority','Status','Due',''].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
       </div>
       ${rows||'<div style="padding:20px;text-align:center;color:#595959;font-size:10px">No tasks found.</div>'}
     </div>`;
