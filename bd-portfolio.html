@@ -177,21 +177,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .collab-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
 .collab-chip{display:flex;align-items:center;gap:3px;background:var(--pl);border-radius:10px;padding:2px 7px 2px 3px;font-size:9px;color:var(--pd)}
 /* ── Scrollbar ── */
-@media print{.nav,.phdr,.frow,.tog-bar,.abtn,#panel-overlay,#slide-panel{display:none!important}.view{display:grid!important}.card{break-inside:avoid}body{background:#fff}}
-.ts-tbl{width:100%;border-collapse:collapse;font-size:10px}
-.ts-tbl th{background:#E8D5EE;color:#4A1759;padding:5px 8px;text-align:left;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.3px}
-.ts-tbl td{padding:5px 8px;border-top:1px solid #D6C8DB;color:#4A1759}
-.ts-tbl tr:nth-child(even) td{background:#FCF5E3}
-.add-row-btn{background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;margin-top:6px}
-.chart2col{grid-template-columns:1fr 1fr}
-@media(max-width:600px){.chart2col{grid-template-columns:1fr}}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--gm);border-radius:2px}
 /* ── Footer ── */
 .footer{text-align:center;padding:18px;font-size:9px;color:var(--gt)}
 @media(max-width:750px){.hm{display:none}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -207,9 +197,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   <button class="nb" onclick="sv('taskboard')">&#9634; Task Board</button>
   <button class="nb" onclick="sv('gantt')">&#9644; Gantt</button>
   <button class="nb" onclick="sv('benefits')">&#9733; Benefits</button>
-  <button class="nb" onclick="sv('charts')">&#9998; Charts</button>
   <button class="nb" onclick="sv('recs')" id="rec-nav"><span>&#128161;</span> Recs <span class="nbadge" id="rbadge">0</span></button>
-  <span id="db-ind" style="font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;background:rgba(192,0,0,.3);color:#FFDCE0;flex-shrink:0">&#9679; Connecting</span>
   <div class="role-wrap">
     <span style="font-size:9px;color:rgba(255,255,255,.5)">View as:</span>
     <select class="role-sel" id="role-sel" onchange="renderTracker()">
@@ -230,7 +218,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
       <button class="tb" onclick="sv('taskboard')">Task Board</button>
       <button class="tb" onclick="sv('gantt')">Gantt Chart</button>
       <button class="tb" onclick="sv('benefits')">Results &amp; Benefits</button>
-      <button class="tb" onclick="sv('charts')">Charts &amp; Reports</button>
       <button class="tb" onclick="sv('recs')">Recommendations <span class="nbadge" id="rbadge2">0</span></button>
     </div>
   </div>
@@ -323,25 +310,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <div id="nokpi-warn"></div>
   </div>
   <div class="card"><div class="ch"><span>All KPI Records</span></div><div style="padding:13px;display:grid;gap:8px" id="allkpi"></div></div>
-</div>
-
-<!-- CHARTS & REPORTS -->
-<div class="view" id="view-charts">
-  <div style="background:#fff;border-radius:10px;border:1px solid var(--gm);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <select class="fsel" id="chart-proj-filter" onchange="renderCharts()"><option value="">All Projects</option></select>
-      <select class="fsel" id="chart-cat-filter" onchange="renderCharts()"><option value="">All KPI Categories</option><option>Financial</option><option>Efficiency</option><option>People</option><option>Quality</option><option>Custom</option></select>
-    </div>
-    <button onclick="window.print()" style="background:var(--pd);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#128438; Export PDF</button>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="chart2col">
-    <div class="card"><div class="ch"><span>Projects by Status</span></div><div style="padding:12px"><div id="leg-status" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:9px"></div><div style="position:relative;width:100%;height:190px"><canvas id="donut-status"></canvas></div></div></div>
-    <div class="card"><div class="ch"><span>Projects by Category</span></div><div style="padding:12px"><div id="leg-cat" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:9px"></div><div style="position:relative;width:100%;height:190px"><canvas id="bar-cat"></canvas></div></div></div>
-  </div>
-  <div class="card"><div class="ch"><span>KPI Achievement by Project</span></div><div style="padding:12px"><div style="position:relative;height:220px"><canvas id="bar-kpi"></canvas></div></div></div>
-  <div class="card"><div class="ch"><span>KPI Gauges</span></div><div style="padding:12px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center" id="gauge-wrap"></div></div>
-  <div class="card"><div class="ch"><span>KPI Heatmap — Project vs Category</span></div><div style="padding:12px;overflow-x:auto"><div id="heatmap-wrap"></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><span style="font-size:9px;color:#595959">Achievement:</span><span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#C0DDAA;display:inline-block"></span>&#8805;100%</span><span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#FFF2CC;display:inline-block"></span>80-99%</span><span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#FFDCE0;display:inline-block"></span>&lt;80%</span><span style="display:flex;align-items:center;gap:3px;font-size:9px"><span style="width:10px;height:10px;border-radius:2px;background:#F0F0F0;display:inline-block"></span>None</span></div></div></div>
-  <div id="ts-charts-wrap"></div>
 </div>
 
 <!-- RECS -->
@@ -475,34 +443,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   </div>
 </div>
 
-<!-- TASK SLIDE-OUT PANEL -->
-<div id="panel-overlay" onclick="closePanel()" style="position:fixed;inset:0;background:rgba(74,23,89,.4);z-index:500;display:none"></div>
-<div id="slide-panel" style="position:fixed;top:0;right:-480px;width:460px;max-width:96vw;height:100vh;background:#fff;z-index:501;box-shadow:-4px 0 24px rgba(74,23,89,.2);display:flex;flex-direction:column;transition:right .3s ease">
-  <div style="background:var(--primary);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-    <div style="flex:1;min-width:0">
-      <div id="panel-tname" style="color:#fff;font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Task</div>
-      <div id="panel-tmeta" style="color:rgba(255,255,255,.6);font-size:9px;margin-top:1px"></div>
-    </div>
-    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-      <select id="panel-stat" onchange="updatePanelStatus(this.value)" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 7px;font-size:9px;font-family:inherit;cursor:pointer"><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
-      <button onclick="closePanel()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:14px;font-family:inherit">&#215;</button>
-    </div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px">
-    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Details</div>
-    <div id="panel-detail" style="background:var(--gl);border-radius:8px;padding:10px;border:1px solid var(--gm);font-size:10px;color:var(--pd)"></div>
-    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Comment Log</div>
-    <div id="panel-comments" style="display:flex;flex-direction:column;gap:8px"></div>
-    <div id="panel-nocomments" style="font-size:10px;color:var(--gt);font-style:italic;display:none">No comments yet.</div>
-  </div>
-  <div style="padding:12px 14px;border-top:1px solid var(--gm);background:#fff;flex-shrink:0">
-    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Add Comment</div>
-    <select id="comment-author" class="fsel" style="width:100%;margin-bottom:6px"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
-    <textarea id="comment-text" class="fi" rows="3" placeholder="Add a comment…" style="resize:none;margin-bottom:6px;width:100%"></textarea>
-    <button onclick="postComment()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:6px;width:100%;cursor:pointer;font-weight:700;font-size:10px;font-family:inherit">Post Comment</button>
-  </div>
-</div>
-
 <div class="footer">Business Development Project Portfolio &middot; <span id="yr"></span></div>
 
 <script>
@@ -580,7 +520,7 @@ function sv(v){
   curView=v;
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const vids=['tracker','dashboard','activity','taskboard','gantt','benefits','charts','recs'];
+  const vids=['tracker','dashboard','activity','taskboard','gantt','benefits','recs'];
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
   document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
   document.getElementById('ptitle').textContent=VTITLES[v];
@@ -964,9 +904,7 @@ function renderTaskBoard(){
         const overdue=due&&due<today&&s!=='Complete';
         const dueSoon=due&&!overdue&&(due-today)/(86400000)<=3;
         const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
-        const cc=getCommentCount(String(t.id),t.isAdHoc);
-        return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" onclick="openPanel('${t.id}',${t.isAdHoc})" style="position:relative">
-          ${cc>0?`<div style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">${cc}</div>`:''}
+        return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" onclick="${t.isAdHoc?`openAdHocModal('${t.id}')`:`openTaskStatusModal('${t.id}')`}">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
             <div class="tcard-name">${esc(t.name)}</div>
             ${t.isAdHoc?'<span class="adhoc-badge">Ad Hoc</span>':''}
@@ -994,7 +932,7 @@ function renderTaskBoard(){
       const due=dueStr?new Date(dueStr):null;
       const overdue=due&&due<today&&t.status!=='Complete';
       const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
-      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
+      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;cursor:pointer" onclick="${t.isAdHoc?`openAdHocModal('${t.id}')`:`openTaskStatusModal('${t.id}')`}">
         <div>
           <div style="font-size:10px;font-weight:700;color:#4A1759;margin-bottom:1px">${esc(t.name)}</div>
           <div style="font-size:8px;color:#595959;display:flex;align-items:center;gap:4px">
@@ -1264,386 +1202,7 @@ function openMo(id){document.getElementById(id).classList.add('open');}
 function closeMo(id,e){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-
-// ══════════════════════════════════════════════════════════════════
-// SUPABASE CONNECTION
-// ══════════════════════════════════════════════════════════════════
-const SURL='https://gmpffdahvqhgfchinwdl.supabase.co';
-const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcGZmZGFodnFoZ2ZjaGlud2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDcxMzYsImV4cCI6MjA5MDEyMzEzNn0.M0bhv-3q4UtQKqkVVmG6fvJA_-bH5bbhiw3EL-Fap4I';
-let sb=null;
-try{sb=supabase.createClient(SURL,SKEY);}catch(e){console.warn('Supabase not loaded',e);}
-
-function setDbInd(ok){
-  const el=document.getElementById('db-ind');
-  if(!el)return;
-  el.innerHTML=ok?'&#9679; Connected':'&#9679; Offline';
-  el.style.background=ok?'rgba(137,171,144,.3)':'rgba(192,0,0,.3)';
-  el.style.color=ok?'#C6EFCE':'#FFDCE0';
-}
-
-function showToast(msg,type='success'){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 16px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;background:'+(type==='error'?'#C00000':'#375623')+';max-width:300px;font-family:inherit;z-index:9999';
-  t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
-}
-
-// Shadow the saveAll to also push to Supabase
-const _localSaveAll=saveAll;
-function saveAll(){
-  _localSaveAll();
-  if(sb)syncToSupabase();
-}
-
-async function syncToSupabase(){
-  if(!sb)return;
-  try{
-    // Upsert all projects
-    if(projects.length){
-      const rows=projects.map(p=>({
-        id:p.id,name:p.name,lead:p.lead,category:p.category,priority:p.priority,
-        status:p.status,approval:p.approval,pct:p.pct,
-        biz_impact:p.bizImpact,cust_value:p.custValue,
-        start_date:p.startDate||null,end_date:p.endDate||null,
-        ext_collabs:p.extCollabs||'',problem:p.problem||'',
-        outcome:p.outcome||'',risks:p.risks||'',deps:p.deps||'',notes:p.notes||''
-      }));
-      await sb.from('projects').upsert(rows,{onConflict:'id'});
-    }
-    // Upsert tasks
-    if(tasks.length){
-      const trows=tasks.map(t=>({
-        id:typeof t.id==='string'&&t.id.includes('-')?undefined:t.id,
-        project_id:t.projId,type:t.type,phase:t.phase,name:t.name,
-        status:t.status,pct:t.pct||0,owner:t.owner||'',
-        start_date:t.start||null,end_date:t.end||null
-      }));
-      await sb.from('tasks').upsert(trows.filter(t=>t.id),{onConflict:'id'});
-    }
-    // Upsert KPIs
-    if(kpis.length){
-      const krows=kpis.map(k=>({
-        id:typeof k.id==='string'&&k.id.startsWith('k')?undefined:k.id,
-        project_id:k.projId,category:k.category,name:k.name,
-        unit:k.unit,target:k.target,actual:k.actual,notes:k.notes||''
-      }));
-      const numKpis=krows.filter(k=>k.id&&typeof k.id==='number');
-      if(numKpis.length)await sb.from('kpis').upsert(numKpis,{onConflict:'id'});
-    }
-    setDbInd(true);
-  }catch(e){
-    console.warn('Supabase sync error:',e);
-    setDbInd(false);
-  }
-}
-
-async function loadFromSupabase(){
-  if(!sb){renderTracker();updateSub();updateBadge();return;}
-  try{
-    const[p,t,ah,k,ts,c,col]=await Promise.all([
-      sb.from('projects').select('*').order('id'),
-      sb.from('tasks').select('*').order('id'),
-      sb.from('adhoc_tasks').select('*').order('id'),
-      sb.from('kpis').select('*').order('id'),
-      sb.from('kpi_timeseries').select('*').order('id'),
-      sb.from('comments').select('*').order('created_at'),
-      sb.from('collaborators').select('*'),
-    ]);
-    if(p.error)throw p.error;
-    // Map DB snake_case to app camelCase
-    projects=(p.data||[]).map(r=>({
-      id:r.id,name:r.name,lead:r.lead,category:r.category,priority:r.priority,
-      status:r.status,approval:r.approval,pct:r.pct||0,
-      bizImpact:r.biz_impact||'Efficiency Gain',custValue:r.cust_value||'Order Winner',
-      startDate:r.start_date||'',endDate:r.end_date||'',
-      extCollabs:r.ext_collabs||'',problem:r.problem||'',
-      outcome:r.outcome||'',risks:r.risks||'',deps:r.deps||'',notes:r.notes||'',
-      collaborators:(col.data||[]).filter(c=>c.project_id===r.id).map(c=>c.collaborator_name)
-    }));
-    tasks=(t.data||[]).map(r=>({
-      id:r.id,projId:r.project_id,type:r.type,phase:r.phase,name:r.name,
-      status:r.status,pct:r.pct||0,owner:r.owner||'',
-      start:r.start_date||'',end:r.end_date||''
-    }));
-    adHocTasks=(ah.data||[]).map(r=>({
-      id:'ah'+r.id,name:r.name,owner:r.owner||'',priority:r.priority||'Medium',
-      status:r.status||'Not Started',due:r.due_date||'',notes:r.notes||'',
-      type:'task',isAdHoc:true
-    }));
-    kpis=(k.data||[]).map(r=>({
-      id:r.id,projId:r.project_id,category:r.category,name:r.name,
-      unit:r.unit,target:r.target,actual:r.actual,notes:r.notes||''
-    }));
-    dbKpiTS=ts.data||[];
-    dbComments=c.data||[];
-    sd('bd-projs',projects);sd('bd-tasks',tasks);sd('bd-adhoc',adHocTasks);sd('bd-kpis',kpis);
-    setDbInd(true);
-    renderTracker();updateSub();updateBadge();populateProjFilter();populateChartProjFilter();
-    showToast('Data loaded from database');
-  }catch(e){
-    console.error('DB load error:',e);
-    setDbInd(false);
-    renderTracker();updateSub();updateBadge();populateProjFilter();populateChartProjFilter();
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// COMMENTS
-// ══════════════════════════════════════════════════════════════════
-let dbComments=[];
-let panelTaskId=null,panelTaskType=null;
-
-function getCommentCount(taskId,isAdHoc){
-  return dbComments.filter(c=>c.task_id===String(taskId)&&c.task_type===(isAdHoc?'adhoc':'project')).length;
-}
-
-function openPanel(taskId,isAdHoc){
-  panelTaskId=String(taskId);panelTaskType=isAdHoc?'adhoc':'project';
-  let task=null;
-  if(isAdHoc){task=adHocTasks.find(t=>String(t.id)===String(taskId))||adHocTasks.find(t=>t.id==='ah'+taskId);}
-  else{task=tasks.find(t=>String(t.id)===String(taskId));}
-  if(!task){console.warn('Task not found:',taskId);return;}
-  const p=isAdHoc?null:projects.find(x=>x.id===task.projId);
-  document.getElementById('panel-tname').textContent=task.name;
-  document.getElementById('panel-tmeta').textContent=(p?p.name:'Ad Hoc')+' · '+(task.owner||'Unassigned');
-  document.getElementById('panel-stat').value=task.status||'Not Started';
-  const due=task.end||task.due||'';
-  document.getElementById('panel-detail').innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Project</div><div style="font-weight:600;font-size:10px">'+(p?p.name:'Ad Hoc')+'</div></div>'+
-    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Owner</div><div style="font-weight:600;font-size:10px">'+(task.owner||'—')+'</div></div>'+
-    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Priority</div>'+pill(p?p.priority:(task.projPriority||'Medium'),PS(p?p.priority:(task.projPriority||'Medium')))+'</div>'+
-    '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Due</div><div style="font-weight:600;font-size:10px">'+(due||'Not set')+'</div></div>'+
-    '</div>';
-  renderPanelComments();
-  document.getElementById('panel-overlay').style.display='block';
-  document.getElementById('slide-panel').style.right='0';
-}
-
-function closePanel(){
-  document.getElementById('panel-overlay').style.display='none';
-  document.getElementById('slide-panel').style.right='-480px';
-  panelTaskId=null;panelTaskType=null;
-}
-
-function renderPanelComments(){
-  const tc=dbComments.filter(c=>c.task_id===panelTaskId&&c.task_type===panelTaskType);
-  const wrap=document.getElementById('panel-comments');
-  const noC=document.getElementById('panel-nocomments');
-  if(!tc.length){wrap.innerHTML='';noC.style.display='block';return;}
-  noC.style.display='none';
-  wrap.innerHTML=tc.map(c=>{
-    const ss=SS(c.task_status_at_time||'Not Started');
-    const dt=c.created_at?new Date(c.created_at).toLocaleString('en-ZA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-    return'<div style="display:flex;gap:8px;padding:10px;background:var(--gl);border-radius:8px;border:1px solid var(--gm)">'+
-      avHtml(c.author,false)+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
-          '<span style="font-size:10px;font-weight:700;color:var(--pd)">'+esc(c.author)+'</span>'+
-          '<span class="pill" style="background:'+ss.bg+';color:'+ss.fg+'">'+esc(c.task_status_at_time||'')+'</span>'+
-        '</div>'+
-        '<div style="font-size:8px;color:var(--gt);margin-top:2px">'+dt+'</div>'+
-        '<div style="font-size:10px;color:var(--pd);line-height:1.5;margin-top:4px">'+esc(c.comment_text)+'</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-}
-
-async function postComment(){
-  const text=document.getElementById('comment-text').value.trim();
-  const author=document.getElementById('comment-author').value;
-  if(!text){showToast('Please enter a comment','error');return;}
-  let currentStatus='Not Started';
-  if(panelTaskType==='project'){const t=tasks.find(x=>String(x.id)===panelTaskId);if(t)currentStatus=t.status||'Not Started';}
-  else{const t=adHocTasks.find(x=>String(x.id)===panelTaskId||x.id==='ah'+panelTaskId);if(t)currentStatus=t.status||'Not Started';}
-  const newComment={task_id:panelTaskId,task_type:panelTaskType,author,comment_text:text,task_status_at_time:currentStatus,created_at:new Date().toISOString()};
-  dbComments.push(newComment);
-  document.getElementById('comment-text').value='';
-  renderPanelComments();
-  renderTaskBoard();
-  if(sb){
-    try{await sb.from('comments').insert(newComment);}
-    catch(e){console.warn('Comment save error:',e);}
-  }
-  showToast('Comment added');
-}
-
-async function updatePanelStatus(newStatus){
-  if(!panelTaskId)return;
-  if(panelTaskType==='project'){
-    const t=tasks.find(x=>String(x.id)===panelTaskId);
-    if(t){t.status=newStatus;saveAll();}
-  }else{
-    const t=adHocTasks.find(x=>String(x.id)===panelTaskId||x.id==='ah'+panelTaskId);
-    if(t){t.status=newStatus;saveAll();}
-  }
-  if(sb){
-    try{
-      if(panelTaskType==='project')await sb.from('tasks').update({status:newStatus}).eq('id',panelTaskId);
-      else await sb.from('adhoc_tasks').update({status:newStatus}).eq('id',panelTaskId.replace('ah',''));
-    }catch(e){console.warn('Status update error:',e);}
-  }
-  renderTaskBoard();showToast('Status updated');
-}
-
-// ══════════════════════════════════════════════════════════════════
-// CHARTS & REPORTS
-// ══════════════════════════════════════════════════════════════════
-let dbKpiTS=[];
-const chartInst={};
-let tsChartTypes={},tsPeriodTypes={};
-
-function populateChartProjFilter(){
-  const sel=document.getElementById('chart-proj-filter');
-  if(!sel)return;
-  sel.innerHTML='<option value="">All Projects</option>'+projects.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
-}
-
-function destroyC(id){if(chartInst[id]){chartInst[id].destroy();delete chartInst[id];}}
-function mkC(id,cfg){destroyC(id);const el=document.getElementById(id);if(!el)return;chartInst[id]=new Chart(el,cfg);return chartInst[id];}
-
-function renderCharts(){
-  const projF=document.getElementById('chart-proj-filter')?document.getElementById('chart-proj-filter').value:'';
-  const catF=document.getElementById('chart-cat-filter')?document.getElementById('chart-cat-filter').value:'';
-  const fk=kpis.filter(k=>{if(projF&&String(k.projId)!==projF)return false;if(catF&&k.category!==catF)return false;return true;});
-
-  // Donut: by status
-  const STATUSES_LIST=['Not Started','In Progress','On Hold','Complete'];
-  const sCounts=STATUSES_LIST.map(s=>projects.filter(p=>p.status===s).length);
-  const sCols=['#D6C8DB','#A98FA8','#D5A99C','#E2EFDA'];
-  document.getElementById('leg-status').innerHTML=STATUSES_LIST.map((s,i)=>'<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:'+sCols[i]+';display:inline-block"></span><span style="color:#595959">'+s+' '+sCounts[i]+'</span></span>').join('');
-  mkC('donut-status',{type:'doughnut',data:{labels:STATUSES_LIST,datasets:[{data:sCounts,backgroundColor:sCols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
-
-  // Bar: by category
-  const CATS_LIST=['Operations','People & Training','Technology & Assets','Finance'];
-  const cCounts=CATS_LIST.map(c=>projects.filter(p=>p.category===c).length);
-  const cCols=['#A6C4CF','#E8D5EE','#CFCFB7','#DBC25D'];
-  document.getElementById('leg-cat').innerHTML=CATS_LIST.map((c,i)=>'<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:'+cCols[i]+';display:inline-block"></span><span style="color:#595959">'+c+'</span></span>').join('');
-  mkC('bar-cat',{type:'bar',data:{labels:CATS_LIST.map(c=>c.replace(' & ','
-& ')),datasets:[{data:cCounts,backgroundColor:cCols,borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},x:{ticks:{font:{size:8}},grid:{display:false}}}}});
-
-  // Bar: KPI achievement
-  const kpiP=projects.filter(p=>fk.some(k=>k.projId===p.id&&k.target>0));
-  const kpiA=kpiP.map(p=>{const pk=fk.filter(k=>k.projId===p.id&&k.target>0);if(!pk.length)return null;return{name:p.name.length>22?p.name.slice(0,20)+'…':p.name,avg:Math.round(pk.reduce((a,k)=>a+k.actual/k.target*100,0)/pk.length)};}).filter(Boolean).sort((a,b)=>b.avg-a.avg);
-  if(kpiA.length){mkC('bar-kpi',{type:'bar',data:{labels:kpiA.map(x=>x.name),datasets:[{data:kpiA.map(x=>x.avg),backgroundColor:kpiA.map(x=>x.avg>=100?'#C0DDAA':x.avg>=80?'#FFF2CC':'#FFDCE0'),borderColor:kpiA.map(x=>x.avg>=100?'#375623':x.avg>=80?'#DBC25D':'#C00000'),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{min:0,max:Math.max(130,...kpiA.map(x=>x.avg+10)),ticks:{callback:v=>v+'%',font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});}
-
-  // Gauges
-  const gw=document.getElementById('gauge-wrap');gw.innerHTML='';
-  const gkpis=fk.filter(k=>k.target>0).slice(0,8);
-  if(!gkpis.length){gw.innerHTML='<div style="font-size:10px;color:#595959;font-style:italic;padding:16px">No KPIs with targets defined.</div>';}
-  else{gkpis.forEach(k=>{
-    const pct=Math.min(150,Math.round(k.actual/k.target*100));
-    const rag=pct>=100?'#375623':pct>=80?'#DBC25D':'#C00000';
-    const ragBg=pct>=100?'#E2EFDA':pct>=80?'#FFF8DC':'#FFDCE0';
-    const r=38,cx=50,cy=52;
-    const endA=Math.PI+Math.min(1,pct/100)*Math.PI;
-    const x2=cx+r*Math.cos(endA),y2=cy+r*Math.sin(endA);
-    const large=pct>=100?1:0;
-    const fmt=v=>k.unit==='R'?fmtR(v):k.unit==='%'?v+'%':v;
-    const p=projects.find(x=>x.id===k.projId);
-    const el=document.createElement('div');
-    el.style.cssText='min-width:110px;flex:1;max-width:155px;background:'+ragBg+';border-radius:8px;border:1px solid '+rag+'33;padding:10px 8px;display:flex;flex-direction:column;align-items:center';
-    el.innerHTML='<svg width="100" height="60" viewBox="0 0 100 60" style="overflow:visible"><path d="M'+(cx-r)+','+cy+' A'+r+','+r+' 0 0,1 '+(cx+r)+','+cy+'" fill="none" stroke="'+rag+'22" stroke-width="10" stroke-linecap="round"/><path d="M'+(cx-r)+','+cy+' A'+r+','+r+' 0 '+large+',1 '+x2+','+y2+'" fill="none" stroke="'+rag+'" stroke-width="10" stroke-linecap="round"/><text x="50" y="50" text-anchor="middle" font-size="13" font-weight="800" fill="'+rag+'">'+pct+'%</text></svg>'+'<div style="font-size:9px;color:#4A1759;text-align:center;font-weight:700;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(k.name)+'">'+esc(k.name)+'</div>'+'<div style="font-size:8px;color:#595959;text-align:center">'+fmt(k.actual)+' / '+fmt(k.target)+'</div>'+(p?'<div style="font-size:8px;color:#595959;text-align:center;opacity:.7">'+esc(p.name.length>20?p.name.slice(0,18)+'…':p.name)+'</div>':'');
-    gw.appendChild(el);
-  });}
-
-  // Heatmap
-  const hmP=projF?projects.filter(p=>String(p.id)===projF):projects.filter(p=>fk.some(k=>k.projId===p.id));
-  const kCats=['Financial','Efficiency','People','Quality','Custom'];
-  function ragC(v){if(v===null)return{bg:'#F0F0F0',fg:'#9A9A9A',lbl:'—'};if(v>=100)return{bg:'#C0DDAA',fg:'#2E4F34',lbl:v+'%'};if(v>=80)return{bg:'#FFF2CC',fg:'#6B5A10',lbl:v+'%'};return{bg:'#FFDCE0',fg:'#C00000',lbl:v+'%'};}
-  const lW=130,cW=72;
-  let hm='<div style="display:grid;grid-template-columns:'+lW+'px '+kCats.map(()=>cW+'px').join(' ')+';gap:2px;min-width:'+(lW+kCats.length*(cW+2))+'px">';
-  hm+='<div></div>'+kCats.map(c=>'<div style="font-size:9px;font-weight:700;color:#4A1759;text-align:center;padding:3px 2px">'+c+'</div>').join('');
-  hmP.forEach(p=>{
-    const nm=p.name.length>18?p.name.slice(0,16)+'…':p.name;
-    hm+='<div style="font-size:9px;color:#4A1759;font-weight:600;padding:4px 4px 4px 0;display:flex;align-items:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:'+lW+'px" title="'+esc(p.name)+'">'+esc(nm)+'</div>';
-    kCats.forEach(cat=>{
-      const pk=fk.filter(k=>k.projId===p.id&&k.category===cat&&k.target>0);
-      const v=pk.length?Math.round(pk.reduce((a,k)=>a+k.actual/k.target*100,0)/pk.length):null;
-      const{bg,fg,lbl}=ragC(v);
-      hm+='<div style="background:'+bg+';border-radius:3px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+fg+'">'+lbl+'</div>';
-    });
-  });
-  hm+='</div>';
-  if(!hmP.length)hm='<div style="font-size:10px;color:#595959;font-style:italic">No projects with KPIs.</div>';
-  document.getElementById('heatmap-wrap').innerHTML=hm;
-
-  // Time-series charts
-  const tsW=document.getElementById('ts-charts-wrap');tsW.innerHTML='';
-  const kpiWithTS=fk.filter(k=>dbKpiTS.some(ts=>ts.kpi_id===k.id));
-  kpiWithTS.forEach(k=>{
-    const p=projects.find(x=>x.id===k.projId);
-    const cid='tsc-'+k.id,tid='tst-'+k.id,tmid='tsgm-'+k.id,tqid='tsgq-'+k.id,tlid='tsgl-'+k.id,tbid='tsgb-'+k.id;
-    const div=document.createElement('div');div.className='card';div.style.marginBottom='0';
-    div.innerHTML='<div class="ch"><span>'+esc(k.name)+(p?' — '+esc(p.name):'')+'</span><div style="display:flex;gap:4px"><button id="'+tlid+'" class="togb active" onclick="setTSType('+k.id+','line')" style="padding:2px 8px;font-size:8px">Line</button><button id="'+tbid+'" class="togb" onclick="setTSType('+k.id+','bar')" style="padding:2px 8px;font-size:8px">Bar</button><button id="'+tmid+'" class="togb active" onclick="setTSPeriod('+k.id+','monthly')" style="padding:2px 8px;font-size:8px">Monthly</button><button id="'+tqid+'" class="togb" onclick="setTSPeriod('+k.id+','quarterly')" style="padding:2px 8px;font-size:8px">Quarterly</button></div></div>'+'<div style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start"><div><div style="position:relative;width:100%;height:200px"><canvas id="'+cid+'"></canvas></div></div><div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:9px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px">Data Table</span><button onclick="addTSRow('+k.id+')" class="add-row-btn">+ Add Period</button></div><table class="ts-tbl"><thead><tr><th>Period</th><th>Value</th><th>Notes</th></tr></thead><tbody id="'+tid+'">'+renderTSRows(k.id,'monthly')+'</tbody></table></div></div>';
-    tsW.appendChild(div);
-    buildTSChart(k.id,'line','monthly');
-  });
-  if(!kpiWithTS.length){const d=document.createElement('div');d.className='info-box';d.innerHTML='<strong>Time-Series Charts</strong> — Add time-series data in Supabase's kpi_timeseries table, or use the + Add Period button once a KPI with time data exists.';tsW.appendChild(d);}
-}
-
-function renderTSRows(kpiId,pt){
-  const rows=dbKpiTS.filter(ts=>ts.kpi_id===kpiId&&ts.period_type===pt);
-  if(!rows.length)return'<tr><td colspan="3" style="font-style:italic;color:#595959;font-size:9px;padding:5px 8px">No data yet</td></tr>';
-  return rows.map(r=>'<tr><td>'+esc(r.period)+'</td><td>'+r.value+'</td><td style="color:#595959">'+esc(r.notes||'')+'</td></tr>').join('');
-}
-
-function setTSType(kid,type){
-  tsChartTypes[kid]=type;
-  const pt=tsPeriodTypes[kid]||'monthly';
-  document.getElementById('tsgl-'+kid).classList.toggle('active',type==='line');
-  document.getElementById('tsgb-'+kid).classList.toggle('active',type==='bar');
-  buildTSChart(kid,type,pt);
-}
-function setTSPeriod(kid,pt){
-  tsPeriodTypes[kid]=pt;
-  const type=tsChartTypes[kid]||'line';
-  document.getElementById('tsgm-'+kid).classList.toggle('active',pt==='monthly');
-  document.getElementById('tsgq-'+kid).classList.toggle('active',pt==='quarterly');
-  const tb=document.getElementById('tst-'+kid);if(tb)tb.innerHTML=renderTSRows(kid,pt);
-  buildTSChart(kid,type,pt);
-}
-function buildTSChart(kid,type,pt){
-  const k=kpis.find(x=>x.id==kid);if(!k)return;
-  const rows=dbKpiTS.filter(ts=>ts.kpi_id===kid&&ts.period_type===pt).sort((a,b)=>a.id-b.id);
-  const cid='tsc-'+kid;destroyC(cid);if(!document.getElementById(cid))return;
-  chartInst[cid]=new Chart(document.getElementById(cid),{type,data:{labels:rows.map(r=>r.period),datasets:[{label:k.name,data:rows.map(r=>r.value),borderColor:'#68217D',backgroundColor:type==='line'?'rgba(104,33,125,.08)':'#E8D5EE',borderWidth:2,pointRadius:type==='line'?4:0,tension:.3,fill:type==='line',borderRadius:type==='bar'?4:0},{label:'Target',data:rows.map(()=>k.target),borderColor:'#DBC25D',backgroundColor:'transparent',borderWidth:1.5,borderDash:[4,4],pointRadius:0,type:'line'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>k.unit==='R'?'R '+Math.round(v/1000)+'k':v+(k.unit==='%'?'%':''),font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},x:{ticks:{font:{size:8},maxRotation:30,autoSkip:false},grid:{display:false}}}}});
-}
-async function addTSRow(kid){
-  const period=prompt('Period (e.g. Jan 2025, Q1 2025):');if(!period)return;
-  const value=parseFloat(prompt('Value:'));if(isNaN(value))return;
-  const notes=prompt('Notes (optional):')||'';
-  const pt=period.trim().toUpperCase().startsWith('Q')?'quarterly':'monthly';
-  const row={kpi_id:kid,period,period_type:pt,value,notes};
-  dbKpiTS.push({...row,id:Date.now()});
-  const tb=document.getElementById('tst-'+kid);if(tb)tb.innerHTML=renderTSRows(kid,pt);
-  buildTSChart(kid,tsChartTypes[kid]||'line',pt);
-  if(sb){try{await sb.from('kpi_timeseries').insert(row);showToast('Data point saved');}catch(e){showToast('Saved locally only','info');}}
-}
-
-// ══════════════════════════════════════════════════════════════════
-// OVERRIDE sv() TO HANDLE CHARTS TAB
-// ══════════════════════════════════════════════════════════════════
-const _origSv=sv;
-function sv(v){
-  _origSv(v);
-  if(v==='charts'){populateChartProjFilter();renderCharts();}
-}
-
-// ══════════════════════════════════════════════════════════════════
-// PATCH renderTaskBoard TO ADD COMMENT BADGES + PANEL CLICK
-// ══════════════════════════════════════════════════════════════════
-const _origRTB=renderTaskBoard;
-function renderTaskBoard(){
-  _origRTB();
-  // After rendering, patch all task cards to open panel on click
-  // and show comment badge
-  // This is handled inline via onclick in the task card HTML below
-}
-
-// Patch getAllBoardTasks to include comment count awareness
-// Task cards will call openPanel() directly
-
-loadFromSupabase();
+renderTracker();updateSub();updateBadge();
 </script>
 </body>
 </html>
