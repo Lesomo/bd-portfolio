@@ -1034,7 +1034,7 @@ function renderTaskBoard(){
           ${['Not Started','In Progress','On Hold','Complete'].map(s=>'<option value="'+s+'"'+(s===t.status?' selected':'')+'>'+s+'</option>').join('')}
         </select>
         <span style="font-size:9px;color:${overdue?'#C00000':'#595959'};font-weight:${overdue?700:400}">${dueStr||'-'}</span>
-        ${t.isAdHoc?'<button onclick="event.stopPropagation();openAdHocModal(''+t.id+'')" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Edit</button>':'<span></span>'}
+        ${t.isAdHoc?'<button data-ahid="'+t.id+'" onclick="event.stopPropagation();editAdHocFromBadge(this)" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Edit</button>':'<span></span>'}
       </div>`;
     }).join('');
     document.getElementById('tblist').innerHTML=`<div class="card">
