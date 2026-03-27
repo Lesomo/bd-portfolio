@@ -291,8 +291,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 
 <!-- GANTT -->
 <div class="view" id="view-gantt">
-  <div style="background:var(--pl);border-radius:7px;padding:8px 13px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:7px">
-    <span style="font-size:10px;color:var(--pd)"><strong>Gantt Chart</strong> — Set start &amp; end dates via Edit. Red = Critical Path.</span>
+  <div style="background:#fff;border-radius:10px;border:1px solid var(--gm);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <select class="fsel" id="gantt-proj-filter" onchange="renderGantt()">
+        <option value="">All Projects</option>
+      </select>
+      <select class="fsel" id="gantt-lead-filter" onchange="renderGantt()">
+        <option value="">All Leads</option>
+        <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
+        <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
+      </select>
+      <select class="fsel" id="gantt-pri-filter" onchange="renderGantt()">
+        <option value="">All Priorities</option>
+        <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+      </select>
+    </div>
     <div style="display:flex;gap:4px">
       <button id="zm" onclick="setZoom('month')" style="background:var(--primary);color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Monthly</button>
       <button id="zq" onclick="setZoom('quarter')" style="background:#fff;color:var(--pd);border:1px solid var(--gm);border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-family:inherit">Quarterly</button>
@@ -1345,6 +1358,15 @@ function setZoom(z){
   renderGantt();
 }
 function renderGantt(){
+  // Populate project filter
+  var gpSel = document.getElementById('gantt-proj-filter');
+  if (gpSel) {
+    var gpVal = gpSel.value;
+    gpSel.innerHTML = '<option value="">All Projects</option>' + projects.map(function(p){ return '<option value="'+p.id+'"'+(String(p.id)===gpVal?' selected':'')+'>'+esc(p.name)+'</option>'; }).join('');
+  }
+  var ganttProjF = (document.getElementById('gantt-proj-filter')||{}).value || '';
+  var ganttLeadF = (document.getElementById('gantt-lead-filter')||{}).value || '';
+  var ganttPriF  = (document.getElementById('gantt-pri-filter')||{}).value || '';
   const today=new Date();const ys=new Date(today.getFullYear(),0,1);const td=365;
   const dd=(a,b)=>Math.round((b-a)/86400000);
   const pct=d=>Math.max(0,Math.min(100,dd(ys,d)/td*100));
@@ -1352,7 +1374,13 @@ function renderGantt(){
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const quarters=['Q1','Q2','Q3','Q4'];
   const cols=gz==='month'?months:quarters;
-  const sorted=[...projects.filter(p=>p.priority==='Critical'),...projects.filter(p=>p.priority!=='Critical')];
+  var filteredProjects = projects.filter(function(p){
+    if (ganttProjF && String(p.id) !== ganttProjF) return false;
+    if (ganttLeadF && p.lead !== ganttLeadF) return false;
+    if (ganttPriF && p.priority !== ganttPriF) return false;
+    return true;
+  });
+  const sorted=[...filteredProjects.filter(p=>p.priority==='Critical'),...filteredProjects.filter(p=>p.priority!=='Critical')];
   const colsH=cols.map((c,i)=>`<div class="gm2" style="${i===0?'border-left:none':''}">${c}</div>`).join('');
   const rowsH=sorted.map((p,idx)=>{
     const s=p.startDate?new Date(p.startDate):null;const e=p.endDate?new Date(p.endDate):null;
