@@ -783,30 +783,77 @@ function renderDash(){
 
 // -- Activity Breakdown --------------------------------------------------------
 function renderActivity(){
-  var html='';
+  var container = document.getElementById('actbody');
+  container.innerHTML = '';
   projects.forEach(function(p){
-    var collabs=[].concat(p.collaborators||[]);
-    if(p.extCollabs){p.extCollabs.split(',').forEach(function(x){var t=x.trim();if(t)collabs.push(t);});}
-    var colStr=collabs.length?' &middot; '+collabs.map(function(c){return esc(c);}).join(', '):'';
-    html+='<div class="card" style="margin-bottom:9px">';
-    html+='<div class="wph" onclick="toggleProject('+p.id+')">';
-    html+='<span style="color:#fff;font-size:11px;min-width:12px" id="act-arr-'+p.id+'">&#9654;</span>';
-    html+='<div style="flex:1;min-width:0">';
-    html+='<div style="color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>';
-    html+='<div style="color:rgba(255,255,255,.6);font-size:8px;margin-top:1px">Lead: '+esc(p.lead)+colStr+'</div>';
-    html+='</div>';
-    html+='<div style="display:flex;gap:4px;flex-shrink:0">'+pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})+pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})+'</div>';
-    html+='<div style="min-width:65px;margin-left:7px">'+pbar(p.pct||0)+'</div>';
-    html+='</div>';
-    html+='<div id="act-'+p.id+'" style="display:none">';
-    html+=renderPhases(p);
-    html+='<div style="padding:8px 14px;background:#F5F0F7;border-top:1px solid #D6C8DB">';
-    html+='<button onclick="addPhase('+p.id+')" style="background:#68217D;color:#fff;border:none;border-radius:5px;padding:4px 11px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Phase</button>';
-    html+='</div>';
-    html+=renderKPISection(p);
-    html+='</div></div>';
+    var collabs = [].concat(p.collaborators||[]);
+    if(p.extCollabs){ p.extCollabs.split(',').forEach(function(x){ var t=x.trim(); if(t) collabs.push(t); }); }
+
+    // Card
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '9px';
+
+    // Header (purple bar)
+    var hdr = document.createElement('div');
+    hdr.className = 'wph';
+    hdr.style.cursor = 'pointer';
+    hdr.onclick = function(){ toggleProject(p.id); };
+
+    var arrSpan = document.createElement('span');
+    arrSpan.id = 'act-arr-'+p.id;
+    arrSpan.innerHTML = '&#9654;';
+    arrSpan.style.cssText = 'color:#fff;font-size:11px;min-width:12px';
+    hdr.appendChild(arrSpan);
+
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    var nm = document.createElement('div');
+    nm.style.cssText = 'color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    nm.textContent = p.name;
+    var sub = document.createElement('div');
+    sub.style.cssText = 'color:rgba(255,255,255,.6);font-size:8px;margin-top:1px';
+    sub.textContent = 'Lead: '+p.lead+(collabs.length?' - '+collabs.join(', '):'');
+    info.appendChild(nm); info.appendChild(sub);
+    hdr.appendChild(info);
+
+    var pills = document.createElement('div');
+    pills.style.cssText = 'display:flex;gap:4px;flex-shrink:0';
+    pills.innerHTML = pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})+pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'});
+    hdr.appendChild(pills);
+
+    var prog = document.createElement('div');
+    prog.style.cssText = 'min-width:65px;margin-left:7px';
+    prog.innerHTML = pbar(p.pct||0);
+    hdr.appendChild(prog);
+    card.appendChild(hdr);
+
+    // Body (hidden by default)
+    var body = document.createElement('div');
+    body.id = 'act-'+p.id;
+    body.style.display = 'none';
+
+    // Append phases fragment directly (preserves event handlers)
+    body.appendChild(renderPhases(p));
+
+    // Add Phase button row
+    var addPhRow = document.createElement('div');
+    addPhRow.style.cssText = 'padding:8px 14px;background:#F5F0F7;border-top:1px solid #D6C8DB';
+    var addPhBtn = document.createElement('button');
+    addPhBtn.textContent = '+ Add Phase';
+    addPhBtn.style.cssText = 'background:#68217D;color:#fff;border:none;border-radius:5px;padding:4px 11px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit';
+    addPhBtn.onclick = function(){ addPhase(p.id); };
+    addPhRow.appendChild(addPhBtn);
+    body.appendChild(addPhRow);
+
+    // KPI section (still uses innerHTML - no event handler loss there)
+    var kpiDiv = document.createElement('div');
+    kpiDiv.innerHTML = renderKPISection(p);
+    body.appendChild(kpiDiv);
+
+    card.appendChild(body);
+    container.appendChild(card);
   });
-  document.getElementById('actbody').innerHTML=html;
 }
 
 function toggleProject(pid){
@@ -1018,10 +1065,7 @@ function renderPhases(p){
     frag.appendChild(wrap);
   });
 
-  // Return as HTML string by converting fragment
-  var tmp = document.createElement('div');
-  tmp.appendChild(frag);
-  return tmp.innerHTML;
+  return frag;
 }
 
 function renderKPISection(p){
