@@ -508,6 +508,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 
 <script>
 document.getElementById('yr').textContent=new Date().getFullYear();
+// Clear stale localStorage data from old versions
+try {
+  var _ver = localStorage.getItem('bd-version');
+  if (_ver !== '4') {
+    ['bd-projs','bd-tasks','bd-adhoc','bd-kpis','bd-comments'].forEach(function(k){ localStorage.removeItem(k); });
+    localStorage.setItem('bd-version','4');
+  }
+} catch(e){}
 
 // -- Constants -----------------------------------------------------------------
 const PHASES=['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
@@ -575,7 +583,7 @@ function avHtml(name,sm){return`<div class="av${sm?' av-sm':''}" title="${esc(na
 function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)return`R ${Math.round(v/1000)}k`;return`R ${Math.round(v)}`;}
 
 // -- View switching -------------------------------------------------------------
-const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',recs:'Recommendations'};
+const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',charts:'Charts & Reports',recs:'Recommendations'};
 let curView='tracker';
 function sv(v){
   curView=v;
@@ -811,63 +819,209 @@ function toggleProject(pid){
 }
 
 function renderPhases(p){
-  var projTasks=tasks.filter(function(t){return t.projId===p.id;});
-  var phaseObjs=projTasks.filter(function(t){return t.type==='phase';});
+  var frag = document.createDocumentFragment();
+  var projTasks = tasks.filter(function(t){ return t.projId===p.id; });
+  var phaseObjs = projTasks.filter(function(t){ return t.type==='phase'; });
   if(!phaseObjs.length){
     PHASES.forEach(function(ph,pi){
       tasks.push({id:p.id+'-p'+pi,projId:p.id,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:''});
-      PTASKS[ph].forEach(function(n,ti){tasks.push({id:p.id+'-p'+pi+'-t'+ti,projId:p.id,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}); });
+      PTASKS[ph].forEach(function(n,ti){
+        tasks.push({id:p.id+'-p'+pi+'-t'+ti,projId:p.id,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''});
+      });
     });
     saveAll();
-    projTasks=tasks.filter(function(t){return t.projId===p.id;});
-    phaseObjs=projTasks.filter(function(t){return t.type==='phase';});
+    projTasks = tasks.filter(function(t){ return t.projId===p.id; });
+    phaseObjs = projTasks.filter(function(t){ return t.type==='phase'; });
   }
-  return phaseObjs.map(function(pt,pi){
-    var phaseTasks=projTasks.filter(function(t){return t.type==='task'&&t.phase===pt.phase;});
-    var done=phaseTasks.filter(function(t){return t.status==='Complete';}).length;
-    var phKey='ph-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
-    var pctKey='pct-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
-    var phaseHtml=''
-      +'<div style="border-top:1px solid #D6C8DB">'
-        +'<div class="wphase" onclick="toggleEl(''+phKey+'-body',''+phKey+'-arr')">'
-          +'<span style="color:#3A3F60;font-size:9px;min-width:10px" id="'+phKey+'-arr">&#9654;</span>'
-          +'<span onclick="event.stopPropagation();startInlineEdit(this,''+String(pt.id)+'')" style="font-weight:700;font-size:10px;color:#3A3F60;flex:1;min-width:60px;cursor:text;padding:1px 4px;border-radius:3px" title="Click to rename phase">'+esc(pt.name)+'</span>'
-          +'<select onchange="updTask(''+pt.id+'','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">'
-            +STATUSES.map(function(s){return'<option'+(s===pt.status?' selected':'')+'>'+s+'</option>';}).join('')
-          +'</select>'
-          +'<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px;min-width:90px">'
-            +'<input type="range" min="0" max="100" step="1" value="'+(pt.pct||0)+'" oninput="updTask(''+pt.id+'','pct',+this.value);document.getElementById(''+pctKey+'').textContent=this.value+'%'" style="flex:1;accent-color:#68217D;height:3px"/>'
-            +'<span id="'+pctKey+'" style="font-size:8px;color:#595959;min-width:24px">'+(pt.pct||0)+'%</span>'
-          +'</div>'
-          +'<span style="font-size:8px;color:#595959">'+done+'/'+phaseTasks.length+'</span>'
-          +'<button onclick="event.stopPropagation();delPhase(''+pt.id+'','+p.id+')" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:3px" title="Delete phase">&#215;</button>'
-        +'</div>'
-        +'<div id="'+phKey+'-body" style="display:none">';
-    phaseTasks.forEach(function(t,ti){
-      var ss=SS(t.status);
-      phaseHtml+=''
-        +'<div class="wtask" style="background:'+(ti%2===0?'#FCF5E3':'#fff')+';position:relative" onmouseenter="var b=this.querySelector('.dtb');if(b)b.style.opacity='1'" onmouseleave="var b=this.querySelector('.dtb');if(b)b.style.opacity='0'">'
-          +'<span style="font-size:8px;color:#595959">'+(pi+1)+'.'+(ti+1)+'</span>'
-          +'<span onclick="startInlineEdit(this,''+String(t.id)+'')" style="font-size:10px;color:#4A1759;font-weight:500;cursor:text;padding:1px 4px;border-radius:3px;flex:1;min-width:80px" title="Click to rename task">'+esc(t.name)+'</span>'
-          +'<select onchange="updTask(''+t.id+'','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit">'
-            +LEADS.map(function(l){return'<option'+(l===(t.owner||p.lead)?' selected':'')+'>'+l+'</option>';}).join('')
-          +'</select>'
-          +'<select onchange="updTask(''+t.id+'','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;background:'+ss.bg+';color:'+ss.fg+';font-weight:700;font-family:inherit">'
-            +STATUSES.map(function(s){return'<option'+(s===t.status?' selected':'')+'>'+s+'</option>';}).join('')
-          +'</select>'
-          +'<input type="date" value="'+(t.start||'')+'" onchange="updTask(''+t.id+'','start',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px"/>'
-          +'<input type="date" value="'+(t.end||'')+'" onchange="updTask(''+t.id+'','end',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px"/>'
-          +'<button class="dtb" onclick="delTask(''+t.id+'','+p.id+')" style="opacity:0;transition:opacity .15s;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit" title="Delete task">&#215;</button>'
-        +'</div>';
+
+  phaseObjs.forEach(function(pt,pi){
+    var phaseTasks = projTasks.filter(function(t){ return t.type==='task'&&t.phase===pt.phase; });
+    var done = phaseTasks.filter(function(t){ return t.status==='Complete'; }).length;
+    var phKey = 'ph-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
+    var pctKey = 'pct-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
+
+    // Phase wrapper
+    var wrap = document.createElement('div');
+    wrap.style.borderTop = '1px solid #D6C8DB';
+
+    // Phase header row
+    var phRow = document.createElement('div');
+    phRow.className = 'wphase';
+    phRow.style.cursor = 'pointer';
+
+    // Arrow
+    var arr = document.createElement('span');
+    arr.id = phKey+'-arr';
+    arr.innerHTML = '&#9654;';
+    arr.style.cssText = 'color:#3A3F60;font-size:9px;min-width:10px';
+    phRow.appendChild(arr);
+
+    // Phase name (editable)
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = pt.name;
+    nameSpan.title = 'Click to rename phase';
+    nameSpan.style.cssText = 'font-weight:700;font-size:10px;color:#3A3F60;flex:1;min-width:60px;cursor:text;padding:1px 4px;border-radius:3px';
+    nameSpan.onclick = function(e){ e.stopPropagation(); startInlineEdit(nameSpan, String(pt.id)); };
+    phRow.appendChild(nameSpan);
+
+    // Status select
+    var statSel = document.createElement('select');
+    statSel.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit';
+    STATUSES.forEach(function(s){
+      var opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      if(s===pt.status) opt.selected = true;
+      statSel.appendChild(opt);
     });
-    phaseHtml+=''
-      +'<div style="padding:5px 11px 5px 40px;background:'+(phaseTasks.length%2===0?'#FCF5E3':'#fff')+';border-top:1px solid #D6C8DB">'
-        +'<button onclick="addTask(''+pt.id+'',''+esc(pt.phase)+'','+p.id+')" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Task</button>'
-      +'</div>'
-      +'</div>'
-    +'</div>';
-    return phaseHtml;
-  }).join('');
+    statSel.onchange = function(){ updTask(pt.id,'status',this.value); };
+    statSel.onclick = function(e){ e.stopPropagation(); };
+    phRow.appendChild(statSel);
+
+    // Progress slider
+    var sliderWrap = document.createElement('div');
+    sliderWrap.onclick = function(e){ e.stopPropagation(); };
+    sliderWrap.style.cssText = 'display:flex;align-items:center;gap:3px;min-width:90px';
+    var slider = document.createElement('input');
+    slider.type = 'range'; slider.min = 0; slider.max = 100; slider.step = 1;
+    slider.value = pt.pct||0;
+    slider.style.cssText = 'flex:1;accent-color:#68217D;height:3px';
+    var pctLbl = document.createElement('span');
+    pctLbl.id = pctKey;
+    pctLbl.textContent = (pt.pct||0)+'%';
+    pctLbl.style.cssText = 'font-size:8px;color:#595959;min-width:24px';
+    slider.oninput = function(){
+      pctLbl.textContent = this.value+'%';
+      updTask(pt.id,'pct',+this.value);
+    };
+    sliderWrap.appendChild(slider); sliderWrap.appendChild(pctLbl);
+    phRow.appendChild(sliderWrap);
+
+    // Done count
+    var doneSpan = document.createElement('span');
+    doneSpan.textContent = done+'/'+phaseTasks.length;
+    doneSpan.style.cssText = 'font-size:8px;color:#595959';
+    phRow.appendChild(doneSpan);
+
+    // Delete phase button
+    var delBtn = document.createElement('button');
+    delBtn.innerHTML = '&#215;';
+    delBtn.title = 'Delete phase';
+    delBtn.style.cssText = 'background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:3px';
+    delBtn.onclick = function(e){ e.stopPropagation(); delPhase(String(pt.id), p.id); };
+    phRow.appendChild(delBtn);
+
+    // Toggle on phase row click
+    phRow.onclick = function(){
+      var body = document.getElementById(phKey+'-body');
+      var a = document.getElementById(phKey+'-arr');
+      if(!body) return;
+      var open = body.style.display==='none';
+      body.style.display = open?'block':'none';
+      if(a) a.innerHTML = open?'&#9660;':'&#9654;';
+    };
+    wrap.appendChild(phRow);
+
+    // Phase body (tasks)
+    var phBody = document.createElement('div');
+    phBody.id = phKey+'-body';
+    phBody.style.display = 'none';
+
+    phaseTasks.forEach(function(t,ti){
+      var ss = SS(t.status);
+      var taskRow = document.createElement('div');
+      taskRow.className = 'wtask';
+      taskRow.style.cssText = 'background:'+(ti%2===0?'#FCF5E3':'#fff')+';position:relative';
+
+      // Row number
+      var num = document.createElement('span');
+      num.textContent = (pi+1)+'.'+(ti+1);
+      num.style.cssText = 'font-size:8px;color:#595959';
+      taskRow.appendChild(num);
+
+      // Task name (editable)
+      var tNameSpan = document.createElement('span');
+      tNameSpan.textContent = t.name;
+      tNameSpan.title = 'Click to rename task';
+      tNameSpan.style.cssText = 'font-size:10px;color:#4A1759;font-weight:500;cursor:text;padding:1px 4px;border-radius:3px;flex:1;min-width:80px';
+      tNameSpan.onclick = function(){ startInlineEdit(tNameSpan, String(t.id)); };
+      taskRow.appendChild(tNameSpan);
+
+      // Owner select
+      var ownerSel = document.createElement('select');
+      ownerSel.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit';
+      LEADS.forEach(function(l){
+        var opt = document.createElement('option');
+        opt.value = l; opt.textContent = l;
+        if(l===(t.owner||p.lead)) opt.selected = true;
+        ownerSel.appendChild(opt);
+      });
+      ownerSel.onchange = function(){ updTask(t.id,'owner',this.value); };
+      taskRow.appendChild(ownerSel);
+
+      // Status select
+      var tStatSel = document.createElement('select');
+      tStatSel.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;font-weight:700;font-family:inherit;background:'+ss.bg+';color:'+ss.fg;
+      STATUSES.forEach(function(s){
+        var opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        if(s===t.status) opt.selected = true;
+        tStatSel.appendChild(opt);
+      });
+      tStatSel.onchange = function(){
+        var newS = this.value;
+        var newSS = SS(newS);
+        this.style.background = newSS.bg;
+        this.style.color = newSS.fg;
+        updTask(t.id,'status',newS);
+      };
+      taskRow.appendChild(tStatSel);
+
+      // Start date
+      var startInp = document.createElement('input');
+      startInp.type = 'date'; startInp.value = t.start||'';
+      startInp.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px';
+      startInp.onchange = function(){ updTask(t.id,'start',this.value); };
+      taskRow.appendChild(startInp);
+
+      // End date
+      var endInp = document.createElement('input');
+      endInp.type = 'date'; endInp.value = t.end||'';
+      endInp.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px';
+      endInp.onchange = function(){ updTask(t.id,'end',this.value); };
+      taskRow.appendChild(endInp);
+
+      // Delete task button (hover reveal)
+      var delT = document.createElement('button');
+      delT.innerHTML = '&#215;';
+      delT.className = 'dtb';
+      delT.title = 'Delete task';
+      delT.style.cssText = 'opacity:0;transition:opacity .15s;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit';
+      delT.onclick = function(){ delTask(String(t.id), p.id); };
+      taskRow.onmouseenter = function(){ delT.style.opacity='1'; };
+      taskRow.onmouseleave = function(){ delT.style.opacity='0'; };
+      taskRow.appendChild(delT);
+
+      phBody.appendChild(taskRow);
+    });
+
+    // Add task button
+    var addTaskRow = document.createElement('div');
+    addTaskRow.style.cssText = 'padding:5px 11px 5px 40px;background:'+(phaseTasks.length%2===0?'#FCF5E3':'#fff')+';border-top:1px solid #D6C8DB';
+    var addTaskBtn = document.createElement('button');
+    addTaskBtn.textContent = '+ Add Task';
+    addTaskBtn.style.cssText = 'background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit';
+    addTaskBtn.onclick = function(){ addTask(String(pt.id), pt.phase, p.id); };
+    addTaskRow.appendChild(addTaskBtn);
+    phBody.appendChild(addTaskRow);
+
+    wrap.appendChild(phBody);
+    frag.appendChild(wrap);
+  });
+
+  // Return as HTML string by converting fragment
+  var tmp = document.createElement('div');
+  tmp.appendChild(frag);
+  return tmp.innerHTML;
 }
 
 function renderKPISection(p){
