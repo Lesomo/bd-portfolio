@@ -199,8 +199,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <div class="brand-icon">BD</div>
     <div><div class="brand-name">BUSINESS DEVELOPMENT</div><div class="brand-sub">Project Portfolio</div></div>
   </div>
-  <button class="nb active" onclick="sv('tracker')">&#9776; Tracker</button>
-  <button class="nb" onclick="sv('dashboard')">&#9672; Dashboard</button>
+  <button class="nb" onclick="sv('tracker')">&#9776; Tracker</button>
+  <button class="nb active" onclick="sv('dashboard')">&#9672; Dashboard</button>
   <button class="nb" onclick="sv('activity')">&#8862; Activity</button>
   <button class="nb" onclick="sv('taskboard')">&#9634; Task Board</button>
   <button class="nb" onclick="sv('gantt')">&#9644; Gantt</button>
@@ -221,14 +221,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <div class="ptitle" id="ptitle">Project Tracker</div>
     <div class="psub" id="psub"></div>
     <div class="tabs-bar">
-      <button class="tb active" onclick="sv('tracker')">Project Tracker</button>
-      <button class="tb" onclick="sv('dashboard')">Dashboard</button>
+      <button class="tb active" onclick="sv('dashboard')">Dashboard</button>
+      <button class="tb" onclick="sv('tracker')">Project Tracker</button>
       <button class="tb" onclick="sv('activity')">Activity Breakdown</button>
       <button class="tb" onclick="sv('taskboard')">Task Board</button>
       <button class="tb" onclick="sv('gantt')">Gantt Chart</button>
-      <button class="tb" onclick="sv('benefits')">Results &amp; Benefits</button>
       <button class="tb" onclick="sv('charts')">Charts &amp; Reports</button>
+      <button class="tb" onclick="sv('benefits')">Results &amp; Benefits</button>
       <button class="tb" onclick="sv('recs')">Recommendations <span class="nbadge" id="rbadge2">0</span></button>
+    </div>
+  </div>
+</div>
+<div id="status-strip" style="background:#4A1759;padding:6px 16px;display:flex;gap:20px;align-items:center;border-top:1px solid rgba(255,255,255,.1)">
+  <div style="max-width:1280px;margin:0 auto;display:flex;gap:20px;align-items:center;width:100%">
+    <span style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;font-weight:700">Portfolio</span>
+    <div id="strip-active" style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#A98FA8;display:inline-block"></span><span style="font-size:10px;color:#fff;font-weight:700" id="strip-active-n">0</span><span style="font-size:9px;color:rgba(255,255,255,.5)">Active</span></div>
+    <div id="strip-due" style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#DBC25D;display:inline-block"></span><span style="font-size:10px;color:#fff;font-weight:700" id="strip-due-n">0</span><span style="font-size:9px;color:rgba(255,255,255,.5)">Due This Week</span></div>
+    <div id="strip-crit" style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#C00000;display:inline-block"></span><span style="font-size:10px;color:#fff;font-weight:700" id="strip-crit-n">0</span><span style="font-size:9px;color:rgba(255,255,255,.5)">Critical Issues</span></div>
+    <div id="strip-health" style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <span id="strip-tl" style="width:10px;height:10px;border-radius:50%;background:#595959;display:inline-block"></span>
+      <span style="font-size:9px;color:rgba(255,255,255,.6)" id="strip-health-lbl">Loading...</span>
     </div>
   </div>
 </div>
@@ -252,6 +264,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 
 <!-- DASHBOARD -->
 <div class="view" id="view-dashboard">
+  <div id="dash-hero" style="background:linear-gradient(135deg,#4A1759,#68217D);border-radius:10px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="color:rgba(255,255,255,.6);font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px" id="dash-date"></div>
+      <div style="color:#fff;font-weight:800;font-size:18px;margin-bottom:4px" id="dash-headline">Portfolio Overview</div>
+      <div style="color:rgba(255,255,255,.7);font-size:10px" id="dash-summary"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="dash-urgent"></div>
+  </div>
   <div class="krow" id="dkrow"></div>
   <div class="sgrid">
     <div class="card"><div class="ch"><span>By Category</span></div><div class="mbar" id="dcat"></div></div>
@@ -318,6 +338,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
       <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--tst)"></div><span style="font-size:8px;color:var(--gt)">Complete</span></div>
       <div style="display:flex;align-items:center;gap:3px"><div style="width:9px;height:9px;border-radius:2px;background:var(--sm)"></div><span style="font-size:8px;color:var(--gt)">On hold</span></div>
       <div style="display:flex;align-items:center;gap:3px;margin-left:auto"><div style="width:2px;height:9px;background:var(--red)"></div><span style="font-size:8px;color:var(--gt)">Today</span></div>
+      <div style="font-size:8px;color:var(--gt);margin-left:8px;font-style:italic">Lighter bar fill = remaining work</div>
     </div>
     <div class="gw"><div class="gi" id="gbody"></div></div>
   </div>
@@ -602,7 +623,7 @@ function sv(v){
   curView=v;
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const vids=['tracker','dashboard','activity','taskboard','gantt','benefits','charts','recs'];
+  const vids=['dashboard','tracker','activity','taskboard','gantt','charts','benefits','recs'];
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
   document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('active',vids[i]===v));
   document.getElementById('ptitle').textContent=VTITLES[v];
@@ -650,7 +671,8 @@ function renderTracker(){
   }
   const html=filtered.map((p,i)=>{
     const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
-    return`<div class="trow tcols" style="background:${i%2===0?'#FCF5E3':'#fff'}">
+    const priColors={Critical:'#C00000',High:'#C55A11',Medium:'#DBC25D',Low:'#375623'};
+    return`<div class="trow tcols" style="background:${i%2===0?'#FCF5E3':'#fff'};border-left:3px solid ${priColors[p.priority]||'transparent'}">
       <div><div class="pname">${esc(p.name)}${kpiDot(p.id)}</div>
         <div class="psub">${esc(p.bizImpact)} . ${esc(p.custValue)}</div>
         ${collabs.length?`<div class="collab-wrap">${collabs.map(c=>`<div class="collab-chip">${avHtml(c,true)}<span>${esc(c)}</span></div>`).join('')}</div>`:''}
@@ -727,17 +749,38 @@ function saveProj(){
     projects.push({id:nid,...d});
     tasks.push(...buildTasks(nid));
   }
-  saveAll();closeMo('pmodal');renderTracker();updateSub();updateBadge();
+  saveAll();closeMo('pmodal');sv('dashboard');updateBadge();
 }
 function delProj(){
   if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
   projects=projects.filter(p=>p.id!==editId);
   tasks=tasks.filter(t=>t.projId!==editId);
   kpis=kpis.filter(k=>k.projId!==editId);
-  saveAll();closeMo('pmodal');renderTracker();updateSub();updateBadge();
+  saveAll();closeMo('pmodal');sv('dashboard');updateBadge();
 }
 
 // -- Dashboard -----------------------------------------------------------------
+function updateStatusStrip(){
+  const active=projects.filter(p=>p.status==='In Progress').length;
+  const today=new Date();today.setHours(0,0,0,0);
+  const nextWeek=new Date(today);nextWeek.setDate(nextWeek.getDate()+7);
+  const dueThisWeek=projects.filter(p=>p.endDate&&p.status!=='Complete'&&new Date(p.endDate)>=today&&new Date(p.endDate)<=nextWeek).length;
+  const critIssues=urgentRecs();
+  const el_a=document.getElementById('strip-active-n');
+  const el_d=document.getElementById('strip-due-n');
+  const el_c=document.getElementById('strip-crit-n');
+  const el_tl=document.getElementById('strip-tl');
+  const el_hl=document.getElementById('strip-health-lbl');
+  if(el_a)el_a.textContent=active;
+  if(el_d)el_d.textContent=dueThisWeek;
+  if(el_c)el_c.textContent=critIssues;
+  const score=Math.max(0,100-critIssues*10);
+  const tlCol=score>=80?'#89AB90':score>=60?'#DBC25D':'#C00000';
+  const tlLbl=score>=80?'Healthy':score>=60?'Needs Attention':'At Risk';
+  if(el_tl)el_tl.style.background=tlCol;
+  if(el_hl){el_hl.textContent=tlLbl;el_hl.style.color=tlCol;}
+}
+
 function renderDash(){
   const total=projects.length;
   const ip=projects.filter(p=>p.status==='In Progress').length;
@@ -792,6 +835,23 @@ function renderDash(){
       <div style="font-size:10px;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.name)}">${esc(p.name)}</div>
       ${pbar(p.pct)}
     </div>`).join('');
+
+  // Hero section
+  const dateEl=document.getElementById('dash-date');
+  const headEl=document.getElementById('dash-headline');
+  const sumEl=document.getElementById('dash-summary');
+  const urgEl=document.getElementById('dash-urgent');
+  if(dateEl)dateEl.textContent=new Date().toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  if(headEl)headEl.textContent=`${total} Projects - ${Math.round(projects.reduce((a,p)=>a+p.pct,0)/total)}% Avg Progress`;
+  const ip=projects.filter(p=>p.status==='In Progress').length;
+  const dn=projects.filter(p=>p.status==='Complete').length;
+  const cr=projects.filter(p=>p.priority==='Critical').length;
+  if(sumEl)sumEl.textContent=`${ip} in progress - ${dn} complete - ${cr} critical`;
+  if(urgEl){
+    const recs=genRecs().filter(r=>r.severity==='critical'||r.severity==='high').slice(0,3);
+    urgEl.innerHTML=recs.length?recs.map(r=>`<div style="background:rgba(255,255,255,.12);border-radius:7px;padding:7px 10px;max-width:200px"><div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${r.severity.toUpperCase()}</div><div style="font-size:9px;color:#fff;line-height:1.3">${esc(r.title)}</div></div>`).join(''):'<div style="font-size:10px;color:rgba(255,255,255,.7)">No urgent issues - portfolio is healthy</div>';
+  }
+  updateStatusStrip();
 }
 
 // -- Activity Breakdown --------------------------------------------------------
@@ -1522,7 +1582,7 @@ function genRecs(){
   return recs.sort((a,b)=>order[a.severity]-order[b.severity]);
 }
 function urgentRecs(){return genRecs().filter(r=>r.severity==='critical'||r.severity==='high').length;}
-function updateBadge(){const n=urgentRecs();document.getElementById('rbadge').textContent=n;document.getElementById('rbadge2').textContent=n;}
+function updateBadge(){const n=urgentRecs();document.getElementById('rbadge').textContent=n;document.getElementById('rbadge2').textContent=n;updateStatusStrip();}
 
 const SEVC={critical:{bg:'#FFDCE0',border:'#C00000',fg:'#C00000',dot:'#C00000',label:'Critical'},high:{bg:'#FCE4D6',border:'#C55A11',fg:'#C55A11',dot:'#C55A11',label:'High'},medium:{bg:'#FFF8DC',border:'#DBC25D',fg:'#6B5A10',dot:'#DBC25D',label:'Medium'},low:{bg:'#E2EFDA',border:'#89AB90',fg:'#375623',dot:'#89AB90',label:'Low'},info:{bg:'#DDE4EC',border:'#7A92AC',fg:'#3A3F60',dot:'#7A92AC',label:'Info'}};
 let rcatf='All';
@@ -1531,7 +1591,7 @@ function renderRecs(){
   const score=Math.max(0,100-recs.filter(r=>r.severity==='critical').length*20-recs.filter(r=>r.severity==='high').length*10-recs.filter(r=>r.severity==='medium').length*5-recs.filter(r=>r.severity==='low').length*2);
   const sc=score>=80?{color:'#375623',bg:'#E2EFDA',label:'Healthy'}:score>=60?{color:'#C55A11',bg:'#FCE4D6',label:'Needs Attention'}:{color:'#C00000',bg:'#FFDCE0',label:'At Risk'};
   document.getElementById('hbox').innerHTML=`<div class="hbox" style="background:${sc.bg};border:1px solid ${sc.color}22">
-    <div style="min-width:60px;text-align:center"><div class="hsnum" style="color:${sc.color}">${score}</div><div class="hslbl" style="color:${sc.color}">Health</div></div>
+    <div style="min-width:60px;text-align:center"><div style="width:36px;height:36px;border-radius:50%;background:${sc.color};margin:0 auto 4px;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:14px;font-weight:800">${score>=80?'&#10003;':score>=60?'!':'!!'}</span></div><div class="hsnum" style="color:${sc.color};font-size:26px">${score}</div><div class="hslbl" style="color:${sc.color}">Health</div></div>
     <div style="flex:1"><div style="font-weight:800;color:${sc.color};font-size:14px;margin-bottom:4px">${sc.label}</div>
     <div class="hbbg"><div class="hbfill" style="width:${score}%;background:${sc.color}"></div></div>
     <div style="font-size:10px;color:${sc.color};opacity:.85">${score>=80?'Portfolio is in good shape.':score>=60?'Several issues need attention - focus on critical items first.':'Immediate action required on multiple critical issues.'}</div></div>
