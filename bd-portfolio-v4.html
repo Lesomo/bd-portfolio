@@ -101,7 +101,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 /* ── WBS ── */
 .wph{padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
 .wph:hover{background:var(--pd)}
-.wphase{display:grid;grid-template-columns:16px 1fr 90px 110px 36px 28px;gap:5px;padding:7px 11px 7px 26px;background:var(--sbl);border-top:1px solid var(--gm);align-items:center;cursor:pointer;user-select:none}
+.wphase{display:grid;grid-template-columns:16px 1fr 90px 110px 36px 28px;gap:8px;padding:7px 11px 7px 26px;background:var(--sbl);border-top:1px solid var(--gm);align-items:center;cursor:pointer;user-select:none}
 .wtask{display:grid;grid-template-columns:16px 1fr 90px 90px 105px 105px 28px;gap:5px;padding:6px 11px 6px 40px;border-top:1px solid var(--gm);align-items:center}
 @media(max-width:680px){.wphase{grid-template-columns:16px 1fr 85px}.wph-hide{display:none}.wtask{grid-template-columns:16px 1fr 85px}.wt-hide{display:none}}
 /* ── KPI tiles ── */
@@ -953,7 +953,7 @@ function renderPhases(p){
     var delBtn = document.createElement('button');
     delBtn.innerHTML = '&#215;';
     delBtn.title = 'Delete phase';
-    delBtn.style.cssText = 'background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:3px';
+    delBtn.style.cssText = 'background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:8px;flex-shrink:0';
     delBtn.onclick = function(e){ e.stopPropagation(); delPhase(String(pt.id), p.id); };
     phRow.appendChild(delBtn);
 
