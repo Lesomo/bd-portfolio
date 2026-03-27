@@ -776,62 +776,85 @@ function renderDash(){
 // -- Activity Breakdown --------------------------------------------------------
 function renderActivity(){
   document.getElementById('actbody').innerHTML=projects.map(p=>{
-    const cs=CS(p.category);
     const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
-    return`<div class="card" style="margin-bottom:9px">
-      <div class="wph" onclick="toggleEl('act-${p.id}','act-arr-${p.id}')">
-        <span style="color:#fff;font-size:11px;min-width:12px" id="act-arr-${p.id}">&#9654;</span>
-        <div style="flex:1;min-width:0">
-          <div style="color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</div>
-          <div style="color:rgba(255,255,255,.6);font-size:8px;margin-top:1px;display:flex;align-items:center;gap:5px">
-            <span>Lead: ${esc(p.lead)}</span>
-            ${collabs.length?`<span>. Collaborators: ${collabs.map(c=>`<span style="background:rgba(255,255,255,.2);padding:1px 5px;border-radius:8px;font-size:8px">${esc(c)}</span>`).join(' ')}</span>`:''}
-          </div>
-        </div>
-        <div style="display:flex;gap:4px;flex-shrink:0">${pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})}${pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})}</div>
-        <div style="min-width:65px;margin-left:7px">${pbar(p.pct)}</div>
-      </div>
-      <div id="act-${p.id}" style="display:none">
-        ${renderPhases(p)}
-        ${renderKPISection(p)}
-      </div>
-    </div>`;
+    return '<div class="card" style="margin-bottom:9px">'
+      +'<div class="wph" onclick="toggleEl('act-'+p.id+'','act-arr-'+p.id+'')">'
+        +'<span style="color:#fff;font-size:11px;min-width:12px" id="act-arr-'+p.id+'">&#9654;</span>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>'
+          +'<div style="color:rgba(255,255,255,.6);font-size:8px;margin-top:1px">Lead: '+esc(p.lead)+(collabs.length?' &middot; '+collabs.map(c=>esc(c)).join(', '):'')+' </div>'
+        +'</div>'
+        +'<div style="display:flex;gap:4px;flex-shrink:0">'+pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})+pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'})+'</div>'
+        +'<div style="min-width:65px;margin-left:7px">'+pbar(p.pct||0)+'</div>'
+      +'</div>'
+      +'<div id="act-'+p.id+'" style="display:none">'
+        +renderPhases(p)
+        +'<div style="padding:8px 14px;background:#F5F0F7;border-top:1px solid #D6C8DB;display:flex;gap:7px">'
+          +'<button onclick="addPhase('+p.id+')" style="background:#68217D;color:#fff;border:none;border-radius:5px;padding:4px 11px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Phase</button>'
+        +'</div>'
+        +renderKPISection(p)
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
 function renderPhases(p){
-  return PHASES.map((phase,pi)=>{
-    const pk=`${p.id}-p${pi}`;
-    const pt=tasks.find(t=>t.id===pk)||{status:'Not Started',pct:0};
-    const phaseTasks=tasks.filter(t=>t.phase===phase&&t.type==='task'&&t.projId===p.id);
-    const done=phaseTasks.filter(t=>t.status==='Complete').length;
-    return`<div class="wphase" onclick="toggleEl('ph-${pk}','ph-arr-${pk}')">
-      <span style="color:#3A3F60;font-size:9px;min-width:10px" id="ph-arr-${pk}">&#9654;</span>
-      <span style="font-weight:700;font-size:10px;color:#3A3F60">${pi+1}. ${esc(phase)}</span>
-      <select onchange="updTask('${pk}','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">
-        ${STATUSES.map(s=>`<option${s===pt.status?' selected':''}>${s}</option>`).join('')}
-      </select>
-      <div onclick="event.stopPropagation()" class="wph-hide" style="display:flex;align-items:center;gap:3px">
-        <input type="range" min="0" max="100" step="1" value="${pt.pct}" oninput="updTask('${pk}','pct',+this.value)" style="flex:1;accent-color:#68217D;height:3px"/>
-        <span style="font-size:8px;color:#595959;min-width:20px">${pt.pct}%</span>
-      </div>
-      <span style="font-size:8px;color:#595959" class="wph-hide">${done}/${phaseTasks.length}</span>
-    </div>
-    <div id="ph-${pk}" style="display:none">${phaseTasks.map((t,ti)=>{
-      const ss=SS(t.status);
-      return`<div class="wtask" style="background:${ti%2===0?'#FCF5E3':'#fff'}">
-        <span style="font-size:8px;color:#595959">${pi+1}.${ti+1}</span>
-        <span style="font-size:10px;color:#4A1759;font-weight:500">${esc(t.name)}</span>
-        <select onchange="updTask('${t.id}','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit">
-          ${LEADS.map(l=>`<option${l===(t.owner||p.lead)?' selected':''}>${l}</option>`).join('')}
-        </select>
-        <select onchange="updTask('${t.id}','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;background:${ss.bg};color:${ss.fg};font-weight:700;font-family:inherit">
-          ${STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}
-        </select>
-        <input type="date" value="${t.start||''}" onchange="updTask('${t.id}','start',this.value)" class="wt-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;width:100%;font-family:inherit"/>
-        <input type="date" value="${t.end||''}" onchange="updTask('${t.id}','end',this.value)" class="wt-hide" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;width:100%;font-family:inherit"/>
-      </div>`;
-    }).join('')}</div>`;
+  var projTasks=tasks.filter(function(t){return t.projId===p.id;});
+  var phaseObjs=projTasks.filter(function(t){return t.type==='phase';});
+  if(!phaseObjs.length){
+    PHASES.forEach(function(ph,pi){
+      tasks.push({id:p.id+'-p'+pi,projId:p.id,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:''});
+      PTASKS[ph].forEach(function(n,ti){tasks.push({id:p.id+'-p'+pi+'-t'+ti,projId:p.id,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}); });
+    });
+    saveAll();
+    projTasks=tasks.filter(function(t){return t.projId===p.id;});
+    phaseObjs=projTasks.filter(function(t){return t.type==='phase';});
+  }
+  return phaseObjs.map(function(pt,pi){
+    var phaseTasks=projTasks.filter(function(t){return t.type==='task'&&t.phase===pt.phase;});
+    var done=phaseTasks.filter(function(t){return t.status==='Complete';}).length;
+    var phKey='ph-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
+    var pctKey='pct-'+String(pt.id).replace(/[^a-zA-Z0-9]/g,'-');
+    var phaseHtml=''
+      +'<div style="border-top:1px solid #D6C8DB">'
+        +'<div class="wphase" onclick="toggleEl(''+phKey+'-body',''+phKey+'-arr')">'
+          +'<span style="color:#3A3F60;font-size:9px;min-width:10px" id="'+phKey+'-arr">&#9654;</span>'
+          +'<span onclick="event.stopPropagation();startInlineEdit(this,''+String(pt.id)+'')" style="font-weight:700;font-size:10px;color:#3A3F60;flex:1;min-width:60px;cursor:text;padding:1px 4px;border-radius:3px" title="Click to rename phase">'+esc(pt.name)+'</span>'
+          +'<select onchange="updTask(''+pt.id+'','status',this.value)" onclick="event.stopPropagation()" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 4px;color:#4A1759;font-family:inherit">'
+            +STATUSES.map(function(s){return'<option'+(s===pt.status?' selected':'')+'>'+s+'</option>';}).join('')
+          +'</select>'
+          +'<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:3px;min-width:90px">'
+            +'<input type="range" min="0" max="100" step="1" value="'+(pt.pct||0)+'" oninput="updTask(''+pt.id+'','pct',+this.value);document.getElementById(''+pctKey+'').textContent=this.value+'%'" style="flex:1;accent-color:#68217D;height:3px"/>'
+            +'<span id="'+pctKey+'" style="font-size:8px;color:#595959;min-width:24px">'+(pt.pct||0)+'%</span>'
+          +'</div>'
+          +'<span style="font-size:8px;color:#595959">'+done+'/'+phaseTasks.length+'</span>'
+          +'<button onclick="event.stopPropagation();delPhase(''+pt.id+'','+p.id+')" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:3px" title="Delete phase">&#215;</button>'
+        +'</div>'
+        +'<div id="'+phKey+'-body" style="display:none">';
+    phaseTasks.forEach(function(t,ti){
+      var ss=SS(t.status);
+      phaseHtml+=''
+        +'<div class="wtask" style="background:'+(ti%2===0?'#FCF5E3':'#fff')+';position:relative" onmouseenter="var b=this.querySelector('.dtb');if(b)b.style.opacity='1'" onmouseleave="var b=this.querySelector('.dtb');if(b)b.style.opacity='0'">'
+          +'<span style="font-size:8px;color:#595959">'+(pi+1)+'.'+(ti+1)+'</span>'
+          +'<span onclick="startInlineEdit(this,''+String(t.id)+'')" style="font-size:10px;color:#4A1759;font-weight:500;cursor:text;padding:1px 4px;border-radius:3px;flex:1;min-width:80px" title="Click to rename task">'+esc(t.name)+'</span>'
+          +'<select onchange="updTask(''+t.id+'','owner',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit">'
+            +LEADS.map(function(l){return'<option'+(l===(t.owner||p.lead)?' selected':'')+'>'+l+'</option>';}).join('')
+          +'</select>'
+          +'<select onchange="updTask(''+t.id+'','status',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;background:'+ss.bg+';color:'+ss.fg+';font-weight:700;font-family:inherit">'
+            +STATUSES.map(function(s){return'<option'+(s===t.status?' selected':'')+'>'+s+'</option>';}).join('')
+          +'</select>'
+          +'<input type="date" value="'+(t.start||'')+'" onchange="updTask(''+t.id+'','start',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px"/>'
+          +'<input type="date" value="'+(t.end||'')+'" onchange="updTask(''+t.id+'','end',this.value)" style="font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit;width:105px"/>'
+          +'<button class="dtb" onclick="delTask(''+t.id+'','+p.id+')" style="opacity:0;transition:opacity .15s;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit" title="Delete task">&#215;</button>'
+        +'</div>';
+    });
+    phaseHtml+=''
+      +'<div style="padding:5px 11px 5px 40px;background:'+(phaseTasks.length%2===0?'#FCF5E3':'#fff')+';border-top:1px solid #D6C8DB">'
+        +'<button onclick="addTask(''+pt.id+'',''+esc(pt.phase)+'','+p.id+')" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Task</button>'
+      +'</div>'
+      +'</div>'
+    +'</div>';
+    return phaseHtml;
   }).join('');
 }
 
@@ -868,8 +891,12 @@ function renderKPISection(p){
 }
 
 function updTask(id,field,val){
-  const t=tasks.find(x=>x.id===id);
-  if(t){t[field]=val;saveAll();}
+  const t=tasks.find(x=>String(x.id)===String(id));
+  if(t){
+    t[field]=field==='pct'?+val:val;
+    saveAll();
+    if(curView==='taskboard')renderTaskBoard();
+  }
 }
 function toggleEl(bid,aid){
   const b=document.getElementById(bid);const a=document.getElementById(aid);
@@ -904,10 +931,17 @@ function openKPIModal(projId,kpiId){
   openMo('kpimodal');
 }
 function saveKPI(){
+  const existing = kpiEditId ? kpis.find(k=>k.id===kpiEditId) : null;
+  const existingTS = existing ? (existing.timeSeries||[]) : [];
   const d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
-  if(kpiEditId){const i=kpis.findIndex(k=>k.id===kpiEditId);kpis[i]={...kpis[i],...d};}
-  else{kpis.push({id:'k'+Date.now(),...d});}
-  saveAll();closeMo('kpimodal');
+  if(kpiEditId){
+    const i=kpis.findIndex(k=>k.id===kpiEditId);
+    kpis[i]={...kpis[i],...d,timeSeries:existingTS};
+  } else {
+    kpis.push({id:'k'+Date.now(),...d,timeSeries:[]});
+  }
+  saveAll();
+  closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
 }
@@ -1616,17 +1650,103 @@ function addTSRow(kid) {
   buildTSChart(k, tsChartTypes[kid]||'line', pt);
 }
 
-// Also patch saveKPI to preserve timeSeries
-var _origSaveKPI = saveKPI;
-function saveKPI() {
-  var existingKPI = kpiEditId ? kpis.find(function(k){ return k.id == kpiEditId; }) : null;
-  var existingTS = existingKPI ? (existingKPI.timeSeries || []) : [];
-  _origSaveKPI();
-  if (kpiEditId) {
-    var k = kpis.find(function(x){ return x.id == kpiEditId; });
-    if (k && existingTS.length) k.timeSeries = existingTS;
-    saveAll();
+// saveKPI timeSeries preservation merged into main saveKPI
+
+
+// -- Inline editing ---------------------------------------------------------
+function startInlineEdit(span, taskId) {
+  if (span.querySelector('input')) return;
+  var current = span.textContent;
+  var inp = document.createElement('input');
+  inp.value = current;
+  inp.style.cssText = 'font-size:inherit;font-weight:inherit;color:inherit;border:1px solid #68217D;border-radius:3px;padding:1px 4px;width:100%;font-family:inherit;outline:none;background:#fff';
+  span.textContent = '';
+  span.appendChild(inp);
+  inp.focus();
+  inp.select();
+  function save() {
+    var val = inp.value.trim() || current;
+    var t = tasks.find(function(x){ return String(x.id) === String(taskId); });
+    if (t) { t.name = val; saveAll(); }
+    span.textContent = val;
   }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { inp.blur(); }
+    if (e.key === 'Escape') { inp.value = current; inp.blur(); }
+  });
+  inp.addEventListener('click', function(e){ e.stopPropagation(); });
+}
+
+// -- Add phase --------------------------------------------------------------
+function addPhase(projId) {
+  var name = prompt('Phase name:');
+  if (!name || !name.trim()) return;
+  var projTasks = tasks.filter(function(t){ return t.projId === projId; });
+  var phaseCount = projTasks.filter(function(t){ return t.type === 'phase'; }).length;
+  var newId = projId + '-cp' + Date.now();
+  tasks.push({ id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '' });
+  saveAll();
+  renderActivity();
+  // Re-expand the project
+  var el = document.getElementById('act-' + projId);
+  var arr = document.getElementById('act-arr-' + projId);
+  if (el) el.style.display = 'block';
+  if (arr) arr.innerHTML = '&#9660;';
+}
+
+// -- Add task ---------------------------------------------------------------
+function addTask(phaseId, phaseName, projId) {
+  var name = prompt('Task name:');
+  if (!name || !name.trim()) return;
+  var proj = projects.find(function(p){ return p.id === projId; });
+  var newId = projId + '-ct' + Date.now();
+  tasks.push({ id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '' });
+  saveAll();
+  renderActivity();
+  // Re-expand project and phase
+  var el = document.getElementById('act-' + projId);
+  var arr = document.getElementById('act-arr-' + projId);
+  if (el) el.style.display = 'block';
+  if (arr) arr.innerHTML = '&#9660;';
+  // Expand the phase too
+  var phKey = 'ph-' + String(phaseId).replace(/[^a-zA-Z0-9]/g, '-');
+  var phEl = document.getElementById(phKey + '-body');
+  var phArr = document.getElementById(phKey + '-arr');
+  if (phEl) phEl.style.display = 'block';
+  if (phArr) phArr.innerHTML = '&#9660;';
+}
+
+// -- Delete phase -----------------------------------------------------------
+function delPhase(phaseId, projId) {
+  var ph = tasks.find(function(t){ return String(t.id) === String(phaseId); });
+  var taskCount = tasks.filter(function(t){ return t.projId === projId && t.type === 'task' && t.phase === (ph ? ph.phase : ''); }).length;
+  var msg = 'Delete this phase' + (taskCount > 0 ? ' and its ' + taskCount + ' task' + (taskCount > 1 ? 's' : '') : '') + '?';
+  if (!confirm(msg)) return;
+  var phaseName = ph ? ph.phase : '';
+  tasks = tasks.filter(function(t){
+    if (String(t.id) === String(phaseId)) return false;
+    if (t.projId === projId && t.type === 'task' && t.phase === phaseName) return false;
+    return true;
+  });
+  saveAll();
+  renderActivity();
+  var el = document.getElementById('act-' + projId);
+  var arr = document.getElementById('act-arr-' + projId);
+  if (el) el.style.display = 'block';
+  if (arr) arr.innerHTML = '&#9660;';
+}
+
+// -- Delete task ------------------------------------------------------------
+function delTask(taskId, projId) {
+  tasks = tasks.filter(function(t){ return String(t.id) !== String(taskId); });
+  saveAll();
+  renderActivity();
+  if (curView === 'taskboard') renderTaskBoard();
+  var el = document.getElementById('act-' + projId);
+  var arr = document.getElementById('act-arr-' + projId);
+  if (el) el.style.display = 'block';
+  if (arr) arr.innerHTML = '&#9660;';
 }
 
 renderTracker();updateSub();updateBadge();
