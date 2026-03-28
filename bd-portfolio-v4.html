@@ -209,10 +209,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   <button class="nb" onclick="sv('charts')">&#9998; Charts</button>
   <button class="nb" onclick="sv('recs')" id="rec-nav"><span>&#128161;</span> Recs <span class="nbadge" id="rbadge">0</span></button>
   <span id="db-ind" style="font-size:9px;padding:2px 10px;border-radius:10px;font-weight:700;background:rgba(219,194,93,.3);color:#FFF8DC;flex-shrink:0">Connecting...</span>
+  <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+    <button onclick="exportData()" title="Export all data as JSON backup" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#8595; Export</button>
+    <button id="import-btn" onclick="document.getElementById('import-file').click()" title="Restore from JSON backup (Admin only)" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#8593; Import</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"/>
+  </div>
   <div class="role-wrap">
     <span style="font-size:9px;color:rgba(255,255,255,.5)">View as:</span>
     <select class="role-sel" id="role-sel" onchange="onRoleChange()">
-      <option>Admin</option><option>Project Leads</option><option>Leadership</option>
+      <option value="Project Leads">Project Leads</option><option value="Leadership">Leadership</option><option value="Admin">Admin</option>
     </select>
   </div>
 </nav>
@@ -620,11 +625,31 @@ function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)r
 
 // -- View switching -------------------------------------------------------------
 function getRole(){ return (document.getElementById('role-sel')||{value:'Admin'}).value; }
+var _adminUnlocked = false;
 function onRoleChange(){
+  var sel = document.getElementById('role-sel');
+  if(sel.value === 'Admin'){
+    if(!_adminUnlocked){
+      var pw = prompt('Enter Admin password:');
+      if(pw !== 'Timwood_10.'){
+        alert('Incorrect password.');
+        sel.value = 'Project Leads';
+        return;
+      }
+      _adminUnlocked = true;
+    }
+  } else {
+    _adminUnlocked = false;
+  }
   renderTracker();
   if(curView==='dashboard') renderDash();
   if(curView==='activity') renderActivity();
   if(curView==='taskboard') renderTaskBoard();
+  updateImportVisibility();
+}
+function updateImportVisibility(){
+  var importBtn = document.getElementById('import-btn');
+  if(importBtn) importBtn.style.display = getRole()==='Admin' ? '' : 'none';
 }
 
 const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',charts:'Charts & Reports',recs:'Recommendations'};
@@ -1990,6 +2015,67 @@ function addTSRow(kid) {
 
 // saveKPI timeSeries preservation merged into main saveKPI
 
+
+
+// -- Export / Import backup -------------------------------------------------
+function exportData(){
+  var backup = {
+    version: 4,
+    exportedAt: new Date().toISOString(),
+    projects: projects,
+    tasks: tasks,
+    adHocTasks: adHocTasks,
+    kpis: kpis,
+    comments: comments
+  };
+  var json = JSON.stringify(backup, null, 2);
+  var blob = new Blob([json], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'bd-portfolio-backup-' + date + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded: bd-portfolio-backup-' + date + '.json');
+}
+
+function importData(event){
+  var file = event.target.files[0];
+  if (!file) return;
+  // Auto-export current data before overwriting
+  exportData();
+  if (!confirm('A backup of your current data has been downloaded first.\n\nImport this file? This will REPLACE all current data. This cannot be undone.')) {
+    event.target.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var backup = JSON.parse(e.target.result);
+      if (!backup.projects || !backup.tasks) {
+        showToast('Invalid backup file - missing required data', 'error');
+        return;
+      }
+      projects = backup.projects || [];
+      tasks = backup.tasks || [];
+      adHocTasks = backup.adHocTasks || [];
+      kpis = backup.kpis || [];
+      comments = backup.comments || [];
+      saveAll();
+      saveComments();
+      sv(curView);
+      updateBadge();
+      showToast('Data restored from backup successfully');
+    } catch(err) {
+      showToast('Failed to read backup file: ' + err.message, 'error');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
 
 // -- Inline editing ---------------------------------------------------------
 function startInlineEdit(span, taskId) {
