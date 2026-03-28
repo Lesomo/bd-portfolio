@@ -189,7 +189,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .footer{text-align:center;padding:18px;font-size:9px;color:var(--gt)}
 @media(max-width:750px){.hm{display:none}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
@@ -211,7 +211,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   <span id="db-ind" style="font-size:9px;padding:2px 10px;border-radius:10px;font-weight:700;background:rgba(219,194,93,.3);color:#FFF8DC;flex-shrink:0">Connecting...</span>
   <div class="role-wrap">
     <span style="font-size:9px;color:rgba(255,255,255,.5)">View as:</span>
-    <select class="role-sel" id="role-sel" onchange="renderTracker()">
+    <select class="role-sel" id="role-sel" onchange="onRoleChange()">
       <option>Admin</option><option>Project Leads</option><option>Leadership</option>
     </select>
   </div>
@@ -305,7 +305,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
     <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
-    <button class="abtn" onclick="openAdHocModal()">+ Add Task</button>
+    <button class="abtn" id="add-task-btn" onclick="openAdHocModal()">+ Add Task</button>
   </div>
   <div id="tbboard"></div>
   <div id="tblist" style="display:none"></div>
@@ -619,6 +619,14 @@ function avHtml(name,sm){return`<div class="av${sm?' av-sm':''}" title="${esc(na
 function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)return`R ${Math.round(v/1000)}k`;return`R ${Math.round(v)}`;}
 
 // -- View switching -------------------------------------------------------------
+function getRole(){ return (document.getElementById('role-sel')||{value:'Admin'}).value; }
+function onRoleChange(){
+  renderTracker();
+  if(curView==='dashboard') renderDash();
+  if(curView==='activity') renderActivity();
+  if(curView==='taskboard') renderTaskBoard();
+}
+
 const VTITLES={tracker:'Project Tracker',dashboard:'Dashboard',activity:'Activity Breakdown',taskboard:'Task Board',gantt:'Gantt Chart',benefits:'Results & Benefits',charts:'Charts & Reports',recs:'Recommendations'};
 let curView='tracker';
 function sv(v){
@@ -652,7 +660,7 @@ function renderTracker(){
   const fp=document.getElementById('fp').value;
   const fl=document.getElementById('fl').value;
   const fs=document.getElementById('fs').value;
-  const role=document.getElementById('role-sel').value;
+  const role=getRole();
   document.getElementById('addpb').style.display=role==='Leadership'?'none':'block';
   const filtered=projects.filter(p=>{
     if(fc&&p.category!==fc)return false;
@@ -922,6 +930,7 @@ function renderActivity(){
     addPhRow.style.cssText = 'padding:8px 14px;background:#F5F0F7;border-top:1px solid #D6C8DB';
     var addPhBtn = document.createElement('button');
     addPhBtn.textContent = '+ Add Phase';
+  if(getRole()==='Leadership') { addPhRow.style.display='none'; }
     addPhBtn.style.cssText = 'background:#68217D;color:#fff;border:none;border-radius:5px;padding:4px 11px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit';
     addPhBtn.onclick = function(){ addPhase(p.id); };
     addPhRow.appendChild(addPhBtn);
@@ -988,8 +997,9 @@ function renderPhases(p){
     var nameSpan = document.createElement('span');
     nameSpan.textContent = pt.name;
     nameSpan.title = 'Click to rename phase';
-    nameSpan.style.cssText = 'font-weight:700;font-size:10px;color:#3A3F60;flex:1;min-width:60px;cursor:text;padding:1px 4px;border-radius:3px';
-    nameSpan.onclick = function(e){ e.stopPropagation(); startInlineEdit(nameSpan, String(pt.id)); };
+    var isLeadership = getRole()==='Leadership';
+    nameSpan.style.cssText = 'font-weight:700;font-size:10px;color:#3A3F60;flex:1;min-width:60px;cursor:'+(isLeadership?'default':'text')+';padding:1px 4px;border-radius:3px';
+    if(!isLeadership) nameSpan.onclick = function(e){ e.stopPropagation(); startInlineEdit(nameSpan, String(pt.id)); };
     phRow.appendChild(nameSpan);
 
     // Status select
@@ -1035,6 +1045,7 @@ function renderPhases(p){
     delBtn.innerHTML = '&#215;';
     delBtn.title = 'Delete phase';
     delBtn.style.cssText = 'background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit;margin-left:8px;flex-shrink:0';
+    if(getRole()==='Leadership') delBtn.style.display='none';
     delBtn.onclick = function(e){ e.stopPropagation(); delPhase(String(pt.id), p.id); };
     phRow.appendChild(delBtn);
 
@@ -1070,8 +1081,8 @@ function renderPhases(p){
       var tNameSpan = document.createElement('span');
       tNameSpan.textContent = t.name;
       tNameSpan.title = 'Click to rename task';
-      tNameSpan.style.cssText = 'font-size:10px;color:#4A1759;font-weight:500;cursor:text;padding:1px 4px;border-radius:3px;flex:1;min-width:80px';
-      tNameSpan.onclick = function(){ startInlineEdit(tNameSpan, String(t.id)); };
+      tNameSpan.style.cssText = 'font-size:10px;color:#4A1759;font-weight:500;cursor:'+(isLeadership?'default':'text')+';padding:1px 4px;border-radius:3px;flex:1;min-width:80px';
+      if(!isLeadership) tNameSpan.onclick = function(){ startInlineEdit(tNameSpan, String(t.id)); };
       taskRow.appendChild(tNameSpan);
 
       // Owner select
@@ -1124,6 +1135,7 @@ function renderPhases(p){
       delT.className = 'dtb';
       delT.title = 'Delete task';
       delT.style.cssText = 'opacity:0;transition:opacity .15s;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-family:inherit';
+      if(isLeadership) { delT.style.display='none'; taskRow.onmouseenter=null; taskRow.onmouseleave=null; }
       delT.onclick = function(){ delTask(String(t.id), p.id); };
       taskRow.onmouseenter = function(){ delT.style.opacity='1'; };
       taskRow.onmouseleave = function(){ delT.style.opacity='0'; };
@@ -1137,6 +1149,7 @@ function renderPhases(p){
     addTaskRow.style.cssText = 'padding:5px 11px 5px 40px;background:'+(phaseTasks.length%2===0?'#FCF5E3':'#fff')+';border-top:1px solid #D6C8DB';
     var addTaskBtn = document.createElement('button');
     addTaskBtn.textContent = '+ Add Task';
+    if(isLeadership) addTaskRow.style.display='none';
     addTaskBtn.style.cssText = 'background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit';
     addTaskBtn.onclick = function(){ addTask(String(pt.id), pt.phase, p.id); };
     addTaskRow.appendChild(addTaskBtn);
@@ -1291,6 +1304,8 @@ function changeTaskStatus(taskId, isAdHoc, newStatus) {
 }
 
 function renderTaskBoard(){
+  var addTaskBtnEl = document.getElementById('add-task-btn');
+  if(addTaskBtnEl) addTaskBtnEl.style.display = getRole()==='Leadership' ? 'none' : '';
   const lead=document.getElementById('tb-lead').value;
   const proj=document.getElementById('tb-proj').value;
   const type=document.getElementById('tb-type').value;
@@ -2091,7 +2106,7 @@ renderTracker();updateSub();updateBadge();
 var SURL = 'https://gmpffdahvqhgfchinwdl.supabase.co';
 var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcGZmZGFodnFoZ2ZjaGlud2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDcxMzYsImV4cCI6MjA5MDEyMzEzNn0.M0bhv-3q4UtQKqkVVmG6fvJA_-bH5bbhiw3EL-Fap4I';
 var sb = null;
-try { sb = window.supabase ? window.supabase.createClient(SURL, SKEY) : null; } catch(e){}
+// sb is initialised inside DOMContentLoaded to ensure CDN is loaded
 
 // -- DB indicator --------------------------------------------------------------
 function setDbInd(state) {
@@ -2196,7 +2211,15 @@ function dbToComment(r) {
 
 // -- Load all from Supabase ----------------------------------------------------
 function loadFromSupabase() {
-  if (!sb) { setDbInd('offline'); return; }
+  if (!sb) {
+    console.warn('No Supabase client - check CDN loaded. window.supabase =', typeof window.supabase);
+    setDbInd('offline');
+    sv('dashboard');
+    updateBadge();
+    populateProjFilter();
+    populateChartProjFilter();
+    return;
+  }
   setDbInd('loading');
   Promise.all([
     sb.from('projects').select('*').order('id'),
@@ -2385,7 +2408,17 @@ window.sbSaveTS = function(kpiId, tsRow) {
 
 // -- Start ---------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function(){
-  setTimeout(loadFromSupabase, 100);
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      sb = window.supabase.createClient(SURL, SKEY);
+      console.log('Supabase client created successfully');
+    } else {
+      console.warn('Supabase not available on window - CDN may have failed to load');
+    }
+  } catch(e) {
+    console.error('Supabase createClient error:', e);
+  }
+  loadFromSupabase();
 });
 
 })(); // end IIFE
