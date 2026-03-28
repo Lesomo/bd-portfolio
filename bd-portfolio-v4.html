@@ -189,6 +189,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .footer{text-align:center;padding:18px;font-size:9px;color:var(--gt)}
 @media(max-width:750px){.hm{display:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body>
@@ -207,6 +208,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   <button class="nb" onclick="sv('benefits')">&#9733; Benefits</button>
   <button class="nb" onclick="sv('charts')">&#9998; Charts</button>
   <button class="nb" onclick="sv('recs')" id="rec-nav"><span>&#128161;</span> Recs <span class="nbadge" id="rbadge">0</span></button>
+  <span id="db-ind" style="font-size:9px;padding:2px 10px;border-radius:10px;font-weight:700;background:rgba(219,194,93,.3);color:#FFF8DC;flex-shrink:0">Connecting...</span>
   <div class="role-wrap">
     <span style="font-size:9px;color:rgba(255,255,255,.5)">View as:</span>
     <select class="role-sel" id="role-sel" onchange="renderTracker()">
@@ -749,14 +751,20 @@ function saveProj(){
     projects.push({id:nid,...d});
     tasks.push(...buildTasks(nid));
   }
-  saveAll();closeMo('pmodal');sv('dashboard');updateBadge();
+  var isNew = !editId;
+  saveAll();
+  if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return p.id===editId;}), isNew, collabs);
+  closeMo('pmodal');sv('dashboard');updateBadge();
 }
 function delProj(){
   if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
   projects=projects.filter(p=>p.id!==editId);
   tasks=tasks.filter(t=>t.projId!==editId);
   kpis=kpis.filter(k=>k.projId!==editId);
-  saveAll();closeMo('pmodal');sv('dashboard');updateBadge();
+  var dpId = editId;
+  saveAll();
+  if(window.sbDelProject) sbDelProject(dpId);
+  closeMo('pmodal');sv('dashboard');updateBadge();
 }
 
 // -- Dashboard -----------------------------------------------------------------
@@ -1178,6 +1186,7 @@ function updTask(id,field,val){
   if(t){
     t[field]=field==='pct'?+val:val;
     saveAll();
+    if(window.sbUpdTask) sbUpdTask(t);
     if(curView==='taskboard')renderTaskBoard();
   }
 }
@@ -1223,15 +1232,21 @@ function saveKPI(){
   } else {
     kpis.push({id:'k'+Date.now(),...d,timeSeries:[]});
   }
+  var isNewKpi = !kpiEditId;
+  var savedKpi = kpiEditId ? kpis.find(function(k){return k.id===kpiEditId;}) : kpis[kpis.length-1];
   saveAll();
+  if(window.sbSaveKPI) sbSaveKPI(savedKpi, isNewKpi);
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
 }
 function delKPI(){
   if(!kpiEditId)return;
+  var kpiToDelete = kpiEditId;
   kpis=kpis.filter(k=>k.id!==kpiEditId);
-  saveAll();closeMo('kpimodal');
+  saveAll();
+  if(window.sbDelKPI) sbDelKPI(kpiToDelete);
+  closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
 }
@@ -1401,12 +1416,19 @@ function saveAdHoc(){
   const d={name:document.getElementById('ahtname').value,owner:document.getElementById('ahowner').value,priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
   if(ahEditId){const i=adHocTasks.findIndex(t=>t.id===ahEditId);adHocTasks[i]={...adHocTasks[i],...d};}
   else adHocTasks.push({id:'ah'+Date.now(),...d});
-  saveAll();closeMo('ahmodal');renderTaskBoard();
+  var isNewAh = !ahEditId;
+  var savedAh = ahEditId ? adHocTasks.find(function(t){return t.id===ahEditId;}) : adHocTasks[adHocTasks.length-1];
+  saveAll();
+  if(window.sbSaveAdHoc) sbSaveAdHoc(savedAh, isNewAh);
+  closeMo('ahmodal');renderTaskBoard();
 }
 function delAdHoc(){
   if(!ahEditId)return;
+  var ahToDelete = adHocTasks.find(function(t){return t.id===ahEditId;});
   adHocTasks=adHocTasks.filter(t=>t.id!==ahEditId);
-  saveAll();closeMo('ahmodal');renderTaskBoard();
+  saveAll();
+  if(window.sbDelAdHoc && ahToDelete) sbDelAdHoc(ahToDelete);
+  closeMo('ahmodal');renderTaskBoard();
 }
 
 // -- Gantt ---------------------------------------------------------------------
@@ -1707,6 +1729,7 @@ function postComment() {
   var dt = now.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
   comments.push({ taskId: panelTaskId, isAdHoc: panelIsAdHoc, author: author, text: text, statusAtTime: currentStatus, dateTime: dt });
   saveComments();
+  if(window.sbSaveComment) sbSaveComment(comments[comments.length-1]);
   document.getElementById('comment-text').value = '';
   renderPanelComments();
   renderTaskBoard();
@@ -1942,8 +1965,10 @@ function addTSRow(kid) {
   var pt = period.trim().toUpperCase().slice(0,1) === 'Q' ? 'quarterly' : 'monthly';
   var k = kpis.find(function(x){ return String(x.id)===String(kid); }); if (!k) return;
   if (!k.timeSeries) k.timeSeries = [];
-  k.timeSeries.push({ period: period, value: value, notes: notes, periodType: pt, order: k.timeSeries.length });
+  var newTS = { period: period, value: value, notes: notes, periodType: pt, order: k.timeSeries.length };
+  k.timeSeries.push(newTS);
   saveAll();
+  if(window.sbSaveTS) sbSaveTS(kid, newTS);
   var tb = document.getElementById('tst-'+kid); if (tb) tb.innerHTML = renderTSRows(k, pt);
   buildTSChart(k, tsChartTypes[kid]||'line', pt);
 }
@@ -1983,8 +2008,10 @@ function addPhase(projId) {
   var projTasks = tasks.filter(function(t){ return t.projId === projId; });
   var phaseCount = projTasks.filter(function(t){ return t.type === 'phase'; }).length;
   var newId = projId + '-cp' + Date.now();
-  tasks.push({ id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '' });
+  var newPhase = { id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '' };
+  tasks.push(newPhase);
   saveAll();
+  if(window.sbSavePhase) sbSavePhase(newPhase);
   renderActivity();
   // Re-expand the project
   var el = document.getElementById('act-' + projId);
@@ -1999,8 +2026,10 @@ function addTask(phaseId, phaseName, projId) {
   if (!name || !name.trim()) return;
   var proj = projects.find(function(p){ return p.id === projId; });
   var newId = projId + '-ct' + Date.now();
-  tasks.push({ id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '' });
+  var newTask = { id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '' };
+  tasks.push(newTask);
   saveAll();
+  if(window.sbUpdTask) sbUpdTask(newTask);
   renderActivity();
   // Re-expand project and phase
   var el = document.getElementById('act-' + projId);
@@ -2028,6 +2057,7 @@ function delPhase(phaseId, projId) {
     return true;
   });
   saveAll();
+  if(window.sbDelPhase) sbDelPhase(phaseId, projId, phaseName);
   renderActivity();
   var el = document.getElementById('act-' + projId);
   var arr = document.getElementById('act-arr-' + projId);
@@ -2039,6 +2069,7 @@ function delPhase(phaseId, projId) {
 function delTask(taskId, projId) {
   tasks = tasks.filter(function(t){ return String(t.id) !== String(taskId); });
   saveAll();
+  if(window.sbDelTask) sbDelTask(taskId);
   renderActivity();
   if (curView === 'taskboard') renderTaskBoard();
   var el = document.getElementById('act-' + projId);
@@ -2048,6 +2079,316 @@ function delTask(taskId, projId) {
 }
 
 renderTracker();updateSub();updateBadge();
+
+
+
+// ------------------------------------------------------------------------------
+// SUPABASE LAYER - reads on load, dual-writes on save
+// App uses camelCase; DB uses snake_case - all mapping happens here
+// ------------------------------------------------------------------------------
+(function(){
+
+var SURL = 'https://gmpffdahvqhgfchinwdl.supabase.co';
+var SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtcGZmZGFodnFoZ2ZjaGlud2RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDcxMzYsImV4cCI6MjA5MDEyMzEzNn0.M0bhv-3q4UtQKqkVVmG6fvJA_-bH5bbhiw3EL-Fap4I';
+var sb = null;
+try { sb = window.supabase ? window.supabase.createClient(SURL, SKEY) : null; } catch(e){}
+
+// -- DB indicator --------------------------------------------------------------
+function setDbInd(state) {
+  var el = document.getElementById('db-ind');
+  if (!el) return;
+  if (state === 'connected') {
+    el.textContent = 'DB Connected';
+    el.style.background = 'rgba(137,171,144,.35)';
+    el.style.color = '#C6EFCE';
+  } else if (state === 'offline') {
+    el.textContent = 'DB Offline';
+    el.style.background = 'rgba(192,0,0,.3)';
+    el.style.color = '#FFDCE0';
+  } else {
+    el.textContent = 'Connecting...';
+    el.style.background = 'rgba(219,194,93,.3)';
+    el.style.color = '#FFF8DC';
+  }
+}
+
+// -- Field mappers -------------------------------------------------------------
+function dbToProj(r, collabs) {
+  return {
+    id: r.id, name: r.name, lead: r.lead, category: r.category,
+    priority: r.priority, status: r.status, approval: r.approval, pct: r.pct || 0,
+    bizImpact: r.biz_impact || 'Efficiency Gain',
+    custValue: r.cust_value || 'Order Winner',
+    startDate: r.start_date || '', endDate: r.end_date || '',
+    extCollabs: r.ext_collabs || '', problem: r.problem || '',
+    outcome: r.outcome || '', risks: r.risks || '',
+    deps: r.deps || '', notes: r.notes || '',
+    collaborators: (collabs || []).filter(function(c){ return c.project_id === r.id; }).map(function(c){ return c.collaborator_name; })
+  };
+}
+function projToDb(p) {
+  return {
+    name: p.name, lead: p.lead, category: p.category,
+    priority: p.priority, status: p.status, approval: p.approval, pct: p.pct || 0,
+    biz_impact: p.bizImpact || '', cust_value: p.custValue || '',
+    start_date: p.startDate || null, end_date: p.endDate || null,
+    ext_collabs: p.extCollabs || '', problem: p.problem || '',
+    outcome: p.outcome || '', risks: p.risks || '',
+    deps: p.deps || '', notes: p.notes || ''
+  };
+}
+function dbToTask(r) {
+  return {
+    id: r.id, projId: r.project_id, type: r.type, phase: r.phase,
+    name: r.name, status: r.status || 'Not Started', pct: r.pct || 0,
+    owner: r.owner || '', start: r.start_date || '', end: r.end_date || ''
+  };
+}
+function taskToDb(t) {
+  return {
+    project_id: t.projId, type: t.type, phase: t.phase, name: t.name,
+    status: t.status || 'Not Started', pct: t.pct || 0,
+    owner: t.owner || '', start_date: t.start || null, end_date: t.end || null
+  };
+}
+function dbToKpi(r, tsRows) {
+  var ts = (tsRows || []).filter(function(t){ return t.kpi_id === r.id; }).map(function(t){
+    return { period: t.period, value: t.value, notes: t.notes || '', periodType: t.period_type, order: t.id };
+  });
+  return {
+    id: r.id, projId: r.project_id, category: r.category,
+    name: r.name, unit: r.unit, target: r.target, actual: r.actual,
+    notes: r.notes || '', timeSeries: ts
+  };
+}
+function kpiToDb(k) {
+  return {
+    project_id: k.projId, category: k.category, name: k.name,
+    unit: k.unit, target: k.target || 0, actual: k.actual || 0, notes: k.notes || ''
+  };
+}
+function dbToAdhoc(r) {
+  return {
+    id: 'ah' + r.id, _dbId: r.id, name: r.name, owner: r.owner || '',
+    priority: r.priority || 'Medium', status: r.status || 'Not Started',
+    due: r.due_date || '', notes: r.notes || '', type: 'task', isAdHoc: true
+  };
+}
+function adhocToDb(t) {
+  return {
+    name: t.name, owner: t.owner || '', priority: t.priority || 'Medium',
+    status: t.status || 'Not Started',
+    due_date: t.due || null, notes: t.notes || ''
+  };
+}
+function dbToComment(r) {
+  var dt = '';
+  try {
+    var d = new Date(r.created_at);
+    dt = d.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  } catch(e){}
+  return {
+    taskId: r.task_id, isAdHoc: r.task_type === 'adhoc',
+    author: r.author, text: r.comment_text,
+    statusAtTime: r.task_status_at_time || '', dateTime: dt
+  };
+}
+
+// -- Load all from Supabase ----------------------------------------------------
+function loadFromSupabase() {
+  if (!sb) { setDbInd('offline'); return; }
+  setDbInd('loading');
+  Promise.all([
+    sb.from('projects').select('*').order('id'),
+    sb.from('collaborators').select('*'),
+    sb.from('tasks').select('*').order('id'),
+    sb.from('adhoc_tasks').select('*').order('id'),
+    sb.from('kpis').select('*').order('id'),
+    sb.from('kpi_timeseries').select('*').order('id'),
+    sb.from('comments').select('*').order('created_at')
+  ]).then(function(results) {
+    var pRes=results[0], colRes=results[1], tRes=results[2];
+    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6];
+
+    if (pRes.error) throw pRes.error;
+
+    var dbCollabs = colRes.data || [];
+    projects = (pRes.data || []).map(function(r){ return dbToProj(r, dbCollabs); });
+    tasks = (tRes.data || []).map(dbToTask);
+    adHocTasks = (ahRes.data || []).map(dbToAdhoc);
+    var tsData = tsRes.data || [];
+    kpis = (kRes.data || []).map(function(r){ return dbToKpi(r, tsData); });
+    comments = (cRes.data || []).map(dbToComment);
+
+    // Also save to localStorage as cache
+    sd('bd-projs', projects);
+    sd('bd-tasks', tasks);
+    sd('bd-adhoc', adHocTasks);
+    sd('bd-kpis', kpis);
+    sd('bd-comments', comments);
+
+    setDbInd('connected');
+    sv('dashboard');
+    updateBadge();
+    populateProjFilter();
+    populateChartProjFilter();
+    showToast('Data loaded from database');
+  }).catch(function(err) {
+    console.error('Supabase load error:', err);
+    setDbInd('offline');
+    showToast('Could not connect - using local data', 'warn');
+    sv('dashboard');
+    updateBadge();
+    populateProjFilter();
+    populateChartProjFilter();
+  });
+}
+
+// -- Toast ---------------------------------------------------------------------
+function showToast(msg, type) {
+  var t = document.createElement('div');
+  var bg = type === 'warn' ? '#C55A11' : type === 'error' ? '#C00000' : '#375623';
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 16px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;background:'+bg+';max-width:320px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3500);
+}
+window.showToast = showToast;
+
+// -- Supabase writes -----------------------------------------------------------
+// These shadow the existing save functions - called AFTER localStorage save
+
+window.sbSaveProject = function(p, isNew, collabs) {
+  if (!sb) return;
+  var d = projToDb(p);
+  var lead = p.lead;
+  if (isNew) {
+    sb.from('projects').insert(Object.assign({id: p.id}, d)).then(function(r){
+      if (r.error) { console.warn('sbSaveProject insert:', r.error); return; }
+      // Insert tasks
+      var newTasks = [];
+      PHASES.forEach(function(ph, pi){
+        newTasks.push({id: String(p.id)+'-p'+pi, project_id: p.id, type:'phase', phase:ph, name:ph, status:'Not Started', pct:0, owner:lead});
+        PTASKS[ph].forEach(function(n, ti){
+          newTasks.push({id: String(p.id)+'-p'+pi+'-t'+ti, project_id: p.id, type:'task', phase:ph, name:n, status:'Not Started', pct:0, owner:lead});
+        });
+      });
+      sb.from('tasks').insert(newTasks).then(function(tr){ if(tr.error) console.warn('sbSaveProject tasks:', tr.error); });
+      // Insert collaborators
+      if (collabs && collabs.length) {
+        var cRows = collabs.filter(function(c){ return c !== lead; }).map(function(c){ return {project_id: p.id, collaborator_name: c}; });
+        if (cRows.length) sb.from('collaborators').insert(cRows).then(function(cr){ if(cr.error) console.warn('sbSaveProject collabs:', cr.error); });
+      }
+    });
+  } else {
+    sb.from('projects').update(d).eq('id', p.id).then(function(r){
+      if (r.error) { console.warn('sbSaveProject update:', r.error); return; }
+      // Sync collaborators
+      sb.from('collaborators').delete().eq('project_id', p.id).then(function(){
+        if (collabs && collabs.length) {
+          var cRows = collabs.filter(function(c){ return c !== lead; }).map(function(c){ return {project_id: p.id, collaborator_name: c}; });
+          if (cRows.length) sb.from('collaborators').insert(cRows).then(function(cr){ if(cr.error) console.warn('sbSaveProject collabs update:', cr.error); });
+        }
+      });
+    });
+  }
+};
+
+window.sbDelProject = function(pid) {
+  if (!sb) return;
+  sb.from('collaborators').delete().eq('project_id', pid).then(function(){});
+  sb.from('tasks').delete().eq('project_id', pid).then(function(){});
+  sb.from('kpis').delete().eq('project_id', pid).then(function(){});
+  sb.from('projects').delete().eq('id', pid).then(function(r){ if(r.error) console.warn('sbDelProject:', r.error); });
+};
+
+window.sbUpdTask = function(task) {
+  if (!sb || !task) return;
+  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name};
+  // Tasks may have string IDs like "1-p0" - upsert handles both new and existing
+  sb.from('tasks').upsert(Object.assign({id: String(task.id), project_id: task.projId, type: task.type, phase: task.phase}, d), {onConflict:'id'})
+    .then(function(r){ if(r.error) console.warn('sbUpdTask:', r.error); });
+};
+
+window.sbSaveKPI = function(kpi, isNew) {
+  if (!sb) return;
+  var d = kpiToDb(kpi);
+  if (isNew) {
+    sb.from('kpis').insert(d).then(function(r){ if(r.error) console.warn('sbSaveKPI insert:', r.error); });
+  } else {
+    sb.from('kpis').update(d).eq('id', kpi.id).then(function(r){ if(r.error) console.warn('sbSaveKPI update:', r.error); });
+  }
+};
+
+window.sbDelKPI = function(kpiId) {
+  if (!sb) return;
+  sb.from('kpi_timeseries').delete().eq('kpi_id', kpiId).then(function(){});
+  sb.from('kpis').delete().eq('id', kpiId).then(function(r){ if(r.error) console.warn('sbDelKPI:', r.error); });
+};
+
+window.sbSaveAdHoc = function(task, isNew) {
+  if (!sb) return;
+  var d = adhocToDb(task);
+  if (isNew) {
+    sb.from('adhoc_tasks').insert(d).then(function(r){ if(r.error) console.warn('sbSaveAdHoc insert:', r.error); });
+  } else {
+    var dbId = task._dbId || String(task.id).replace('ah','');
+    sb.from('adhoc_tasks').update(d).eq('id', dbId).then(function(r){ if(r.error) console.warn('sbSaveAdHoc update:', r.error); });
+  }
+};
+
+window.sbDelAdHoc = function(task) {
+  if (!sb) return;
+  var dbId = task._dbId || String(task.id).replace('ah','');
+  sb.from('adhoc_tasks').delete().eq('id', dbId).then(function(r){ if(r.error) console.warn('sbDelAdHoc:', r.error); });
+};
+
+window.sbSaveComment = function(comment) {
+  if (!sb) return;
+  sb.from('comments').insert({
+    task_id: comment.taskId,
+    task_type: comment.isAdHoc ? 'adhoc' : 'project',
+    author: comment.author,
+    comment_text: comment.text,
+    task_status_at_time: comment.statusAtTime || '',
+    created_at: new Date().toISOString()
+  }).then(function(r){ if(r.error) console.warn('sbSaveComment:', r.error); });
+};
+
+window.sbSavePhase = function(task) {
+  if (!sb || !task) return;
+  sb.from('tasks').upsert({
+    id: String(task.id), project_id: task.projId, type: 'phase',
+    phase: task.phase, name: task.name, status: task.status || 'Not Started',
+    pct: task.pct || 0, owner: task.owner || ''
+  }, {onConflict:'id'}).then(function(r){ if(r.error) console.warn('sbSavePhase:', r.error); });
+};
+
+window.sbDelPhase = function(phaseId, projId, phaseName) {
+  if (!sb) return;
+  sb.from('tasks').delete().eq('id', String(phaseId)).then(function(){});
+  sb.from('tasks').delete().eq('project_id', projId).eq('phase', phaseName).eq('type', 'task').then(function(r){ if(r.error) console.warn('sbDelPhase tasks:', r.error); });
+};
+
+window.sbDelTask = function(taskId) {
+  if (!sb) return;
+  sb.from('tasks').delete().eq('id', String(taskId)).then(function(r){ if(r.error) console.warn('sbDelTask:', r.error); });
+};
+
+window.sbSaveTS = function(kpiId, tsRow) {
+  if (!sb) return;
+  sb.from('kpi_timeseries').insert({
+    kpi_id: kpiId, period: tsRow.period, period_type: tsRow.periodType,
+    value: tsRow.value, notes: tsRow.notes || ''
+  }).then(function(r){ if(r.error) console.warn('sbSaveTS:', r.error); });
+};
+
+// -- Start ---------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(loadFromSupabase, 100);
+});
+
+})(); // end IIFE
 
 </script>
 </body>
