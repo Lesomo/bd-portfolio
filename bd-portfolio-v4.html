@@ -307,6 +307,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 <div class="tog-bar">
     <button class="togb active" id="tog-board" onclick="setTog('board')">Board</button>
     <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
+    <button class="togb" id="tog-bylead" onclick="setTog('bylead')">By Lead</button>
     <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
     <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
@@ -314,6 +315,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
   </div>
   <div id="tbboard"></div>
   <div id="tblist" style="display:none"></div>
+  <div id="tbbylead" style="display:none"></div>
 </div>
 
 <!-- GANTT -->
@@ -1295,8 +1297,10 @@ function setTog(v){
   togView=v;
   document.getElementById('tog-board').classList.toggle('active',v==='board');
   document.getElementById('tog-list').classList.toggle('active',v==='list');
+  document.getElementById('tog-bylead').classList.toggle('active',v==='bylead');
   document.getElementById('tbboard').style.display=v==='board'?'block':'none';
   document.getElementById('tblist').style.display=v==='list'?'block':'none';
+  document.getElementById('tbbylead').style.display=v==='bylead'?'block':'none';
   renderTaskBoard();
 }
 function populateProjFilter(){
@@ -1416,6 +1420,103 @@ function renderTaskBoard(){
       ${rows||'<div style="padding:20px;text-align:center;color:#595959;font-size:10px">No tasks found.</div>'}
     </div>`;
   }
+  if(togView==='bylead') renderByLead(all);
+}
+
+
+// -- By Lead summary ----------------------------------------------------------
+function renderByLead(allTasks){
+  var wrap = document.getElementById('tbbylead');
+  if(!wrap) return;
+
+  var lead = document.getElementById('tb-lead').value;
+  var proj = document.getElementById('tb-proj').value;
+  var type = document.getElementById('tb-type').value;
+
+  // Build per-lead summary
+  var leadsToShow = lead ? [lead] : LEADS;
+  var statuses = ['Not Started','In Progress','On Hold','Complete'];
+
+  // Header
+  var html = '<div class="card" style="overflow-x:auto">';
+  html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;background:#68217D;padding:9px 14px;gap:7px;min-width:600px">';
+  html += '<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Lead</span>';
+  statuses.forEach(function(s){
+    var ss = SS(s);
+    html += '<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px;text-align:center">'+s+'</span>';
+  });
+  html += '<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px;text-align:center">Total</span>';
+  html += '</div>';
+
+  // Rows
+  var grandTotal = {total:0};
+  statuses.forEach(function(s){ grandTotal[s]=0; });
+
+  leadsToShow.forEach(function(l, idx){
+    var leadTasks = allTasks.filter(function(t){ return (t.owner||'') === l; });
+    if(!leadTasks.length && lead) return; // skip empty if filtered
+    var counts = {};
+    statuses.forEach(function(s){ counts[s] = leadTasks.filter(function(t){ return t.status===s; }).length; });
+    var total = leadTasks.length;
+
+    // Update grand totals
+    grandTotal.total += total;
+    statuses.forEach(function(s){ grandTotal[s] += counts[s]; });
+
+    var bg = idx%2===0 ? '#FCF5E3' : '#fff';
+    html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;padding:8px 14px;gap:7px;background:'+bg+';border-top:1px solid #D6C8DB;align-items:center;min-width:600px">';
+
+    // Lead avatar + name
+    html += '<div style="display:flex;align-items:center;gap:5px">'+avHtml(l,true)+'<span style="font-size:10px;font-weight:700;color:#4A1759">'+esc(l)+'</span></div>';
+
+    statuses.forEach(function(s){
+      var ss = SS(s);
+      var n = counts[s];
+      html += '<div style="text-align:center">';
+      if(n > 0){
+        html += '<span style="display:inline-block;min-width:22px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:'+ss.bg+';color:'+ss.fg+'">'+n+'</span>';
+      } else {
+        html += '<span style="font-size:10px;color:#D6C8DB">-</span>';
+      }
+      html += '</div>';
+    });
+
+    // Total
+    html += '<div style="text-align:center"><span style="font-size:11px;font-weight:800;color:#68217D">'+total+'</span></div>';
+    html += '</div>';
+
+    // Mini progress bar under each row
+    if(total > 0){
+      var completePct = Math.round((counts['Complete']||0)/total*100);
+      html += '<div style="height:3px;background:#E8D5EE;min-width:600px">';
+      html += '<div style="height:100%;width:'+completePct+'%;background:#68217D;transition:width .3s"></div>';
+      html += '</div>';
+    }
+  });
+
+  // Grand total row
+  if(leadsToShow.length > 1){
+    html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;padding:8px 14px;gap:7px;background:#F5F0F7;border-top:2px solid #68217D;align-items:center;min-width:600px">';
+    html += '<span style="font-size:10px;font-weight:800;color:#4A1759">All Leads</span>';
+    statuses.forEach(function(s){
+      var ss = SS(s);
+      var n = grandTotal[s];
+      html += '<div style="text-align:center">';
+      html += '<span style="display:inline-block;min-width:22px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:'+ss.bg+';color:'+ss.fg+'">'+n+'</span>';
+      html += '</div>';
+    });
+    html += '<div style="text-align:center"><span style="font-size:11px;font-weight:800;color:#68217D">'+grandTotal.total+'</span></div>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+
+  // Ad hoc vs project breakdown note
+  var projCount = allTasks.filter(function(t){ return !t.isAdHoc; }).length;
+  var ahCount = allTasks.filter(function(t){ return t.isAdHoc; }).length;
+  html += '<div style="margin-top:8px;font-size:9px;color:#595959;padding:0 2px">'+projCount+' project tasks + '+ahCount+' ad hoc tasks shown. Use filters above to narrow by lead, project or type.</div>';
+
+  wrap.innerHTML = html;
 }
 
 // -- Task status quick-edit ----------------------------------------------------
