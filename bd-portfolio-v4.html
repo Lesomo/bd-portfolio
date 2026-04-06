@@ -1313,29 +1313,52 @@ function openKPIModal(projId,kpiId){
 }
 function saveKPI(){
   try {
-  const existing = kpiEditId ? kpis.find(k=>String(k.id)===String(kpiEditId)) : null;
-  const existingTS = existing ? (existing.timeSeries||[]) : [];
-  const d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
-  if(kpiEditId){
-    const i=kpis.findIndex(k=>String(k.id)===String(kpiEditId));
-    kpis[i]={...kpis[i],...d,timeSeries:existingTS};
-  } else {
-    kpis.push({id:'k'+Date.now(),...d,timeSeries:[]});
-  }
+  var existing = kpiEditId ? kpis.find(function(k){ return String(k.id)===String(kpiEditId); }) : null;
+  var existingTS = existing ? (existing.timeSeries||[]) : [];
+  var d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
   var isNewKpi = !kpiEditId;
-  var savedKpi = kpiEditId ? kpis.find(function(k){return String(k.id)===String(kpiEditId);}) : kpis[kpis.length-1];
-  saveAll();
-  if(window.sbSaveKPI && savedKpi) sbSaveKPI(savedKpi, isNewKpi);
-  closeMo('kpimodal');
-  if(curView==='activity')renderActivity();
-  if(curView==='benefits')renderBenefits();
-  if(isNewKpi){
-    showToast('KPI saved -- reopen this tile to add time-series data', 'info');
-  } else {
+  if(kpiEditId){
+    var idx=kpis.findIndex(function(k){ return String(k.id)===String(kpiEditId); });
+    if(idx<0){ showToast('KPI not found','error'); return; }
+    kpis[idx]={...kpis[idx],...d,timeSeries:existingTS};
+    var kpiId = kpis[idx].id;
+    saveAll();
+    if(window.sb && sb){
+      sb.from('kpis').update({category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).eq('id',kpiId).then(function(r){
+        if(r.error){console.warn('saveKPI update:',r.error);return;}
+        sb.from('kpi_timeseries').delete().eq('kpi_id',kpiId).then(function(){
+          if(!existingTS.length)return;
+          var rows=existingTS.map(function(tr){return{kpi_id:kpiId,period:tr.period,period_type:tr.periodType||'monthly',value:tr.value,notes:tr.notes||''};});
+          sb.from('kpi_timeseries').insert(rows).then(function(ir){if(ir.error)console.warn('ts resync:',ir.error);else console.log('TS resynced',kpiId,rows.length,'rows');});
+        });
+      });
+    }
+    closeMo('kpimodal');
+    if(curView==='activity')renderActivity();
+    if(curView==='benefits')renderBenefits();
     showToast('KPI updated successfully');
+  } else {
+    var tempId='k'+Date.now();
+    kpis.push({id:tempId,...d,timeSeries:[]});
+    saveAll();
+    closeMo('kpimodal');
+    if(curView==='activity')renderActivity();
+    if(curView==='benefits')renderBenefits();
+    showToast('KPI added - reopen the tile to add time-series data');
+    if(window.sb && sb){
+      sb.from('kpis').insert({project_id:d.projId,category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).select().then(function(r){
+        if(r.error){console.warn('saveKPI insert:',r.error);return;}
+        if(r.data&&r.data[0]){
+          var newId=r.data[0].id;
+          var lk=kpis.find(function(k){return String(k.id)===String(tempId);});
+          if(lk){lk.id=newId;saveAll();console.log('KPI id synced:',tempId,'->',newId);}
+        }
+      });
+    }
   }
-  } catch(err) { console.error('saveKPI error:', err); showToast('Error saving KPI - check console', 'error'); }
+  } catch(err){console.error('saveKPI error:',err);showToast('Error saving KPI - check console','error');}
 }
+
 function delKPI(){
   if(!kpiEditId)return;
   var kpiToDelete = kpiEditId;
