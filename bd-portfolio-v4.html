@@ -523,9 +523,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
         <div id="kpi-ts-table" style="max-height:150px;overflow-y:auto;font-size:9px">
           <table style="width:100%;border-collapse:collapse">
             <thead><tr style="background:#F5F0F7">
-              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Period</th>
-              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Value</th>
-              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Notes</th>
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB;font-size:9px">Period</th>
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB;font-size:9px">Value</th>
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB;font-size:9px">Notes</th>
+              <th style="padding:4px 8px;border-bottom:1px solid #D6C8DB"></th>
             </tr></thead>
             <tbody id="kpi-ts-body"></tbody>
           </table>
@@ -1298,19 +1299,7 @@ function openKPIModal(projId,kpiId){
     tsSection.style.display = 'block';
     var kpiForTS = kpis.find(function(x){ return String(x.id)===String(kpiId); });
     var tsRows = kpiForTS ? (kpiForTS.timeSeries||[]) : [];
-    if(tsRows.length){
-      tsEmpty.style.display = 'none';
-      tsBody.innerHTML = tsRows.map(function(r){
-        return '<tr style="border-bottom:1px solid #F0EAF5">'
-          +'<td style="padding:4px 8px">'+esc(r.period)+'</td>'
-          +'<td style="padding:4px 8px">'+r.value+'</td>'
-          +'<td style="padding:4px 8px;color:#595959">'+esc(r.notes||'')+'</td>'
-          +'</tr>';
-      }).join('');
-    } else {
-      tsEmpty.style.display = 'block';
-      tsBody.innerHTML = '';
-    }
+    renderTSModalRows();
   } else if(tsSection){
     tsSection.style.display = 'block';
     if(tsBody) tsBody.innerHTML = '';
@@ -2171,6 +2160,58 @@ function buildTSChart(k, type, pt) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: function(v){ return k.unit==='R'?'R '+Math.round(v/1000)+'k':v+(k.unit==='%'?'%':''); }, font: { size: 9 } }, grid: { color: 'rgba(0,0,0,.05)' } }, x: { ticks: { font: { size: 8 }, maxRotation: 30, autoSkip: false }, grid: { display: false } } } }
   });
 }
+function renderTSModalRows(){
+  var k = kpis.find(function(x){ return String(x.id)===String(kpiEditId); });
+  var tsBody = document.getElementById('kpi-ts-body');
+  var tsEmpty = document.getElementById('kpi-ts-empty');
+  if(!tsBody) return;
+  var tsRows = k ? (k.timeSeries||[]) : [];
+  if(!tsRows.length){
+    tsBody.innerHTML = '';
+    if(tsEmpty){ tsEmpty.style.display='block'; tsEmpty.innerHTML='No periods recorded yet -- click + Add Period above'; }
+    return;
+  }
+  if(tsEmpty) tsEmpty.style.display='none';
+  tsBody.innerHTML = tsRows.map(function(r, idx){
+    return '<tr style="border-bottom:1px solid #F0EAF5">'
+      +'<td style="padding:4px 8px;font-size:9px">'+esc(r.period)+'</td>'
+      +'<td style="padding:4px 8px;font-size:9px">'+r.value+'</td>'
+      +'<td style="padding:4px 8px;font-size:9px;color:#595959">'+esc(r.notes||'')+'</td>'
+      +'<td style="padding:4px 8px;white-space:nowrap">'
+        +'<button onclick="editTSRow('+idx+')" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:1px 7px;font-size:8px;cursor:pointer;font-family:inherit;font-weight:700;margin-right:3px">Edit</button>'
+        +'<button onclick="delTSRow('+idx+')" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 7px;font-size:8px;cursor:pointer;font-family:inherit;font-weight:700">Del</button>'
+      +'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function editTSRow(idx){
+  var k = kpis.find(function(x){ return String(x.id)===String(kpiEditId); });
+  if(!k || !k.timeSeries || !k.timeSeries[idx]) return;
+  var r = k.timeSeries[idx];
+  var period = prompt('Period:', r.period); if(period===null) return;
+  var value = parseFloat(prompt('Value:', r.value)); if(isNaN(value)) return;
+  var notes = prompt('Notes:', r.notes||'') || '';
+  var pt = period.trim().toUpperCase().slice(0,1)==='Q' ? 'quarterly' : 'monthly';
+  k.timeSeries[idx] = {period:period, value:value, notes:notes, periodType:pt, order:idx};
+  saveAll();
+  renderTSModalRows();
+  showToast('Period updated: '+period);
+}
+
+function delTSRow(idx){
+  var k = kpis.find(function(x){ return String(x.id)===String(kpiEditId); });
+  if(!k || !k.timeSeries) return;
+  var period = k.timeSeries[idx] ? k.timeSeries[idx].period : 'this period';
+  if(!confirm('Delete '+period+'?')) return;
+  k.timeSeries.splice(idx, 1);
+  // Re-order remaining
+  k.timeSeries.forEach(function(r,i){ r.order=i; });
+  saveAll();
+  renderTSModalRows();
+  showToast('Period deleted');
+}
+
 function addTSRowFromModal() {
   if(!kpiEditId) return;
   var period = prompt('Period (e.g. Jan 2025, Q1 2025):'); if (!period) return;
@@ -2186,14 +2227,7 @@ function addTSRowFromModal() {
   // Refresh the table in modal
   var tsBody = document.getElementById('kpi-ts-body');
   var tsEmpty = document.getElementById('kpi-ts-empty');
-  if(tsBody){
-    tsEmpty.style.display = 'none';
-    tsBody.innerHTML += '<tr style="border-bottom:1px solid #F0EAF5">'
-      +'<td style="padding:4px 8px">'+esc(period)+'</td>'
-      +'<td style="padding:4px 8px">'+value+'</td>'
-      +'<td style="padding:4px 8px;color:#595959">'+esc(notes)+'</td>'
-      +'</tr>';
-  }
+  renderTSModalRows();
   showToast('Period added: '+period);
 }
 
