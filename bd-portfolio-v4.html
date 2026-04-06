@@ -99,9 +99,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .mbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
 .mbb{height:5px;background:var(--gm);border-radius:3px;overflow:hidden}
 /* ── WBS ── */
-.wph{padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:#7B3F8F;user-select:none}
-.wph:hover{background:var(--primary)}
-.wphase{display:grid;grid-template-columns:16px 1fr 90px 110px 36px 28px;gap:8px;padding:7px 11px 7px 26px;background:#F0EAF5;border-top:1px solid #D6C8DB;align-items:center;cursor:pointer;user-select:none}
+.wph{padding:7px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
+.wph:hover{filter:brightness(1.12)}
+.wphase{display:grid;grid-template-columns:16px 1fr 90px 110px 36px 28px;gap:8px;padding:7px 11px 7px 26px;background:#FAFAFA;border-top:1px solid #E8E0EC;align-items:center;cursor:pointer;user-select:none}
 .wtask{display:grid;grid-template-columns:16px 1fr 90px 90px 105px 105px 28px;gap:5px;padding:6px 11px 6px 40px;border-top:1px solid var(--gm);align-items:center}
 @media(max-width:680px){.wphase{grid-template-columns:16px 1fr 85px}.wph-hide{display:none}.wtask{grid-template-columns:16px 1fr 85px}.wt-hide{display:none}}
 /* ── KPI tiles ── */
@@ -908,7 +908,7 @@ function renderActivity(){
     // Card
     var card = document.createElement('div');
     card.className = 'card';
-    card.style.marginBottom = '9px';
+    card.style.marginBottom = '5px';
 
     // Header (purple bar)
     var hdr = document.createElement('div');
@@ -928,7 +928,7 @@ function renderActivity(){
     nm.style.cssText = 'color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     nm.textContent = p.name;
     var sub = document.createElement('div');
-    sub.style.cssText = 'color:rgba(255,255,255,.6);font-size:8px;margin-top:1px';
+    sub.style.cssText = 'color:rgba(255,255,255,.55);font-size:8px;margin-top:1px';
     sub.textContent = 'Lead: '+p.lead+(collabs.length?' - '+collabs.join(', '):'');
     info.appendChild(nm); info.appendChild(sub);
     hdr.appendChild(info);
@@ -1200,9 +1200,10 @@ function renderKPISection(p){
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
       ${pk.map(k=>{
         const kc=KCAT(k.category);
-        const pct=k.target>0?Math.round(k.actual/k.target*100):0;
-        const rag=pct>=100?'#375623':pct>=80?'#DBC25D':'#C00000';
-        const ragbg=pct>=100?'#E2EFDA':pct>=80?'#FFF8DC':'#FFDCE0';
+        const rawPct=k.target>0?Math.round(k.actual/k.target*100):0;
+        const pct=Math.min(100,rawPct); // bar capped at 100%
+        const rag=rawPct>=100?'#375623':rawPct>=80?'#DBC25D':'#C00000';
+        const ragbg=rawPct>=100?'#E2EFDA':rawPct>=80?'#FFF8DC':'#FFDCE0';
         const unit=k.unit==='R'?'R ':k.unit==='%'?'':'';
         const suffix=k.unit==='%'?'%':k.unit!=='R'?` ${k.unit}`:'';
         const fmt=v=>k.unit==='R'?fmtR(v):`${unit}${v}${suffix}`;
@@ -1213,8 +1214,8 @@ function renderKPISection(p){
             <div class="kpi-vbox" style="background:rgba(255,255,255,.6)"><div class="kpi-vlbl" style="color:${kc.fg}">Target</div><div class="kpi-vnum" style="color:${kc.fg}">${fmt(k.target)}</div></div>
             <div class="kpi-vbox" style="background:${ragbg}"><div class="kpi-vlbl" style="color:${rag}">Actual</div><div class="kpi-vnum" style="color:${rag}">${fmt(k.actual)}</div></div>
           </div>
-          <div class="kpi-bbg"><div class="kpi-bfill" style="width:${Math.min(100,pct)}%;background:${rag}"></div></div>
-          <div class="kpi-pct" style="color:${rag}"><span class="rag" style="background:${rag}"></span>${pct}% of target${k.notes?` . ${esc(k.notes)}`:''}</div>
+          <div class="kpi-bbg"><div class="kpi-bfill" style="width:${pct}%;background:${rag}"></div></div>
+          <div class="kpi-pct" style="color:${rag}"><span class="rag" style="background:${rag}"></span>${rawPct>=100?'<span style="font-weight:700">Target met</span>':rawPct+'% of target'}${k.notes?' &middot; '+esc(k.notes):''}</div>
         </div>`;
       }).join('')}
     </div>
@@ -1245,7 +1246,7 @@ function openKPIModal(projId,kpiId){
   document.getElementById('kpimtitle').textContent=kpiId?'Edit KPI':'Add KPI';
   document.getElementById('kpidelb').style.display=kpiId?'block':'none';
   if(kpiId){
-    const k=kpis.find(x=>x.id===kpiId);
+    const k=kpis.find(x=>String(x.id)===String(kpiId));
     document.getElementById('kpicat').value=k.category;
     document.getElementById('kpiname').value=k.name;
     document.getElementById('kpiunit').value=k.unit;
@@ -1267,7 +1268,7 @@ function saveKPI(){
   const existingTS = existing ? (existing.timeSeries||[]) : [];
   const d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
   if(kpiEditId){
-    const i=kpis.findIndex(k=>k.id===kpiEditId);
+    const i=kpis.findIndex(k=>String(k.id)===String(kpiEditId));
     kpis[i]={...kpis[i],...d,timeSeries:existingTS};
   } else {
     kpis.push({id:'k'+Date.now(),...d,timeSeries:[]});
@@ -1283,7 +1284,7 @@ function saveKPI(){
 function delKPI(){
   if(!kpiEditId)return;
   var kpiToDelete = kpiEditId;
-  kpis=kpis.filter(k=>k.id!==kpiEditId);
+  kpis=kpis.filter(k=>String(k.id)!==String(kpiEditId));
   saveAll();
   if(window.sbDelKPI) sbDelKPI(kpiToDelete);
   closeMo('kpimodal');
