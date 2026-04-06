@@ -49,6 +49,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 /* ── Progress ── */
 .pb{display:flex;align-items:center;gap:4px}
 .pb-bg{flex:1;height:5px;background:var(--gm);border-radius:3px;overflow:hidden;min-width:36px}
+.wph .pb-bg{background:rgba(255,255,255,.6)}
+.wph .pb-fill{background:#2F6070 !important}
+.wph .pb-txt{color:#2F6070;font-weight:700}
 .pb-fill{height:100%;border-radius:3px;background:var(--primary)}
 .pb-txt{font-size:9px;color:var(--gt);min-width:22px}
 /* ── KPI row ── */
@@ -914,18 +917,21 @@ function renderActivity(){
     var hdr = document.createElement('div');
     hdr.className = 'wph';
     hdr.style.cursor = 'pointer';
+    var priBorder = {Critical:'#C00000',High:'#C55A11',Medium:'#DBC25D',Low:'#375623'};
+    hdr.style.borderLeft = '4px solid '+(priBorder[p.priority]||'#A6C4CF');
+    hdr.title = 'Click to expand';
     hdr.onclick = function(){ toggleProject(p.id); };
 
     var arrSpan = document.createElement('span');
     arrSpan.id = 'act-arr-'+p.id;
     arrSpan.innerHTML = '&#9654;';
-    arrSpan.style.cssText = 'color:var(--tskyd);font-size:11px;min-width:12px';
+    arrSpan.style.cssText = 'color:var(--tskyd);font-size:13px;min-width:16px;transition:transform .2s';
     hdr.appendChild(arrSpan);
 
     var info = document.createElement('div');
     info.style.cssText = 'flex:1;min-width:0';
     var nm = document.createElement('div');
-    nm.style.cssText = 'color:var(--tskyd);font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    nm.style.cssText = 'color:var(--tskyd);font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     nm.textContent = p.name;
     var sub = document.createElement('div');
     sub.style.cssText = 'color:var(--tskyd);font-size:8px;margin-top:1px;opacity:.75';
@@ -979,7 +985,10 @@ function toggleProject(pid){
   if(!el)return;
   var open=el.style.display==='none';
   el.style.display=open?'block':'none';
-  if(arr)arr.innerHTML=open?'&#9660;':'&#9654;';
+  if(arr){
+    arr.innerHTML=open?'&#9660;':'&#9654;';
+    arr.style.transform=open?'rotate(0deg)':'rotate(0deg)';
+  }
 }
 
 function renderPhases(p){
