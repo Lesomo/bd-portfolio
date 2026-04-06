@@ -514,6 +514,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
         <div><label class="fl">Actual Value</label><input class="fi" id="kpiact" type="number" placeholder="0"/></div>
         <div><label class="fl">Notes / Source</label><input class="fi" id="kpinotes" type="text" placeholder="e.g. Q2 audit"/></div>
       </div>
+      <!-- Time series section - shown only when editing existing KPI -->
+      <div id="kpi-ts-section" style="display:none;border-top:1px solid #D6C8DB;padding-top:12px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label class="fl" style="margin:0;font-size:10px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px">Time-Series Data</label>
+          <button onclick="addTSRowFromModal()" style="background:#68217D;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Period</button>
+        </div>
+        <div id="kpi-ts-table" style="max-height:150px;overflow-y:auto;font-size:9px">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="background:#F5F0F7">
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Period</th>
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Value</th>
+              <th style="padding:4px 8px;text-align:left;font-weight:700;color:#4A1759;border-bottom:1px solid #D6C8DB">Notes</th>
+            </tr></thead>
+            <tbody id="kpi-ts-body"></tbody>
+          </table>
+          <div id="kpi-ts-empty" style="padding:8px;text-align:center;color:#595959;font-style:italic;font-size:9px">No periods recorded yet — click + Add Period above</div>
+        </div>
+      </div>
       <div class="mact">
         <button class="bcan" onclick="closeMo('kpimodal')">Cancel</button>
         <button class="bsav" onclick="saveKPI()">Save KPI</button>
@@ -1271,6 +1289,30 @@ function openKPIModal(projId,kpiId){
     document.getElementById('kpitgt').value='';
     document.getElementById('kpiact').value='';
     document.getElementById('kpinotes').value='';
+  }
+  // Show/hide time series section
+  var tsSection = document.getElementById('kpi-ts-section');
+  var tsBody = document.getElementById('kpi-ts-body');
+  var tsEmpty = document.getElementById('kpi-ts-empty');
+  if(kpiId && tsSection){
+    tsSection.style.display = 'block';
+    var kpiForTS = kpis.find(function(x){ return String(x.id)===String(kpiId); });
+    var tsRows = kpiForTS ? (kpiForTS.timeSeries||[]) : [];
+    if(tsRows.length){
+      tsEmpty.style.display = 'none';
+      tsBody.innerHTML = tsRows.map(function(r){
+        return '<tr style="border-bottom:1px solid #F0EAF5">'
+          +'<td style="padding:4px 8px">'+esc(r.period)+'</td>'
+          +'<td style="padding:4px 8px">'+r.value+'</td>'
+          +'<td style="padding:4px 8px;color:#595959">'+esc(r.notes||'')+'</td>'
+          +'</tr>';
+      }).join('');
+    } else {
+      tsEmpty.style.display = 'block';
+      tsBody.innerHTML = '';
+    }
+  } else if(tsSection){
+    tsSection.style.display = 'none';
   }
   openMo('kpimodal');
 }
@@ -2040,10 +2082,10 @@ function renderCharts() {
     info.innerHTML = '<strong>Time-Series Charts</strong>'
     + '<ol style="margin:8px 0 0 0;padding-left:18px;font-size:10px;color:#4A1759;line-height:1.7">'
     + '<li>Go to <strong>Activity Breakdown</strong> and expand a project</li>'
-    + '<li>Click on a <strong>KPI tile</strong> to open the edit modal</li>'
-    + '<li>In the modal click <strong>Save KPI</strong> &mdash; then reopen the tile</li>'
-    + '<li>Click <strong>+ Add Period</strong> to record a monthly or quarterly value (e.g. Jan 2025, Q1 2025)</li>'
-    + '<li>Come back to <strong>Charts &amp; Reports</strong> &mdash; the time-series chart will appear here automatically</li>'
+    + '<li>Click any <strong>KPI tile</strong> to open the edit modal</li>'
+    + '<li>Scroll to the <strong>Time-Series Data</strong> section at the bottom of the modal</li>'
+    + '<li>Click <strong>+ Add Period</strong> and enter a period (e.g. Jan 2025 or Q1 2025), value and notes</li>'
+    + '<li>Click <strong>Save KPI</strong> &mdash; the chart will appear here automatically</li>'
     + '</ol>';
     tsW.appendChild(info);
     return;
@@ -2127,6 +2169,32 @@ function buildTSChart(k, type, pt) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: function(v){ return k.unit==='R'?'R '+Math.round(v/1000)+'k':v+(k.unit==='%'?'%':''); }, font: { size: 9 } }, grid: { color: 'rgba(0,0,0,.05)' } }, x: { ticks: { font: { size: 8 }, maxRotation: 30, autoSkip: false }, grid: { display: false } } } }
   });
 }
+function addTSRowFromModal() {
+  if(!kpiEditId) return;
+  var period = prompt('Period (e.g. Jan 2025, Q1 2025):'); if (!period) return;
+  var value = parseFloat(prompt('Value:')); if (isNaN(value)) return;
+  var notes = prompt('Notes (optional):') || '';
+  var pt = period.trim().toUpperCase().slice(0,1) === 'Q' ? 'quarterly' : 'monthly';
+  var k = kpis.find(function(x){ return String(x.id)===String(kpiEditId); }); if (!k) return;
+  if (!k.timeSeries) k.timeSeries = [];
+  var newTS = { period: period, value: value, notes: notes, periodType: pt, order: k.timeSeries.length };
+  k.timeSeries.push(newTS);
+  saveAll();
+  if(window.sbSaveTS) sbSaveTS(kpiEditId, newTS);
+  // Refresh the table in modal
+  var tsBody = document.getElementById('kpi-ts-body');
+  var tsEmpty = document.getElementById('kpi-ts-empty');
+  if(tsBody){
+    tsEmpty.style.display = 'none';
+    tsBody.innerHTML += '<tr style="border-bottom:1px solid #F0EAF5">'
+      +'<td style="padding:4px 8px">'+esc(period)+'</td>'
+      +'<td style="padding:4px 8px">'+value+'</td>'
+      +'<td style="padding:4px 8px;color:#595959">'+esc(notes)+'</td>'
+      +'</tr>';
+  }
+  showToast('Period added: '+period);
+}
+
 function addTSRow(kid) {
   var period = prompt('Period (e.g. Jan 2025, Q1 2025):'); if (!period) return;
   var value = parseFloat(prompt('Value:')); if (isNaN(value)) return;
