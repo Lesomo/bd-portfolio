@@ -1323,13 +1323,12 @@ function saveKPI(){
     kpis[idx]={...kpis[idx],...d,timeSeries:existingTS};
     var kpiId = kpis[idx].id;
     saveAll();
-    if(window.sb && sb){
-      sb.from('kpis').update({category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).eq('id',kpiId).then(function(r){
-        if(r.error){console.warn('saveKPI update:',r.error);return;}
-        sb.from('kpi_timeseries').delete().eq('kpi_id',kpiId).then(function(){
+    if(window._sb){ var _s=window._sb; _s.from('kpis').update({category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).eq('id',kpiId).then(function(r){
+        if(r.error){console.warn('saveKPI update:',r.error);showToast('KPI update to database failed: '+r.error.message,'error');return;}
+        _s.from('kpi_timeseries').delete().eq('kpi_id',kpiId).then(function(){
           if(!existingTS.length)return;
           var rows=existingTS.map(function(tr){return{kpi_id:kpiId,period:tr.period,period_type:tr.periodType||'monthly',value:tr.value,notes:tr.notes||''};});
-          sb.from('kpi_timeseries').insert(rows).then(function(ir){if(ir.error)console.warn('ts resync:',ir.error);else console.log('TS resynced',kpiId,rows.length,'rows');});
+          _s.from('kpi_timeseries').insert(rows).then(function(ir){if(ir.error)console.warn('ts resync:',ir.error);else console.log('TS resynced',kpiId,rows.length,'rows');});
         });
       });
     }
@@ -1345,9 +1344,8 @@ function saveKPI(){
     if(curView==='activity')renderActivity();
     if(curView==='benefits')renderBenefits();
     showToast('KPI added - reopen the tile to add time-series data');
-    if(window.sb && sb){
-      sb.from('kpis').insert({project_id:d.projId,category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).select().then(function(r){
-        if(r.error){console.warn('saveKPI insert:',r.error);return;}
+    if(window._sb){ var _s=window._sb; _s.from('kpis').insert({project_id:d.projId,category:d.category,name:d.name,unit:d.unit,target:d.target,actual:d.actual,notes:d.notes}).select().then(function(r){
+        if(r.error){console.warn('saveKPI insert:',r.error);showToast('KPI save to database failed: '+r.error.message,'error');return;}
         if(r.data&&r.data[0]){
           var newId=r.data[0].id;
           var lk=kpis.find(function(k){return String(k.id)===String(tempId);});
@@ -2777,6 +2775,7 @@ document.addEventListener('DOMContentLoaded', function(){
   try {
     if (window.supabase && window.supabase.createClient) {
       sb = window.supabase.createClient(SURL, SKEY);
+      window._sb = sb; // expose for functions outside IIFE
       console.log('Supabase client created successfully');
     } else {
       console.warn('Supabase not available on window - CDN may have failed to load');
