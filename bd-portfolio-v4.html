@@ -1976,7 +1976,9 @@ function renderCharts() {
       var fmt = function(v){ return k.unit==='R' ? fmtR(v) : k.unit==='%' ? v+'%' : v+' '+(k.unit||''); };
       var proj = projects.find(function(p){ return p.id === k.projId; });
       var el = document.createElement('div');
-      el.style.cssText = 'min-width:110px;flex:1;max-width:155px;background:'+ragBg+';border-radius:8px;border:1px solid '+rag+'33;padding:10px 8px;display:flex;flex-direction:column;align-items:center';
+      el.style.cssText = 'min-width:110px;flex:1;max-width:155px;background:'+ragBg+';border-radius:8px;border:1px solid '+rag+'33;padding:10px 8px;display:flex;flex-direction:column;align-items:center;cursor:pointer';
+      el.title = 'Click to edit KPI';
+      el.onclick = (function(kk){ return function(){ openKPIModal(kk.projId, kk.id); }; })(k);
       el.innerHTML =
         '<svg width="100" height="60" viewBox="0 0 100 60" style="overflow:visible">' +
           '<path d="M'+(cx-r)+','+cy+' A'+r+','+r+' 0 0,1 '+(cx+r)+','+cy+'" fill="none" stroke="'+rag+'22" stroke-width="10" stroke-linecap="round"/>' +
@@ -1995,12 +1997,12 @@ function renderCharts() {
   var hmP = projF ? projects.filter(function(p){ return String(p.id)===projF; }) : projects.filter(function(p){ return fk.some(function(k){ return k.projId===p.id; }); });
   var kCats = ['Financial','Efficiency','People','Quality','Custom'];
   function ragC(v){ if(v===null)return{bg:'#F0F0F0',fg:'#9A9A9A',lbl:'-'}; if(v>=100)return{bg:'#C0DDAA',fg:'#2E4F34',lbl:v+'%'}; if(v>=80)return{bg:'#FFF2CC',fg:'#6B5A10',lbl:v+'%'}; return{bg:'#FFDCE0',fg:'#C00000',lbl:v+'%'}; }
-  var lW=130, cW=72;
+  var lW=200, cW=72;
   var hm = '<div style="display:grid;grid-template-columns:'+lW+'px '+kCats.map(function(){return cW+'px';}).join(' ')+';gap:2px;min-width:'+(lW+kCats.length*(cW+2))+'px">';
   hm += '<div></div>' + kCats.map(function(c){ return '<div style="font-size:9px;font-weight:700;color:#4A1759;text-align:center;padding:3px 2px">'+c+'</div>'; }).join('');
   hmP.forEach(function(p) {
-    var nm = p.name.length>18 ? p.name.slice(0,16)+'...' : p.name;
-    hm += '<div style="font-size:9px;color:#4A1759;font-weight:600;padding:4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:'+lW+'px" title="'+esc(p.name)+'">'+esc(nm)+'</div>';
+    var nm = p.name.length>30 ? p.name.slice(0,28)+'...' : p.name;
+    hm += '<div style="font-size:9px;color:#4A1759;font-weight:600;padding:4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:'+lW+'px;min-width:'+lW+'px" title="'+esc(p.name)+'">'+esc(nm)+'</div>';
     kCats.forEach(function(cat) {
       var pk = fk.filter(function(k){ return k.projId===p.id && k.category===cat && k.target>0; });
       var v = pk.length ? Math.round(pk.reduce(function(a,k){ return a+k.actual/k.target*100; },0)/pk.length) : null;
