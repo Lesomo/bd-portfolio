@@ -793,6 +793,7 @@ function saveProj(){
   saveAll();
   if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return p.id===editId;}), isNew, collabs);
   closeMo('pmodal');sv('dashboard');updateBadge();
+  showToast(isNew ? 'Project added successfully' : 'Project saved successfully');
 }
 function delProj(){
   if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
@@ -1289,6 +1290,7 @@ function saveKPI(){
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
+  showToast(isNewKpi ? 'KPI added successfully' : 'KPI updated successfully');
 }
 function delKPI(){
   if(!kpiEditId)return;
@@ -1299,6 +1301,7 @@ function delKPI(){
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
+  showToast('KPI deleted');
 }
 
 // -- Task Board ----------------------------------------------------------------
@@ -1572,6 +1575,7 @@ function saveAdHoc(){
   saveAll();
   if(window.sbSaveAdHoc) sbSaveAdHoc(savedAh, isNewAh);
   closeMo('ahmodal');renderTaskBoard();
+  showToast(isNewAh ? 'Task added' : 'Task updated');
 }
 function delAdHoc(){
   if(!ahEditId)return;
@@ -2030,7 +2034,14 @@ function renderCharts() {
   if (!kpiWithTS.length) {
     var info = document.createElement('div');
     info.className = 'info-box';
-    info.innerHTML = '<strong>Time-Series Charts</strong> - Click a KPI tile in Activity Breakdown and use "Add Period" to record monthly or quarterly data. Charts will appear here automatically.';
+    info.innerHTML = '<strong>Time-Series Charts</strong>'
+    + '<ol style="margin:8px 0 0 0;padding-left:18px;font-size:10px;color:#4A1759;line-height:1.7">'
+    + '<li>Go to <strong>Activity Breakdown</strong> and expand a project</li>'
+    + '<li>Click on a <strong>KPI tile</strong> to open the edit modal</li>'
+    + '<li>In the modal click <strong>Save KPI</strong> &mdash; then reopen the tile</li>'
+    + '<li>Click <strong>+ Add Period</strong> to record a monthly or quarterly value (e.g. Jan 2025, Q1 2025)</li>'
+    + '<li>Come back to <strong>Charts &amp; Reports</strong> &mdash; the time-series chart will appear here automatically</li>'
+    + '</ol>';
     tsW.appendChild(info);
     return;
   }
@@ -2126,6 +2137,7 @@ function addTSRow(kid) {
   if(window.sbSaveTS) sbSaveTS(kid, newTS);
   var tb = document.getElementById('tst-'+kid); if (tb) tb.innerHTML = renderTSRows(k, pt);
   buildTSChart(k, tsChartTypes[kid]||'line', pt);
+  showToast('Period added to time series');
 }
 
 // saveKPI timeSeries preservation merged into main saveKPI
