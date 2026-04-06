@@ -1659,7 +1659,7 @@ function renderGantt(){
     const s=p.startDate?new Date(p.startDate):null;const e=p.endDate?new Date(p.endDate):null;
     const hb=s&&e&&e>s;const l=hb?pct(s):0;const w=hb?Math.max(1,pct(e)-pct(s)):0;
     const ic=p.priority==='Critical';const bc=ic?'#C00000':p.status==='Complete'?'#89AB90':p.status==='On Hold'?'#D5A99C':'#68217D';
-    const dl=e?dd(today,e):null;const ov=dl!==null&&dl<0;const ds=dl!==null&&dl>=0&&dl<14;
+    const dl=e?dd(today,e):null;const ov=dl!==null&&dl<0&&p.status!=='Complete';const ds=dl!==null&&dl>=0&&dl<14&&p.status!=='Complete';
     const gl=cols.map((_,i)=>`<div style="flex:1;border-left:${i>0?`1px solid #D6C8DB`:'none'};height:100%"></div>`).join('');
     return`<div class="grow" style="background:${idx%2===0?'#FCF5E3':'#fff'}">
       <div class="gl">
@@ -1675,13 +1675,13 @@ function renderGantt(){
   }).join('');
   document.getElementById('gbody').innerHTML=`<div class="ghdr"><div class="glh"><span style="font-size:8px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Project</span></div><div class="gth">${colsH}</div></div>${rowsH}`;
   document.getElementById('cpsumm').innerHTML=projects.filter(p=>p.priority==='Critical').map(p=>{
-    const e=p.endDate?new Date(p.endDate):null;const dl=e?dd(today,e):null;
-    return`<div style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:#FFDCE0;border-radius:6px;flex-wrap:wrap">
-      <div style="width:7px;height:7px;border-radius:50%;background:#C00000;flex-shrink:0"></div>
+    const e=p.endDate?new Date(p.endDate):null;const dl=e&&p.status!=='Complete'?dd(today,e):null;
+    return`<div style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:${p.status==='Complete'?'#E2EFDA':'#FFDCE0'};border-radius:6px;flex-wrap:wrap">
+      <div style="width:7px;height:7px;border-radius:50%;background:${p.status==='Complete'?'#375623':'#C00000'};flex-shrink:0"></div>
       <div style="flex:1;font-size:10px;font-weight:600;color:#4A1759;min-width:100px">${esc(p.name)}</div>
       <span style="font-size:9px;color:#595959">${esc(p.lead)}</span>
       ${pill(p.status,SS(p.status))}
-      ${dl!==null?`<span style="font-size:10px;font-weight:700;color:${dl<0?'#C00000':dl<14?'#C55A11':'#375623'}">${dl<0?`${Math.abs(dl)}d overdue`:`${dl}d left`}</span>`:`<span style="font-size:9px;color:#595959;font-style:italic">No end date</span>`}
+      ${dl!==null?`<span style="font-size:10px;font-weight:700;color:${p.status==='Complete'?'#375623':dl<0?'#C00000':dl<14?'#C55A11':'#375623'}">${p.status==='Complete'?'Complete':dl<0?`${Math.abs(dl)}d overdue`:`${dl}d left`}</span>`:`<span style="font-size:9px;color:#595959;font-style:italic">No end date</span>`}
       <div style="min-width:70px">${pbar(p.pct)}</div>
     </div>`;
   }).join('')||'<div style="color:#595959;font-size:10px;font-style:italic">No critical projects.</div>';
