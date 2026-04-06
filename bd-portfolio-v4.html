@@ -1257,6 +1257,7 @@ function openKPIModal(projId,kpiId){
   document.getElementById('kpidelb').style.display=kpiId?'block':'none';
   if(kpiId){
     const k=kpis.find(x=>String(x.id)===String(kpiId));
+    if(!k){ console.error('KPI not found for id:', kpiId, 'available:', kpis.map(x=>x.id)); closeMo('kpimodal'); return; }
     document.getElementById('kpicat').value=k.category;
     document.getElementById('kpiname').value=k.name;
     document.getElementById('kpiunit').value=k.unit;
@@ -1274,7 +1275,8 @@ function openKPIModal(projId,kpiId){
   openMo('kpimodal');
 }
 function saveKPI(){
-  const existing = kpiEditId ? kpis.find(k=>k.id===kpiEditId) : null;
+  try {
+  const existing = kpiEditId ? kpis.find(k=>String(k.id)===String(kpiEditId)) : null;
   const existingTS = existing ? (existing.timeSeries||[]) : [];
   const d={projId:kpiProjId,category:document.getElementById('kpicat').value,name:document.getElementById('kpiname').value,unit:document.getElementById('kpiunit').value,target:parseFloat(document.getElementById('kpitgt').value)||0,actual:parseFloat(document.getElementById('kpiact').value)||0,notes:document.getElementById('kpinotes').value};
   if(kpiEditId){
@@ -1284,13 +1286,14 @@ function saveKPI(){
     kpis.push({id:'k'+Date.now(),...d,timeSeries:[]});
   }
   var isNewKpi = !kpiEditId;
-  var savedKpi = kpiEditId ? kpis.find(function(k){return k.id===kpiEditId;}) : kpis[kpis.length-1];
+  var savedKpi = kpiEditId ? kpis.find(function(k){return String(k.id)===String(kpiEditId);}) : kpis[kpis.length-1];
   saveAll();
-  if(window.sbSaveKPI) sbSaveKPI(savedKpi, isNewKpi);
+  if(window.sbSaveKPI && savedKpi) sbSaveKPI(savedKpi, isNewKpi);
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
   showToast(isNewKpi ? 'KPI added successfully' : 'KPI updated successfully');
+  } catch(err) { console.error('saveKPI error:', err); showToast('Error saving KPI - check console', 'error'); }
 }
 function delKPI(){
   if(!kpiEditId)return;
