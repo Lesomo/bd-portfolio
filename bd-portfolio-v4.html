@@ -515,7 +515,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
         <div><label class="fl">Notes / Source</label><input class="fi" id="kpinotes" type="text" placeholder="e.g. Q2 audit"/></div>
       </div>
       <!-- Time series section - shown only when editing existing KPI -->
-      <div id="kpi-ts-section" style="display:none;border-top:1px solid #D6C8DB;padding-top:12px;margin-top:4px">
+      <div id="kpi-ts-section" style="display:none;border-top:1px solid #D6C8DB;padding-top:12px;margin-top:8px;background:#FAFAFA;border-radius:6px;padding:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <label class="fl" style="margin:0;font-size:10px;font-weight:700;color:#4A1759;text-transform:uppercase;letter-spacing:.4px">Time-Series Data</label>
           <button onclick="addTSRowFromModal()" style="background:#68217D;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">+ Add Period</button>
@@ -575,9 +575,9 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 // Clear stale localStorage data from old versions
 try {
   var _ver = localStorage.getItem('bd-version');
-  if (_ver !== '4') {
+  if (_ver !== '4.1') {
     ['bd-projs','bd-tasks','bd-adhoc','bd-kpis','bd-comments'].forEach(function(k){ localStorage.removeItem(k); });
-    localStorage.setItem('bd-version','4');
+    localStorage.setItem('bd-version','4.1');
   }
 } catch(e){}
 
@@ -1312,7 +1312,9 @@ function openKPIModal(projId,kpiId){
       tsBody.innerHTML = '';
     }
   } else if(tsSection){
-    tsSection.style.display = 'none';
+    tsSection.style.display = 'block';
+    if(tsBody) tsBody.innerHTML = '';
+    if(tsEmpty) tsEmpty.innerHTML = 'Save this KPI first, then reopen it to add time-series periods.';
   }
   openMo('kpimodal');
 }
