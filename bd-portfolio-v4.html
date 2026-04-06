@@ -99,8 +99,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .mbl{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
 .mbb{height:5px;background:var(--gm);border-radius:3px;overflow:hidden}
 /* ── WBS ── */
-.wph{padding:7px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--primary);user-select:none}
-.wph:hover{filter:brightness(1.12)}
+.wph{padding:7px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--tsky);user-select:none}
+.wph:hover{filter:brightness(.95)}
 .wphase{display:grid;grid-template-columns:16px 1fr 90px 110px 36px 28px;gap:8px;padding:7px 11px 7px 26px;background:#FAFAFA;border-top:1px solid #E8E0EC;align-items:center;cursor:pointer;user-select:none}
 .wtask{display:grid;grid-template-columns:16px 1fr 90px 90px 105px 105px 28px;gap:5px;padding:6px 11px 6px 40px;border-top:1px solid var(--gm);align-items:center}
 @media(max-width:680px){.wphase{grid-template-columns:16px 1fr 85px}.wph-hide{display:none}.wtask{grid-template-columns:16px 1fr 85px}.wt-hide{display:none}}
@@ -919,23 +919,23 @@ function renderActivity(){
     var arrSpan = document.createElement('span');
     arrSpan.id = 'act-arr-'+p.id;
     arrSpan.innerHTML = '&#9654;';
-    arrSpan.style.cssText = 'color:#fff;font-size:11px;min-width:12px';
+    arrSpan.style.cssText = 'color:var(--tskyd);font-size:11px;min-width:12px';
     hdr.appendChild(arrSpan);
 
     var info = document.createElement('div');
     info.style.cssText = 'flex:1;min-width:0';
     var nm = document.createElement('div');
-    nm.style.cssText = 'color:#fff;font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    nm.style.cssText = 'color:var(--tskyd);font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
     nm.textContent = p.name;
     var sub = document.createElement('div');
-    sub.style.cssText = 'color:rgba(255,255,255,.55);font-size:8px;margin-top:1px';
+    sub.style.cssText = 'color:var(--tskyd);font-size:8px;margin-top:1px;opacity:.75';
     sub.textContent = 'Lead: '+p.lead+(collabs.length?' - '+collabs.join(', '):'');
     info.appendChild(nm); info.appendChild(sub);
     hdr.appendChild(info);
 
     var pills = document.createElement('div');
     pills.style.cssText = 'display:flex;gap:4px;flex-shrink:0';
-    pills.innerHTML = pill(p.priority,{bg:'rgba(255,255,255,.2)',fg:'#fff'})+pill(p.status,{bg:'rgba(255,255,255,.15)',fg:'#fff'});
+    pills.innerHTML = pill(p.priority,PS(p.priority))+pill(p.status,SS(p.status));
     hdr.appendChild(pills);
 
     var prog = document.createElement('div');
