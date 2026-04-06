@@ -812,7 +812,11 @@ function saveProj(){
   saveAll();
   if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return p.id===editId;}), isNew, collabs);
   closeMo('pmodal');sv('dashboard');updateBadge();
-  showToast(isNew ? 'Project added successfully' : 'Project saved successfully');
+  if(isNew){
+    showToast('Project added -- open Activity Breakdown to add tasks and KPIs', 'info');
+  } else {
+    showToast('Project saved successfully');
+  }
 }
 function delProj(){
   if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
@@ -1325,7 +1329,11 @@ function saveKPI(){
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
-  showToast(isNewKpi ? 'KPI added successfully' : 'KPI updated successfully');
+  if(isNewKpi){
+    showToast('KPI saved -- reopen this tile to add time-series data', 'info');
+  } else {
+    showToast('KPI updated successfully');
+  }
   } catch(err) { console.error('saveKPI error:', err); showToast('Error saving KPI - check console', 'error'); }
 }
 function delKPI(){
@@ -2590,11 +2598,11 @@ function loadFromSupabase() {
 // -- Toast ---------------------------------------------------------------------
 function showToast(msg, type) {
   var t = document.createElement('div');
-  var bg = type === 'warn' ? '#C55A11' : type === 'error' ? '#C00000' : '#375623';
+  var bg = type === 'warn' ? '#C55A11' : type === 'error' ? '#C00000' : type === 'info' ? '#2F6070' : '#375623';
   t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 16px;border-radius:8px;font-size:11px;font-weight:700;color:#fff;background:'+bg+';max-width:320px;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.2)';
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3500);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, type==='info'?5500:3500);
 }
 window.showToast = showToast;
 
@@ -2657,7 +2665,19 @@ window.sbSaveKPI = function(kpi, isNew) {
   if (!sb) return;
   var d = kpiToDb(kpi);
   if (isNew) {
-    sb.from('kpis').insert(d).then(function(r){ if(r.error) console.warn('sbSaveKPI insert:', r.error); });
+    sb.from('kpis').insert(d).select().then(function(r){
+      if(r.error){ console.warn('sbSaveKPI insert:', r.error); return; }
+      // Update local kpi id to match Supabase auto-assigned id
+      if(r.data && r.data[0]){
+        var newId = r.data[0].id;
+        var localKpi = kpis.find(function(k){ return String(k.id)===String(kpi.id); });
+        if(localKpi){
+          localKpi.id = newId;
+          saveAll();
+          console.log('KPI id synced: '+kpi.id+' -> '+newId);
+        }
+      }
+    });
   } else {
     sb.from('kpis').update(d).eq('id', kpi.id).then(function(r){ if(r.error) console.warn('sbSaveKPI update:', r.error); });
   }
@@ -2720,8 +2740,11 @@ window.sbDelTask = function(taskId) {
 
 window.sbSaveTS = function(kpiId, tsRow) {
   if (!sb) return;
+  // Use current id from kpis array in case it was synced after insert
+  var k = kpis.find(function(x){ return String(x.id)===String(kpiId); });
+  var realId = k ? k.id : kpiId;
   sb.from('kpi_timeseries').insert({
-    kpi_id: kpiId, period: tsRow.period, period_type: tsRow.periodType,
+    kpi_id: realId, period: tsRow.period, period_type: tsRow.periodType,
     value: tsRow.value, notes: tsRow.notes || ''
   }).then(function(r){ if(r.error) console.warn('sbSaveTS:', r.error); });
 };
