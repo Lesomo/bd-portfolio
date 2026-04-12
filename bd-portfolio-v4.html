@@ -72,7 +72,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .trow:hover{filter:brightness(.97)}
 .pname{font-weight:700;font-size:11px;color:var(--pd);margin-bottom:1px}
 .psub{font-size:9px;color:var(--gt)}
-.tcols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 90px 28px}
+.tcols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 90px 90px 28px}
 @media(max-width:750px){.tcols{grid-template-columns:1fr 1fr}.hm{display:none}}
 /* ── Avatar ── */
 .av{width:20px;height:20px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:var(--primary);flex-shrink:0;border:1.5px solid #fff}
@@ -267,7 +267,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
   </div>
   <div class="card">
-    <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span></span></div>
+    <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span class="hm">Health</span><span></span></div>
     <div id="tbody"></div>
   </div>
 </div>
@@ -413,7 +413,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
     <div class="mbody">
       <div><label class="fl">Project Name</label><input class="fi" id="fn" type="text"/></div>
       <div class="mrow">
-        <div><label class="fl">Project Lead</label><select class="fi" id="fld"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select></div>
+        <div>
+          <label class="fl">Project Lead</label>
+          <div style="display:flex;gap:5px">
+            <select class="fi" id="fld" onchange="syncLeadInput()" style="flex:1"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select>
+            <input class="fi" id="fld-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncLeadSelect()"/>
+          </div>
+        </div>
         <div><label class="fl">Category</label><select class="fi" id="fcat"><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select></div>
       </div>
       <div class="mrow">
@@ -449,11 +455,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
       </div>
       <div><label class="fl">Problem Statement</label><textarea class="fi" id="fprob" rows="2" style="resize:vertical"></textarea></div>
       <div><label class="fl">Expected Outcome / Success Metric</label><textarea class="fi" id="fout" rows="2" style="resize:vertical"></textarea></div>
-      <div class="mrow">
-        <div><label class="fl">Key Risks</label><textarea class="fi" id="frisk" rows="2" style="resize:vertical"></textarea></div>
-        <div><label class="fl">Dependencies</label><textarea class="fi" id="fdep" rows="2" style="resize:vertical"></textarea></div>
-      </div>
+
       <div><label class="fl">Notes</label><textarea class="fi" id="fnotes" rows="2" style="resize:vertical"></textarea></div>
+      <!-- Project Update Log -->
+      <div id="update-log-section" style="border-top:1px solid #D6C8DB;padding-top:12px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label class="fl" style="margin:0">Project Updates</label>
+          <span style="font-size:9px;color:#595959">Latest updates from the team</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <select class="fi" id="update-author" style="width:130px;flex-shrink:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+          <input class="fi" id="update-text" type="text" placeholder="Add a project update..." style="flex:1"/>
+          <button onclick="postProjectUpdate()" style="background:#68217D;color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Post</button>
+        </div>
+        <div id="update-log-list" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
       <div class="mact">
         <button class="bcan" onclick="closeMo('pmodal')">Cancel</button>
         <button class="bsav" onclick="saveProj()">Save Changes</button>
@@ -633,6 +649,7 @@ let adHocTasks=ld('bd-adhoc',[]);
 let kpis=ld('bd-kpis',DEFAULT_KPIS);
 
 function saveAll(){sd('bd-projs',projects);sd('bd-tasks',tasks);sd('bd-adhoc',adHocTasks);sd('bd-kpis',kpis);}
+function saveUpdates(){try{localStorage.setItem('bd-updates',JSON.stringify(projectUpdates));}catch(e){}}
 
 // -- Style helpers -------------------------------------------------------------
 const PS=p=>({Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#DBC25D',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}}[p]||{bg:'#F0F0F0',fg:'#595959'});
@@ -641,6 +658,20 @@ const AS=a=>({Approved:{bg:'#89AB90',fg:'#2E4F34'},Proposed:{bg:'#DBC25D',fg:'#6
 const CS=c=>({'Operations':{bg:'#A6C4CF',fg:'#2F6070'},'People & Training':{bg:'#E8D5EE',fg:'#68217D'},'Technology & Assets':{bg:'#CFCFB7',fg:'#7A7A58'},'Finance':{bg:'#DBC25D',fg:'#6B5A10'}}[c]||{bg:'#F0F0F0',fg:'#595959'});
 const KCAT=c=>({Financial:{bg:'#E2EFDA',fg:'#375623',dot:'#375623'},Efficiency:{bg:'#E8D5EE',fg:'#68217D',dot:'#68217D'},People:{bg:'#DDE4EC',fg:'#3A3F60',dot:'#7A92AC'},Quality:{bg:'#FCF5E3',fg:'#6B5A10',dot:'#DBC25D'},Custom:{bg:'#FCE4D6',fg:'#C55A11',dot:'#C55A11'}}[c]||{bg:'#F0F0F0',fg:'#595959',dot:'#595959'});
 function pill(l,s){return`<span class="pill" style="background:${s.bg};color:${s.fg}">${esc(l)}</span>`;}
+function projectHealth(p){
+  if(p.status==='Complete') return {label:'Complete',color:'#375623',bg:'#E2EFDA',icon:'&#10003;'};
+  if(p.status==='On Hold')  return {label:'On Hold', color:'#7A4A40',bg:'#D5A99C',icon:'&#9646;'};
+  if(!p.startDate||!p.endDate) return {label:'No Dates',color:'#595959',bg:'#F0F0F0',icon:'&#8212;'};
+  var today=new Date(); today.setHours(0,0,0,0);
+  var start=new Date(p.startDate); var end=new Date(p.endDate);
+  var total=end-start; if(total<=0) return {label:'No Dates',color:'#595959',bg:'#F0F0F0',icon:'&#8212;'};
+  var elapsed=Math.max(0,Math.min(100,Math.round((today-start)/total*100)));
+  var gap=elapsed-(p.pct||0);
+  if(gap<10)  return {label:'On Track', color:'#375623',bg:'#E2EFDA',icon:'&#9650;'};
+  if(gap<25)  return {label:'At Risk',  color:'#C55A11',bg:'#FCE4D6',icon:'&#9679;'};
+  return       {label:'Behind',  color:'#C00000',bg:'#FFDCE0',icon:'&#9660;'};
+}
+
 function pbar(p){return`<div class="pb"><div class="pb-bg"><div class="pb-fill" style="width:${p}%;background:${p===100?'#89AB90':'#68217D'}"></div></div><span class="pb-txt">${p}%</span></div>`;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);}
@@ -648,6 +679,30 @@ function avHtml(name,sm){return`<div class="av${sm?' av-sm':''}" title="${esc(na
 function fmtR(v){if(v>=1000000)return`R ${(v/1000000).toFixed(1)}M`;if(v>=1000)return`R ${Math.round(v/1000)}k`;return`R ${Math.round(v)}`;}
 
 // -- View switching -------------------------------------------------------------
+function syncLeadInput(){
+  var sel = document.getElementById('fld');
+  var inp = document.getElementById('fld-custom');
+  if(!sel || !inp) return;
+  if(sel.value === '__other__'){
+    inp.style.display = 'block';
+    inp.focus();
+  } else {
+    inp.style.display = 'none';
+  }
+}
+function syncLeadSelect(){
+  // while typing custom name, keep select on __other__
+  var sel = document.getElementById('fld');
+  if(sel) sel.value = '__other__';
+}
+function getLeadValue(){
+  var sel = document.getElementById('fld');
+  var inp = document.getElementById('fld-custom');
+  if(sel && sel.value === '__other__' && inp && inp.value.trim()){
+    return inp.value.trim();
+  }
+  return sel ? sel.value : '';
+}
 function getRole(){ return (document.getElementById('role-sel')||{value:'Admin'}).value; }
 var _adminUnlocked = false;
 function onRoleChange(){
@@ -741,6 +796,7 @@ function renderTracker(){
       <div class="hm">${pill(p.status,SS(p.status))}</div>
       <div class="hm">${pill(p.approval,AS(p.approval))}</div>
       <div class="hm">${pbar(p.pct)}</div>
+      <div class="hm">${(function(){var h=projectHealth(p);return'<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;background:'+h.bg+';color:'+h.color+'">'+h.icon+' '+h.label+'</span>';})()}</div>
       <div>${role!=='Leadership'?`<button onclick="openModal(${p.id})" style="background:#E8D5EE;color:#68217D;border:none;border-radius:5px;padding:3px 7px;cursor:pointer;font-size:9px;font-weight:700;font-family:inherit">Edit</button>`:''}</div>
     </div>`;
   }).join('');
@@ -756,7 +812,17 @@ function openModal(id){
   document.getElementById('mdelb').style.display=isNew?'none':'block';
   const p=isNew?{name:'New Project',lead:'Berenicia',category:'Operations',priority:'Medium',status:'Not Started',approval:'Proposed',pct:0,bizImpact:'Efficiency Gain',custValue:'Order Qualifier',startDate:'',endDate:'',collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:''}:projects.find(x=>x.id===id);
   document.getElementById('fn').value=p.name;
-  document.getElementById('fld').value=p.lead;
+  var fldSel = document.getElementById('fld');
+  var fldInp = document.getElementById('fld-custom');
+  var knownLeads = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+  if(knownLeads.indexOf(p.lead) >= 0){
+    fldSel.value = p.lead;
+    fldInp.style.display = 'none';
+  } else {
+    fldSel.value = '__other__';
+    fldInp.value = p.lead;
+    fldInp.style.display = 'block';
+  }
   document.getElementById('fcat').value=p.category;
   document.getElementById('fpri').value=p.priority;
   document.getElementById('fst').value=p.status;
@@ -770,19 +836,20 @@ function openModal(id){
   document.getElementById('fext').value=p.extCollabs||'';
   document.getElementById('fprob').value=p.problem||'';
   document.getElementById('fout').value=p.outcome||'';
-  document.getElementById('frisk').value=p.risks||'';
-  document.getElementById('fdep').value=p.deps||'';
+  if(document.getElementById('frisk')) document.getElementById('frisk').value=p.risks||'';
+  if(document.getElementById('fdep')) document.getElementById('fdep').value=p.deps||'';
   document.getElementById('fnotes').value=p.notes||'';
   document.querySelectorAll('#collab-checks input[type=checkbox]').forEach(cb=>{
     cb.checked=(p.collaborators||[]).includes(cb.value)&&cb.value!==p.lead;
   });
+  renderUpdateLog(id || null);
   openMo('pmodal');
 }
 function saveProj(){
   const collabs=Array.from(document.querySelectorAll('#collab-checks input[type=checkbox]')).filter(c=>c.checked).map(c=>c.value);
   const d={
     name:document.getElementById('fn').value,
-    lead:document.getElementById('fld').value,
+    lead:getLeadValue(),
     category:document.getElementById('fcat').value.replace(/&amp;/g,'&'),
     priority:document.getElementById('fpri').value,
     status:document.getElementById('fst').value,
@@ -796,8 +863,8 @@ function saveProj(){
     extCollabs:document.getElementById('fext').value,
     problem:document.getElementById('fprob').value,
     outcome:document.getElementById('fout').value,
-    risks:document.getElementById('frisk').value,
-    deps:document.getElementById('fdep').value,
+    risks:(document.getElementById('frisk')||{value:''}).value,
+    deps:(document.getElementById('fdep')||{value:''}).value,
     notes:document.getElementById('fnotes').value,
   };
   if(editId){
@@ -917,6 +984,12 @@ function renderDash(){
   const dn_hero=projects.filter(p=>p.status==='Complete').length;
   const cr_hero=projects.filter(p=>p.priority==='Critical').length;
   if(sumEl)sumEl.textContent=ip_hero+' in progress - '+dn_hero+' complete - '+cr_hero+' critical';
+  // Health summary
+  var onTrack=projects.filter(function(p){return projectHealth(p).label==='On Track';}).length;
+  var atRisk=projects.filter(function(p){return projectHealth(p).label==='At Risk';}).length;
+  var behind=projects.filter(function(p){return projectHealth(p).label==='Behind';}).length;
+  var headEl2=document.getElementById('dash-headline');
+  if(headEl2) headEl2.textContent=total+' Projects - '+Math.round(projects.reduce(function(a,p){return a+p.pct;},0)/total)+'% Avg Progress';
   if(urgEl){
     const recs=genRecs().filter(r=>r.severity==='critical'||r.severity==='high').slice(0,3);
     urgEl.innerHTML=recs.length?recs.map(r=>`<div style="background:rgba(255,255,255,.12);border-radius:7px;padding:7px 10px;max-width:200px"><div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${r.severity.toUpperCase()}</div><div style="font-size:9px;color:#fff;line-height:1.3">${esc(r.title)}</div></div>`).join(''):'<div style="font-size:10px;color:rgba(255,255,255,.7)">No urgent issues - portfolio is healthy</div>';
@@ -1874,6 +1947,8 @@ function closeMo(id,e){if(e&&e.target!==document.getElementById(id))return;docum
 // ==============================================
 let comments = [];
 try { comments = JSON.parse(localStorage.getItem('bd-comments') || '[]'); } catch(e){}
+let projectUpdates = [];
+try { projectUpdates = JSON.parse(localStorage.getItem('bd-updates') || '[]'); } catch(e){}
 function saveComments(){ try{ localStorage.setItem('bd-comments', JSON.stringify(comments)); }catch(e){} }
 
 let panelTaskId = null, panelIsAdHoc = false;
@@ -1917,9 +1992,10 @@ function renderPanelComments() {
   var noC  = document.getElementById('panel-nocomments');
   if (!tc.length) { wrap.innerHTML = ''; noC.style.display = 'block'; return; }
   noC.style.display = 'none';
-  wrap.innerHTML = tc.map(function(c) {
+  wrap.innerHTML = tc.map(function(c, idx) {
     var ss = SS(c.statusAtTime || 'Not Started');
-    return '<div style="display:flex;gap:8px;padding:10px;background:var(--gl);border-radius:8px;border:1px solid var(--gm)">' +
+    var globalIdx = comments.indexOf(c);
+    return '<div style="display:flex;gap:8px;padding:10px;background:var(--gl);border-radius:8px;border:1px solid var(--gm);position:relative">' +
       avHtml(c.author, false) +
       '<div style="flex:1;min-width:0">' +
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
@@ -1929,8 +2005,67 @@ function renderPanelComments() {
         '<div style="font-size:8px;color:var(--gt);margin-top:2px">' + esc(c.dateTime) + '</div>' +
         '<div style="font-size:10px;color:var(--pd);line-height:1.5;margin-top:4px">' + esc(c.text) + '</div>' +
       '</div>' +
+      '<button onclick="deleteComment(' + globalIdx + ')" title="Delete comment" style="position:absolute;top:7px;right:7px;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 7px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700;opacity:.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">&#215;</button>' +
     '</div>';
   }).join('');
+}
+
+
+// -- Project Update Log --------------------------------------------------------
+function renderUpdateLog(projId){
+  var list = document.getElementById('update-log-list');
+  if(!list) return;
+  var updates = projectUpdates.filter(function(u){ return u.projId===projId; })
+    .slice().reverse(); // newest first
+  if(!updates.length){
+    list.innerHTML = '<div style="font-size:9px;color:#595959;font-style:italic;padding:4px 0">No updates yet - be the first to post one</div>';
+    return;
+  }
+  list.innerHTML = updates.map(function(u, idx){
+    var realIdx = projectUpdates.indexOf(u);
+    return '<div style="display:flex;gap:7px;padding:7px 9px;background:var(--gl);border-radius:7px;border:1px solid var(--gm);position:relative">'
+      + avHtml(u.author, true)
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:5px">'
+          + '<span style="font-size:10px;font-weight:700;color:var(--pd)">'+esc(u.author)+'</span>'
+          + '<span style="font-size:8px;color:var(--gt)">'+esc(u.dateTime)+'</span>'
+        + '</div>'
+        + '<div style="font-size:10px;color:#333;line-height:1.5;margin-top:2px">'+esc(u.text)+'</div>'
+      + '</div>'
+      + '<button onclick="deleteUpdate('+realIdx+')" title="Delete update" style="position:absolute;top:5px;right:5px;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">&#215;</button>'
+    + '</div>';
+  }).join('');
+}
+
+function postProjectUpdate(){
+  var text = document.getElementById('update-text').value.trim();
+  var author = document.getElementById('update-author').value;
+  if(!text){ showToast('Please enter an update','warn'); return; }
+  var now = new Date();
+  var dt = now.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})
+    + ' ' + now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  projectUpdates.push({projId:editId, author:author, text:text, dateTime:dt});
+  saveUpdates();
+  document.getElementById('update-text').value = '';
+  renderUpdateLog(editId);
+  showToast('Update posted');
+}
+
+function deleteUpdate(idx){
+  if(!confirm('Delete this update?')) return;
+  projectUpdates.splice(idx,1);
+  saveUpdates();
+  renderUpdateLog(editId);
+  showToast('Update deleted');
+}
+
+function deleteComment(idx) {
+  if(!confirm('Delete this comment?')) return;
+  comments.splice(idx, 1);
+  saveComments();
+  renderPanelComments();
+  renderTaskBoard();
+  showToast('Comment deleted');
 }
 
 function postComment() {
