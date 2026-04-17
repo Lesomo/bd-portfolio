@@ -2106,7 +2106,7 @@ function renderPanelComments() {
         '<div style="font-size:8px;color:var(--gt);margin-top:2px">' + esc(c.dateTime) + '</div>' +
         '<div style="font-size:10px;color:var(--pd);line-height:1.5;margin-top:4px">' + esc(c.text) + '</div>' +
       '</div>' +
-      '<button onclick="deleteComment(' + globalIdx + ')" title="Delete comment" style="position:absolute;top:7px;right:7px;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 7px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700;opacity:.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">&#215;</button>' +
+      '<div style="position:absolute;top:7px;right:7px;display:flex;gap:3px">' +'<button onclick="editComment(' + globalIdx + ')" title="Edit" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:1px 7px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700;opacity:.8">&#9998;</button>' +'<button onclick="deleteComment(' + globalIdx + ')" title="Delete" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 7px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700;opacity:.8">&#215;</button>' +'</div>' +
     '</div>';
   }).join('');
 }
@@ -2133,7 +2133,7 @@ function renderUpdateLog(projId){
         + '</div>'
         + '<div style="font-size:10px;color:#333;line-height:1.5;margin-top:2px">'+esc(u.text)+'</div>'
       + '</div>'
-      + '<button onclick="deleteUpdate('+realIdx+')" title="Delete update" style="position:absolute;top:5px;right:5px;background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">&#215;</button>'
+      + '<div style="position:absolute;top:5px;right:5px;display:flex;gap:3px">'      + '<button onclick="editUpdate('+realIdx+')" title="Edit" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.8">&#9998;</button>'      + '<button onclick="deleteUpdate('+realIdx+')" title="Delete" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.8">&#215;</button>'      + '</div>'
     + '</div>';
   }).join('');
 }
@@ -2145,8 +2145,10 @@ function postProjectUpdate(){
   var now = new Date();
   var dt = now.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})
     + ' ' + now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
-  projectUpdates.push({projId:editId, author:author, text:text, dateTime:dt});
+  var newUpdate = {projId:editId, author:author, text:text, dateTime:dt};
+  projectUpdates.push(newUpdate);
   saveUpdates();
+  if(window.sbSaveUpdate) window.sbSaveUpdate(newUpdate);
   document.getElementById('update-text').value = '';
   renderUpdateLog(editId);
   showToast('Update posted');
@@ -2154,10 +2156,43 @@ function postProjectUpdate(){
 
 function deleteUpdate(idx){
   if(!confirm('Delete this update?')) return;
+  var u = projectUpdates[idx];
+  if(u && u.id && window.sbDeleteUpdate) window.sbDeleteUpdate(u.id);
   projectUpdates.splice(idx,1);
   saveUpdates();
   renderUpdateLog(editId);
   showToast('Update deleted');
+}
+
+
+function editComment(idx){
+  var c = comments[idx];
+  if(!c) return;
+  var newText = prompt('Edit comment:', c.text);
+  if(newText===null || !newText.trim()) return;
+  c.text = newText.trim();
+  saveComments();
+  if(c.id && window._sb){
+    window._sb.from('comments').update({comment_text:c.text}).eq('id',c.id)
+      .then(function(r){ if(r.error) console.warn('editComment:',r.error); });
+  }
+  renderPanelComments();
+  showToast('Comment updated');
+}
+
+function editUpdate(idx){
+  var u = projectUpdates[idx];
+  if(!u) return;
+  var newText = prompt('Edit update:', u.text);
+  if(newText===null || !newText.trim()) return;
+  u.text = newText.trim();
+  saveUpdates();
+  if(u.id && window._sb){
+    window._sb.from('project_updates').update({text:u.text}).eq('id',u.id)
+      .then(function(r){ if(r.error) console.warn('editUpdate:',r.error); });
+  }
+  renderUpdateLog(editId);
+  showToast('Update edited');
 }
 
 function deleteComment(idx) {
@@ -3146,10 +3181,11 @@ function loadFromSupabase() {
     sb.from('adhoc_tasks').select('*').order('id'),
     sb.from('kpis').select('*').order('id'),
     sb.from('kpi_timeseries').select('*').order('id'),
-    sb.from('comments').select('*').order('created_at')
+    sb.from('comments').select('*').order('created_at'),
+    sb.from('project_updates').select('*').order('created_at')
   ]).then(function(results) {
     var pRes=results[0], colRes=results[1], tRes=results[2];
-    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6];
+    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7];
 
     if (pRes.error) throw pRes.error;
 
@@ -3160,6 +3196,10 @@ function loadFromSupabase() {
     var tsData = tsRes.data || [];
     kpis = (kRes.data || []).map(function(r){ return dbToKpi(r, tsData); });
     comments = (cRes.data || []).map(dbToComment);
+    projectUpdates = (uRes && uRes.data || []).map(function(r){
+      return {id:r.id, projId:r.project_id, author:r.author, text:r.text, dateTime:r.date_time};
+    });
+    localStorage.setItem('bd-updates', JSON.stringify(projectUpdates));
 
     // Also save to localStorage as cache
     sd('bd-projs', projects);
@@ -3330,13 +3370,38 @@ window.sbDelTask = function(taskId) {
 
 window.sbSaveTS = function(kpiId, tsRow) {
   if (!sb) return;
-  // Use current id from kpis array in case it was synced after insert
   var k = kpis.find(function(x){ return String(x.id)===String(kpiId); });
   var realId = k ? k.id : kpiId;
   sb.from('kpi_timeseries').insert({
     kpi_id: realId, period: tsRow.period, period_type: tsRow.periodType,
     value: tsRow.value, notes: tsRow.notes || ''
   }).then(function(r){ if(r.error) console.warn('sbSaveTS:', r.error); });
+};
+
+window.sbSaveUpdate = function(update) {
+  if (!sb) return;
+  sb.from('project_updates').insert({
+    project_id: update.projId,
+    author: update.author,
+    text: update.text,
+    date_time: update.dateTime
+  }).select().then(function(r){
+    if(r.error){ console.warn('sbSaveUpdate:', r.error); return; }
+    // Store the Supabase id so we can delete later
+    if(r.data && r.data[0]){
+      var saved = projectUpdates.find(function(u){
+        return u.projId===update.projId && u.text===update.text && u.dateTime===update.dateTime;
+      });
+      if(saved) saved.id = r.data[0].id;
+      localStorage.setItem('bd-updates', JSON.stringify(projectUpdates));
+    }
+  });
+};
+
+window.sbDeleteUpdate = function(updateId) {
+  if (!sb || !updateId) return;
+  sb.from('project_updates').delete().eq('id', updateId)
+    .then(function(r){ if(r.error) console.warn('sbDeleteUpdate:', r.error); });
 };
 
 // -- Start ---------------------------------------------------------------------
