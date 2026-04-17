@@ -2197,6 +2197,12 @@ function editUpdate(idx){
 
 function deleteComment(idx) {
   if(!confirm('Delete this comment?')) return;
+  var c = comments[idx];
+  // Delete from Supabase
+  if(c && c.id && window._sb){
+    window._sb.from('comments').delete().eq('id', c.id)
+      .then(function(r){ if(r.error) console.warn('deleteComment:', r.error); });
+  }
   comments.splice(idx, 1);
   saveComments();
   renderPanelComments();
@@ -3323,7 +3329,20 @@ window.sbSaveAdHoc = function(task, isNew) {
   if (!sb) return;
   var d = adhocToDb(task);
   if (isNew) {
-    sb.from('adhoc_tasks').insert(d).then(function(r){ if(r.error) console.warn('sbSaveAdHoc insert:', r.error); });
+    sb.from('adhoc_tasks').insert(d).select().then(function(r){
+      if(r.error){ console.warn('sbSaveAdHoc insert:', r.error); return; }
+      // Sync Supabase id back to local task
+      if(r.data && r.data[0]){
+        var newDbId = r.data[0].id;
+        var localTask = adHocTasks.find(function(t){ return String(t.id)===String(task.id); });
+        if(localTask){
+          localTask._dbId = newDbId;
+          localTask.id = 'ah' + newDbId;
+          saveAll();
+          console.log('AdHoc id synced:', task.id, '->', localTask.id);
+        }
+      }
+    });
   } else {
     var dbId = task._dbId || String(task.id).replace('ah','');
     sb.from('adhoc_tasks').update(d).eq('id', dbId).then(function(r){ if(r.error) console.warn('sbSaveAdHoc update:', r.error); });
