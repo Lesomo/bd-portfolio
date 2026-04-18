@@ -72,7 +72,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .trow:hover{filter:brightness(.97)}
 .pname{font-weight:700;font-size:11px;color:var(--pd);margin-bottom:1px}
 .psub{font-size:9px;color:var(--gt)}
-.tcols{grid-template-columns:2fr 1fr 1fr 1fr 1fr 90px 90px 28px}
+.tcols{grid-template-columns:20px 2fr 1fr 1fr 1fr 1fr 90px 90px 28px}
 @media(max-width:750px){.tcols{grid-template-columns:1fr 1fr}.hm{display:none}}
 /* ── Avatar ── */
 .av{width:20px;height:20px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:var(--primary);flex-shrink:0;border:1.5px solid #fff}
@@ -288,9 +288,10 @@ body.meeting-mode .trow:hover { background:inherit !important; }
       <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
       <span id="fcount" style="font-size:9px;color:var(--gt)"></span>
       <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
+      <button id="bulk-tracker-btn" onclick="toggleBulkTracker()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Bulk Update</button>
     </div>
     <div class="card">
-      <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span class="hm">Health</span><span></span></div>
+      <div class="thdr tcols"><span></span><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span class="hm">Health</span><span></span></div>
       <div id="tbody"></div>
     </div>
   </div>
@@ -335,7 +336,8 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   <span style="font-size:16px">&#128172;</span>
   <span><strong>To add a comment:</strong> click any task card on the board below. A panel will slide out from the right where you can post dated, authored comments and update the task status.</span>
 </div>
-<div class="tog-bar">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+  <div class="tog-bar" style="margin-bottom:0">
     <button class="togb active" id="tog-board" onclick="setTog('board')">Board</button>
     <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
     <button class="togb" id="tog-bylead" onclick="setTog('bylead')">By Lead</button>
@@ -346,6 +348,36 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   </div>
   <div id="tbboard"></div>
   <div id="tblist" style="display:none"></div>
+<!-- Tasks bulk action bar -->
+<div id="bulk-bar-tasks" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2F6070;color:#fff;border-radius:12px;padding:10px 16px;align-items:center;gap:10px;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.3);flex-wrap:wrap">
+  <span style="font-size:10px;font-weight:700" id="bulk-count-tasks">0 selected</span>
+  <select id="bulk-tasks-field" style="font-size:9px;border-radius:5px;border:none;padding:3px 7px;font-family:inherit;background:#fff;color:#2F6070;font-weight:700">
+    <option value="">Field...</option>
+    <option value="status">Status</option>
+    <option value="owner">Owner</option>
+    <option value="priority">Priority (Ad Hoc only)</option>
+  </select>
+  <select id="bulk-tasks-value" style="font-size:9px;border-radius:5px;border:none;padding:3px 7px;font-family:inherit;background:#fff;color:#2F6070;font-weight:700">
+    <option value="">Value...</option>
+    <option value="Not Started">Not Started</option>
+    <option value="In Progress">In Progress</option>
+    <option value="On Hold">On Hold</option>
+    <option value="Complete">Complete</option>
+    <option value="Critical">Critical</option>
+    <option value="High">High</option>
+    <option value="Medium">Medium</option>
+    <option value="Low">Low</option>
+    <option value="Berenicia">Berenicia</option>
+    <option value="Jacques">Jacques</option>
+    <option value="Letlhogonolo">Letlhogonolo</option>
+    <option value="Wendy">Wendy</option>
+    <option value="Beverley">Beverley</option>
+    <option value="David">David</option>
+    <option value="Danesha">Danesha</option>
+  </select>
+  <button onclick="applyBulkTasks()" style="background:#DBC25D;color:#2F6070;border:none;border-radius:6px;padding:4px 12px;font-size:9px;cursor:pointer;font-weight:800;font-family:inherit">Apply</button>
+  <button onclick="toggleBulkTasks()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:9px;cursor:pointer;font-family:inherit">Cancel</button>
+</div>
   <div id="tbbylead" style="display:none"></div>
 </div>
 
@@ -893,6 +925,122 @@ function updateSub(){
 // -- Tracker Mode -------------------------------------------------------------
 window._trackerMode = 'active';
 
+
+// -- Bulk Update System -------------------------------------------------------
+var _bulkMode = { tracker: false, tasks: false };
+var _bulkSelected = { tracker: new Set(), tasks: new Set() };
+
+// -- Tracker bulk -------------------------------------------------------------
+function toggleBulkTracker(){
+  _bulkMode.tracker = !_bulkMode.tracker;
+  _bulkSelected.tracker.clear();
+  var btn = document.getElementById('bulk-tracker-btn');
+  if(btn){
+    btn.textContent = _bulkMode.tracker ? 'Cancel Select' : 'Bulk Update';
+    btn.style.background = _bulkMode.tracker ? '#C55A11' : 'rgba(255,255,255,.15)';
+  }
+  renderTracker();
+  updateBulkBar('tracker');
+}
+
+function toggleBulkSelectProj(id){
+  if(_bulkSelected.tracker.has(id)) _bulkSelected.tracker.delete(id);
+  else _bulkSelected.tracker.add(id);
+  updateBulkBar('tracker');
+  // Update checkbox visual
+  var cb = document.getElementById('bsel-'+id);
+  if(cb) cb.checked = _bulkSelected.tracker.has(id);
+}
+
+function applyBulkTracker(){
+  var field = document.getElementById('bulk-tracker-field').value;
+  var value = document.getElementById('bulk-tracker-value').value;
+  if(!field||!value){ showToast('Choose a field and value','warn'); return; }
+  var ids = Array.from(_bulkSelected.tracker);
+  if(!ids.length){ showToast('No projects selected','warn'); return; }
+  ids.forEach(function(id){
+    var p = projects.find(function(x){ return String(x.id)===String(id); });
+    if(!p) return;
+    if(field==='status') p.status=value;
+    else if(field==='priority') p.priority=value;
+    else if(field==='approval') p.approval=value;
+    else if(field==='pct') p.pct=parseInt(value)||0;
+    // Sync to Supabase
+    if(window.sbSaveProject) sbSaveProject(p, false, p.collaborators||[]);
+  });
+  saveAll();
+  _bulkSelected.tracker.clear();
+  renderTracker();
+  updateBulkBar('tracker');
+  showToast('Updated '+ids.length+' project'+(ids.length>1?'s':''));
+}
+
+function updateBulkBar(type){
+  var bar = document.getElementById('bulk-bar-'+type);
+  if(!bar) return;
+  var sel = _bulkSelected[type];
+  if(sel.size === 0){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  var countEl = document.getElementById('bulk-count-'+type);
+  if(countEl) countEl.textContent = sel.size+' selected';
+}
+
+// -- Tasks bulk ---------------------------------------------------------------
+function toggleBulkTasks(){
+  _bulkMode.tasks = !_bulkMode.tasks;
+  _bulkSelected.tasks.clear();
+  var btn = document.getElementById('bulk-tasks-btn');
+  if(btn){
+    btn.textContent = _bulkMode.tasks ? 'Cancel Select' : 'Bulk Update';
+    btn.style.background = _bulkMode.tasks ? '#C55A11' : 'rgba(255,255,255,.15)';
+  }
+  renderTaskBoard();
+  updateBulkBar('tasks');
+}
+
+function toggleBulkSelectTask(id){
+  var sid = String(id);
+  if(_bulkSelected.tasks.has(sid)) _bulkSelected.tasks.delete(sid);
+  else _bulkSelected.tasks.add(sid);
+  updateBulkBar('tasks');
+  var cb = document.getElementById('tbsel-'+sid);
+  if(cb) cb.checked = _bulkSelected.tasks.has(sid);
+}
+
+function applyBulkTasks(){
+  var field = document.getElementById('bulk-tasks-field').value;
+  var value = document.getElementById('bulk-tasks-value').value;
+  if(!field||!value){ showToast('Choose a field and value','warn'); return; }
+  var ids = Array.from(_bulkSelected.tasks);
+  if(!ids.length){ showToast('No tasks selected','warn'); return; }
+
+  ids.forEach(function(sid){
+    // Check project tasks first
+    var t = tasks.find(function(x){ return String(x.id)===sid; });
+    if(t){
+      if(field==='status') t.status=value;
+      else if(field==='owner') t.owner=value;
+      if(window.sbUpdTask) sbUpdTask(t);
+      return;
+    }
+    // Check ad hoc tasks
+    var ah = adHocTasks.find(function(x){ return String(x.id)===sid; });
+    if(ah){
+      if(field==='status') ah.status=value;
+      else if(field==='owner') ah.owner=value;
+      else if(field==='priority') ah.priority=value;
+      if(window.sbSaveAdHoc) sbSaveAdHoc(ah, false);
+    }
+  });
+
+  saveAll();
+  _bulkSelected.tasks.clear();
+  renderTaskBoard();
+  updateBulkBar('tasks');
+  showToast('Updated '+ids.length+' task'+(ids.length>1?'s':''));
+}
+
+
 function setTrackerMode(mode){
   window._trackerMode = mode;
   // Update tab buttons
@@ -1061,6 +1209,7 @@ function renderTracker(){
     const collabs=[...(p.collaborators||[]),...(p.extCollabs?p.extCollabs.split(',').map(x=>x.trim()).filter(Boolean):[])];
     const priColors={Critical:'#C00000',High:'#C55A11',Medium:'#DBC25D',Low:'#375623'};
     return`<div class="trow tcols" style="background:${i%2===0?'#FCF5E3':'#fff'};border-left:3px solid ${priColors[p.priority]||'transparent'}">
+      <div style="display:flex;align-items:center">${_bulkMode.tracker?'<input type="checkbox" id="bsel-'+p.id+'" onclick="event.stopPropagation();toggleBulkSelectProj(\''+p.id+'\')" style="cursor:pointer;width:14px;height:14px">':''}</div>
       <div><div class="pname">${esc(p.name)}${kpiDot(p.id)}</div>
         <div class="psub">${esc(p.bizImpact)} . ${esc(p.custValue)}</div>
         ${collabs.length?`<div class="collab-wrap">${collabs.map(c=>`<div class="collab-chip">${avHtml(c,true)}<span>${esc(c)}</span></div>`).join('')}</div>`:''}
@@ -1843,7 +1992,8 @@ function renderTaskBoard(){
       const overdue=due&&due<today&&t.status!=='Complete';
       const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
       const ss=SS(t.status);
-      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;">
+      return`<div style="display:grid;grid-template-columns:20px 2fr 1fr 1fr 1fr 90px 28px;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;">
+        <div style="display:flex;align-items:center">${_bulkMode.tasks?'<input type="checkbox" id="tbsel-'+t.id+'" onclick="event.stopPropagation();toggleBulkSelectTask(\''+t.id+'\')" style="cursor:pointer;width:14px;height:14px">':'' }</div>
         <div style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
           <div style="font-size:10px;font-weight:700;color:#4A1759;margin-bottom:1px">${esc(t.name)}</div>
           <div style="font-size:8px;color:#595959;display:flex;align-items:center;gap:4px">
@@ -1860,8 +2010,8 @@ function renderTaskBoard(){
       </div>`;
     }).join('');
     document.getElementById('tblist').innerHTML=`<div class="card">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
-        ${['Task','Owner','Priority','Status','Due',''].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
+      <div style="display:grid;grid-template-columns:20px 2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
+        ${['','Task','Owner','Priority','Status','Due',''].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
       </div>
       ${rows||'<div style="padding:20px;text-align:center;color:#595959;font-size:10px">No tasks found.</div>'}
     </div>`;
