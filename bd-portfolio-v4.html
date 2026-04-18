@@ -1199,7 +1199,7 @@ function renderTracker(){
   document.getElementById('fcount').textContent=`${filtered.length}/${projects.length}`;
   // KPI health dot
   function kpiDot(pid){
-    const pk=kpis.filter(k=>k.projId===pid&&k.target>0);
+    const pk=kpis.filter(k=>String(k.projId)===String(pid)&&k.target>0);
     if(!pk.length)return'';
     const avg=pk.reduce((a,k)=>a+kpiAchievement(k),0)/pk.length;
     const col=avg>=100?'#375623':avg>=80?'#DBC25D':'#C00000';
@@ -1233,7 +1233,8 @@ function openModal(id){
   const isNew=!id;
   document.getElementById('mtitle').textContent=isNew?'New Project':'Edit Project';
   document.getElementById('mdelb').style.display=isNew?'none':'block';
-  const p=isNew?{name:'New Project',lead:'Berenicia',category:'Operations',priority:'Medium',status:'Not Started',approval:'Proposed',pct:0,bizImpact:'Efficiency Gain',custValue:'Order Qualifier',startDate:'',endDate:'',collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:''}:projects.find(x=>x.id===id);
+  const p=isNew?{name:'New Project',lead:'Berenicia',category:'Operations',priority:'Medium',status:'Not Started',approval:'Proposed',pct:0,bizImpact:'Efficiency Gain',custValue:'Order Qualifier',startDate:'',endDate:'',collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:''}:projects.find(x=>String(x.id)===String(id));
+  if(!p){ console.error('openModal: project not found for id=',id); showToast('Project not found - try refreshing','error'); return; }
   document.getElementById('fn').value=p.name;
   var fldSel = document.getElementById('fld');
   var fldInp = document.getElementById('fld-custom');
@@ -1282,7 +1283,7 @@ function saveProj(){
     custValue:document.getElementById('fcv').value,
     startDate:document.getElementById('fsd').value,
     endDate:document.getElementById('fed').value,
-    collaborators:collabs.filter(c=>c!==document.getElementById('fld').value),
+    collaborators:collabs.filter(c=>c!==getLeadValue()),
     extCollabs:document.getElementById('fext').value,
     problem:document.getElementById('fprob').value,
     outcome:document.getElementById('fout').value,
@@ -1291,7 +1292,7 @@ function saveProj(){
     notes:document.getElementById('fnotes').value,
   };
   if(editId){
-    const i=projects.findIndex(p=>p.id===editId);
+    const i=projects.findIndex(p=>String(p.id)===String(editId));
     projects[i]={...projects[i],...d};
   }else{
     const nid=Math.max(...projects.map(p=>p.id),0)+1;
@@ -1300,7 +1301,7 @@ function saveProj(){
   }
   var isNew = !editId;
   saveAll();
-  if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return p.id===editId;}), isNew, collabs);
+  if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return String(p.id)===String(editId);}), isNew, collabs);
   closeMo('pmodal');sv('dashboard');updateBadge();
   if(isNew){
     showToast('Project added -- open Activity Breakdown to add tasks and KPIs', 'info');
@@ -2117,7 +2118,7 @@ function renderByLead(allTasks){
 
 // -- Task status quick-edit ----------------------------------------------------
 function openTaskStatusModal(taskId){
-  const t=tasks.find(x=>x.id===taskId);if(!t)return;
+  const t=tasks.find(x=>String(x.id)===String(taskId));if(!t)return;
   const s=prompt(`Update status for "${t.name}":\n1. Not Started\n2. In Progress\n3. On Hold\n4. Complete\n\nType the number or status name:`,'');
   if(!s)return;
   const map={'1':'Not Started','2':'In Progress','3':'On Hold','4':'Complete'};
@@ -2132,7 +2133,7 @@ function openAdHocModal(id){
   document.getElementById('ahtitle').textContent=id?'Edit Task':'Add Ad Hoc Task';
   document.getElementById('ahdelb').style.display=id?'block':'none';
   if(id){
-    const t=adHocTasks.find(x=>x.id===id);
+    const t=adHocTasks.find(x=>String(x.id)===String(id));
     document.getElementById('ahtname').value=t.name;
     var ahSel = document.getElementById('ahowner');
   var ahInp = document.getElementById('ahowner-custom');
@@ -2167,10 +2168,10 @@ function openAdHocModal(id){
 }
 function saveAdHoc(){
   const d={name:document.getElementById('ahtname').value,owner:getAhOwnerValue(),priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
-  if(ahEditId){const i=adHocTasks.findIndex(t=>t.id===ahEditId);adHocTasks[i]={...adHocTasks[i],...d};}
+  if(ahEditId){const i=adHocTasks.findIndex(t=>String(t.id)===String(ahEditId));adHocTasks[i]={...adHocTasks[i],...d};}
   else adHocTasks.push({id:'ah'+Date.now(),...d});
   var isNewAh = !ahEditId;
-  var savedAh = ahEditId ? adHocTasks.find(function(t){return t.id===ahEditId;}) : adHocTasks[adHocTasks.length-1];
+  var savedAh = ahEditId ? adHocTasks.find(function(t){return String(t.id)===String(ahEditId);}) : adHocTasks[adHocTasks.length-1];
   saveAll();
   if(window.sbSaveAdHoc) sbSaveAdHoc(savedAh, isNewAh);
   closeMo('ahmodal');renderTaskBoard();
@@ -2178,7 +2179,7 @@ function saveAdHoc(){
 }
 function delAdHoc(){
   if(!ahEditId)return;
-  var ahToDelete = adHocTasks.find(function(t){return t.id===ahEditId;});
+  var ahToDelete = adHocTasks.find(function(t){return String(t.id)===String(ahEditId);});
   adHocTasks=adHocTasks.filter(t=>t.id!==ahEditId);
   saveAll();
   if(window.sbDelAdHoc && ahToDelete) sbDelAdHoc(ahToDelete);
@@ -3817,6 +3818,41 @@ document.addEventListener('DOMContentLoaded', function(){
   window.renderWeeklyUpdates=renderWeeklyUpdates;
   window.renderWeeklyTasks=renderWeeklyTasks;
   window.renderWeeklyAdhoc=renderWeeklyAdhoc;
+  // Auto-expose all HTML-callable functions defined inside IIFE
+  window.editComment=editComment;
+  window.closeMo=closeMo;
+  window.postProjectUpdate=postProjectUpdate;
+  window.openPanel=openPanel;
+  window.exportData=exportData;
+  window.editUpdate=editUpdate;
+  window.delKPI=delKPI;
+  window.deleteComment=deleteComment;
+  window.addTSRowFromModal=addTSRowFromModal;
+  window.editAdHocFromBadge=editAdHocFromBadge;
+  window.deleteUpdate=deleteUpdate;
+  window.editTSRow=editTSRow;
+  window.delAdHoc=delAdHoc;
+  window.setZoom=setZoom;
+  window.setRCat=setRCat;
+  window.saveAdHoc=saveAdHoc;
+  window.toggleRec=toggleRec;
+  window.delTSRow=delTSRow;
+  window.setTog=setTog;
+  window.postComment=postComment;
+  window.openAdHocModal=openAdHocModal;
+  window.closePanel=closePanel;
+  window.importData=importData;
+  window.renderTaskBoard=renderTaskBoard;
+  window.renderGantt=renderGantt;
+  window.renderBenefits=renderBenefits;
+  window.renderCharts=renderCharts;
+  window.renderRecs=renderRecs;
+  window.updateBadge=updateBadge;
+  window.changeTaskStatus=changeTaskStatus;
+  window.addPhase=addPhase;
+  window.addTask=addTask;
+  window.delPhase=delPhase;
+  window.delTask=delTask;
 
 })(); // end IIFE
 
