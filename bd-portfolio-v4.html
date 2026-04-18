@@ -880,11 +880,11 @@ function onRoleChange(){
   if(sel.value === 'Leadership' && curView !== 'weekly'){
     sv('weekly');
   } else {
-    renderTracker();
-    if(curView==='dashboard') renderDash();
-    if(curView==='activity') renderActivity();
-    if(curView==='taskboard') renderTaskBoard();
-    if(curView==='weekly') renderWeekly();
+    if(window.renderTracker) window.renderTracker();
+    if(curView==='dashboard' && window.renderDash) window.renderDash();
+    if(curView==='activity' && window.renderActivity) window.renderActivity();
+    if(curView==='taskboard' && window.renderTaskBoard) window.renderTaskBoard();
+    if(curView==='weekly' && window.renderWeekly) window.renderWeekly();
   }
   updateImportVisibility();
 }
@@ -939,7 +939,7 @@ function toggleBulkTracker(){
     btn.textContent = _bulkMode.tracker ? 'Cancel Select' : 'Bulk Update';
     btn.style.background = _bulkMode.tracker ? '#C55A11' : 'rgba(255,255,255,.15)';
   }
-  renderTracker();
+  if(window.renderTracker) window.renderTracker();
   updateBulkBar('tracker');
 }
 
@@ -970,7 +970,7 @@ function applyBulkTracker(){
   });
   saveAll();
   _bulkSelected.tracker.clear();
-  renderTracker();
+  if(window.renderTracker) window.renderTracker();
   updateBulkBar('tracker');
   showToast('Updated '+ids.length+' project'+(ids.length>1?'s':''));
 }
@@ -994,7 +994,7 @@ function toggleBulkTasks(){
     btn.textContent = _bulkMode.tasks ? 'Cancel Select' : 'Bulk Update';
     btn.style.background = _bulkMode.tasks ? '#C55A11' : 'rgba(255,255,255,.15)';
   }
-  renderTaskBoard();
+  if(window.renderTaskBoard) window.renderTaskBoard();
   updateBulkBar('tasks');
 }
 
@@ -1035,7 +1035,7 @@ function applyBulkTasks(){
 
   saveAll();
   _bulkSelected.tasks.clear();
-  renderTaskBoard();
+  if(window.renderTaskBoard) window.renderTaskBoard();
   updateBulkBar('tasks');
   showToast('Updated '+ids.length+' task'+(ids.length>1?'s':''));
 }
@@ -1043,7 +1043,6 @@ function applyBulkTasks(){
 
 function setTrackerMode(mode){
   window._trackerMode = mode;
-  // Update tab buttons
   ['active','complete','all'].forEach(function(m){
     var btn = document.getElementById('tmode-'+m);
     if(btn){
@@ -1051,17 +1050,16 @@ function setTrackerMode(mode){
       btn.style.color = m===mode ? '#fff' : '#595959';
     }
   });
-  // Show/hide views
   var activeView = document.getElementById('tracker-active-view');
   var completeView = document.getElementById('tracker-complete-view');
   if(mode === 'complete'){
     if(activeView) activeView.style.display = 'none';
     if(completeView) completeView.style.display = 'block';
-    renderCompletedProjects();
+    if(window.renderCompletedProjects) window.renderCompletedProjects();
   } else {
     if(activeView) activeView.style.display = 'block';
     if(completeView) completeView.style.display = 'none';
-    renderTracker();
+    if(window.renderTracker) window.renderTracker();
   }
 }
 
