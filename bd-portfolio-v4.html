@@ -272,18 +272,31 @@ body.meeting-mode .trow:hover { background:inherit !important; }
 
 <!-- TRACKER -->
 <div class="view active" id="view-tracker">
-  <div class="frow">
-    <input class="sinp" id="si" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
-    <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select>
-    <select class="fsel" id="fp" onchange="renderTracker()"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
-    <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
-    <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
-    <span id="fcount" style="font-size:9px;color:var(--gt)"></span>
-    <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
+  <!-- Tracker mode tabs -->
+  <div style="display:flex;gap:0;margin-bottom:10px;background:#fff;border-radius:8px;border:1px solid #D6C8DB;overflow:hidden;width:fit-content">
+    <button id="tmode-active" onclick="setTrackerMode('active')" style="padding:7px 18px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:#68217D;color:#fff;font-family:inherit">Active Projects</button>
+    <button id="tmode-complete" onclick="setTrackerMode('complete')" style="padding:7px 18px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:#fff;color:#595959;border-left:1px solid #D6C8DB;font-family:inherit">&#10003; Completed</button>
+    <button id="tmode-all" onclick="setTrackerMode('all')" style="padding:7px 18px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:#fff;color:#595959;border-left:1px solid #D6C8DB;font-family:inherit">All Projects</button>
   </div>
-  <div class="card">
-    <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span class="hm">Health</span><span></span></div>
-    <div id="tbody"></div>
+  <!-- Active/All view -->
+  <div id="tracker-active-view">
+    <div class="frow">
+      <input class="sinp" id="si" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
+      <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select>
+      <select class="fsel" id="fp" onchange="renderTracker()"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
+      <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+      <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
+      <span id="fcount" style="font-size:9px;color:var(--gt)"></span>
+      <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
+    </div>
+    <div class="card">
+      <div class="thdr tcols"><span>Project</span><span class="hm">Lead</span><span>Priority</span><span class="hm">Status</span><span class="hm">Approval</span><span class="hm">Progress</span><span class="hm">Health</span><span></span></div>
+      <div id="tbody"></div>
+    </div>
+  </div>
+  <!-- Completed view -->
+  <div id="tracker-complete-view" style="display:none">
+    <div id="completed-body"></div>
   </div>
 </div>
 
@@ -838,6 +851,144 @@ function updateSub(){
 }
 
 // -- Tracker -------------------------------------------------------------------
+
+// -- Tracker Mode -------------------------------------------------------------
+window._trackerMode = 'active';
+
+function setTrackerMode(mode){
+  window._trackerMode = mode;
+  // Update tab buttons
+  ['active','complete','all'].forEach(function(m){
+    var btn = document.getElementById('tmode-'+m);
+    if(btn){
+      btn.style.background = m===mode ? '#68217D' : '#fff';
+      btn.style.color = m===mode ? '#fff' : '#595959';
+    }
+  });
+  // Show/hide views
+  var activeView = document.getElementById('tracker-active-view');
+  var completeView = document.getElementById('tracker-complete-view');
+  if(mode === 'complete'){
+    if(activeView) activeView.style.display = 'none';
+    if(completeView) completeView.style.display = 'block';
+    renderCompletedProjects();
+  } else {
+    if(activeView) activeView.style.display = 'block';
+    if(completeView) completeView.style.display = 'none';
+    renderTracker();
+  }
+}
+
+function renderCompletedProjects(){
+  var body = document.getElementById('completed-body');
+  if(!body) return;
+  var completed = projects.filter(function(p){ return p.status === 'Complete'; });
+
+  if(!completed.length){
+    body.innerHTML = '<div class="info-box" style="text-align:center;padding:30px">'
+      + '<div style="font-size:32px;margin-bottom:10px">&#127881;</div>'
+      + '<div style="font-weight:800;color:#4A1759;font-size:14px;margin-bottom:6px">No completed projects yet</div>'
+      + '<div style="font-size:10px;color:#595959">Projects marked Complete will appear here as a record of achievement</div>'
+      + '</div>';
+    return;
+  }
+
+  // Summary strip
+  var totalComplete = completed.length;
+  var avgProgress = Math.round(completed.reduce(function(a,p){ return a+p.pct; },0)/totalComplete);
+  var kpismet = 0; var totalkpis = 0;
+  completed.forEach(function(p){
+    var pk = kpis.filter(function(k){ return k.projId===p.id && k.target>0; });
+    totalkpis += pk.length;
+    kpismet += pk.filter(function(k){ return kpiAchievement(k)>=100; }).length;
+  });
+
+  var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">'
+    + '<div style="background:#E2EFDA;border-radius:9px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:800;color:#375623">'+totalComplete+'</div><div style="font-size:9px;color:#375623;margin-top:2px;font-weight:700">Projects Completed</div></div>'
+    + '<div style="background:#E8D5EE;border-radius:9px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:800;color:#68217D">'+avgProgress+'%</div><div style="font-size:9px;color:#68217D;margin-top:2px;font-weight:700">Avg Final Progress</div></div>'
+    + '<div style="background:#DDE4EC;border-radius:9px;padding:12px 14px;text-align:center"><div style="font-size:24px;font-weight:800;color:#3A3F60">'+kpismet+'/'+totalkpis+'</div><div style="font-size:9px;color:#3A3F60;margin-top:2px;font-weight:700">KPIs Met</div></div>'
+    + '</div>';
+
+  // Completion summary cards
+  html += '<div style="display:grid;gap:10px">';
+  completed.forEach(function(p){
+    var pk = kpis.filter(function(k){ return k.projId===p.id && k.target>0; });
+    var kpisMet = pk.filter(function(k){ return kpiAchievement(k)>=100; }).length;
+    var pTasks = tasks.filter(function(t){ return t.projId===p.id && t.type==='task'; });
+    var doneTasks = pTasks.filter(function(t){ return t.status==='Complete'; }).length;
+    var priColors = {Critical:'#C00000',High:'#C55A11',Medium:'#DBC25D',Low:'#375623'};
+    var priPills = {Critical:{bg:'#FFDCE0',fg:'#C00000'},High:{bg:'#FCE4D6',fg:'#C55A11'},Medium:{bg:'#FFF8DC',fg:'#6B5A10'},Low:{bg:'#E2EFDA',fg:'#375623'}};
+    var role = getRole();
+
+    // Duration
+    var duration = '';
+    if(p.startDate && p.endDate){
+      var d1=new Date(p.startDate); var d2=new Date(p.endDate);
+      var days=Math.round((d2-d1)/86400000);
+      duration = days > 0 ? days + ' days' : '';
+    }
+
+    html += '<div class="card" style="border-left:4px solid #375623;overflow:hidden">'
+      // Header
+      + '<div style="background:#E2EFDA;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+            + '<span style="font-size:13px;font-weight:800;color:#375623">&#10003; '+esc(p.name)+'</span>'
+          + '</div>'
+          + '<div style="font-size:9px;color:#375623;opacity:.8;margin-top:2px">Lead: '+esc(p.lead)+(p.category?' &middot; '+esc(p.category):'')+(duration?' &middot; '+duration:'')+'</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:5px;align-items:center;flex-shrink:0">'
+          + (priPills[p.priority]?pill(p.priority,priPills[p.priority]):'')
+          + pill('Complete', {bg:'#E2EFDA',fg:'#375623'})
+          + (role!=='Leadership'?'<button onclick="openModal('+p.id+')" style="background:#375623;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Edit</button>':'')
+        + '</div>'
+      + '</div>'
+      // Stats grid
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid #D6C8DB">';
+
+    // Stat cells
+    var stats = [
+      {label:'Final Progress', val:p.pct+'%', color:'#375623'},
+      {label:'Tasks Complete', val:doneTasks+'/'+pTasks.length, color:'#68217D'},
+      {label:'KPIs Met', val:pk.length?kpisMet+'/'+pk.length:'-', color:'#3A3F60'},
+      {label:'Category', val:p.category||'-', color:'#595959'},
+    ];
+    stats.forEach(function(s, i){
+      html += '<div style="padding:10px 12px;'+(i>0?'border-left:1px solid #D6C8DB;':'')+'">'
+        + '<div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+s.label+'</div>'
+        + '<div style="font-size:13px;font-weight:800;color:'+s.color+'">'+esc(s.val)+'</div>'
+        + '</div>';
+    });
+
+    // KPI achievements if any
+    if(pk.length){
+      html += '</div><div style="padding:10px 16px;border-top:1px solid #E2EFDA;display:flex;flex-wrap:wrap;gap:6px">';
+      pk.forEach(function(k){
+        var ach = kpiAchievement(k);
+        var rg = kpiRag(ach);
+        var fmt = k.unit==='R'?'R ':k.unit==='%'?'':'';
+        html += '<div style="background:'+rg.bg+';border-radius:6px;padding:4px 10px;font-size:9px;font-weight:700;color:'+rg.color+'">'
+          + esc(k.name)+': '+ach+'% of target'
+          + '</div>';
+      });
+    }
+
+    // Outcome/notes
+    if(p.outcome||p.notes){
+      html += '</div><div style="padding:10px 16px;border-top:1px solid #E2EFDA;font-size:10px;color:#595959;line-height:1.5">'
+        + (p.outcome?'<strong>Outcome:</strong> '+esc(p.outcome):'')
+        + (p.outcome&&p.notes?' &nbsp;&middot;&nbsp; ':'')
+        + (p.notes?esc(p.notes):'')
+        + '</div>';
+    }
+
+    html += '</div></div>';
+  });
+
+  html += '</div>';
+  body.innerHTML = html;
+}
+
 function renderTracker(){
   const s=(document.getElementById('si').value||'').toLowerCase();
   const fc=document.getElementById('fc').value;
@@ -846,7 +997,12 @@ function renderTracker(){
   const fs=document.getElementById('fs').value;
   const role=getRole();
   document.getElementById('addpb').style.display=role==='Leadership'?'none':'block';
+  // Respect tracker mode
+  var _tmode = window._trackerMode || 'active';
   const filtered=projects.filter(p=>{
+    // Mode filter
+    if(_tmode==='active' && p.status==='Complete') return false;
+    if(_tmode==='complete' && p.status!=='Complete') return false;
     if(fc&&p.category!==fc)return false;
     if(fp&&p.priority!==fp)return false;
     if(fl&&p.lead!==fl)return false;
@@ -3451,6 +3607,8 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
   window.renderWeekly=renderWeekly;
+  window.setTrackerMode=setTrackerMode;
+  window.renderCompletedProjects=renderCompletedProjects;
   window.setWeeklyTab=setWeeklyTab;
   window.renderWeeklyUpdates=renderWeeklyUpdates;
   window.renderWeeklyTasks=renderWeeklyTasks;
