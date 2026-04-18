@@ -3162,6 +3162,7 @@ function dbToComment(r) {
     dt = d.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
   } catch(e){}
   return {
+    id: r.id,
     taskId: r.task_id, isAdHoc: r.task_type === 'adhoc',
     author: r.author, text: r.comment_text,
     statusAtTime: r.task_status_at_time || '', dateTime: dt
@@ -3364,7 +3365,17 @@ window.sbSaveComment = function(comment) {
     comment_text: comment.text,
     task_status_at_time: comment.statusAtTime || '',
     created_at: new Date().toISOString()
-  }).then(function(r){ if(r.error) console.warn('sbSaveComment:', r.error); });
+  }).select().then(function(r){
+    if(r.error){ console.warn('sbSaveComment:', r.error); return; }
+    // Sync Supabase id back to local comment so delete works
+    if(r.data && r.data[0]){
+      var newId = r.data[0].id;
+      var local = comments.find(function(c){
+        return c.taskId===comment.taskId && c.text===comment.text && !c.id;
+      });
+      if(local){ local.id = newId; saveComments(); }
+    }
+  });
 };
 
 window.sbSavePhase = function(task) {
