@@ -519,7 +519,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
           <span style="font-size:9px;color:#595959">Latest updates from the team</span>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:8px">
-          <select class="fi" id="update-author" style="width:130px;flex-shrink:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+          <div style="display:flex;gap:5px;width:180px;flex-shrink:0"><select class="fi" id="update-author" onchange="syncUpdateAuthor()" style="flex:1;min-width:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="update-author-custom" type="text" placeholder="Name" style="display:none;flex:1;min-width:0" oninput="syncUpdateAuthorSel()"/></div>
           <input class="fi" id="update-text" type="text" placeholder="Add a project update..." style="flex:1"/>
           <button onclick="postProjectUpdate()" style="background:#68217D;color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Post</button>
         </div>
@@ -546,7 +546,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <div class="mbody">
       <div><label class="fl">Task Name</label><input class="fi" id="ahtname" type="text"/></div>
       <div class="mrow">
-        <div><label class="fl">Owner</label><select class="fi" id="ahowner"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select></div>
+        <div><label class="fl">Owner</label><div style="display:flex;gap:5px"><select class="fi" id="ahowner" onchange="syncAhOwner()" style="flex:1"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="ahowner-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncAhOwnerSel()"/></div></div>
         <div><label class="fl">Priority</label><select class="fi" id="ahpri"><option>High</option><option>Critical</option><option>Medium</option><option>Low</option></select></div>
       </div>
       <div class="mrow">
@@ -789,6 +789,44 @@ function getLeadValue(){
   }
   return sel ? sel.value : '';
 }
+
+// -- Dynamic member name helpers ----------------------------------------------
+function syncAhOwner(){
+  var sel = document.getElementById('ahowner');
+  var inp = document.getElementById('ahowner-custom');
+  if(!sel||!inp) return;
+  if(sel.value==='__other__'){ inp.style.display='block'; inp.focus(); }
+  else inp.style.display='none';
+}
+function syncAhOwnerSel(){
+  var sel = document.getElementById('ahowner');
+  if(sel) sel.value='__other__';
+}
+function getAhOwnerValue(){
+  var sel = document.getElementById('ahowner');
+  var inp = document.getElementById('ahowner-custom');
+  if(sel&&sel.value==='__other__'&&inp&&inp.value.trim()) return inp.value.trim();
+  return sel ? sel.value : '';
+}
+
+function syncUpdateAuthor(){
+  var sel = document.getElementById('update-author');
+  var inp = document.getElementById('update-author-custom');
+  if(!sel||!inp) return;
+  if(sel.value==='__other__'){ inp.style.display='block'; inp.focus(); }
+  else inp.style.display='none';
+}
+function syncUpdateAuthorSel(){
+  var sel = document.getElementById('update-author');
+  if(sel) sel.value='__other__';
+}
+function getUpdateAuthorValue(){
+  var sel = document.getElementById('update-author');
+  var inp = document.getElementById('update-author-custom');
+  if(sel&&sel.value==='__other__'&&inp&&inp.value.trim()) return inp.value.trim();
+  return sel ? sel.value : '';
+}
+
 function getRole(){ return (document.getElementById('role-sel')||{value:'Admin'}).value; }
 var _adminUnlocked = false;
 function onRoleChange(){
@@ -1946,13 +1984,29 @@ function openAdHocModal(id){
   if(id){
     const t=adHocTasks.find(x=>x.id===id);
     document.getElementById('ahtname').value=t.name;
-    document.getElementById('ahowner').value=t.owner||'Berenicia';
+    var ahSel = document.getElementById('ahowner');
+  var ahInp = document.getElementById('ahowner-custom');
+  var knownLeads = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+  if(ahSel && ahInp){
+    if(knownLeads.indexOf(t.owner||'Berenicia') >= 0){
+      ahSel.value = t.owner||'Berenicia';
+      ahInp.style.display = 'none';
+    } else {
+      ahSel.value = '__other__';
+      ahInp.value = t.owner||'';
+      ahInp.style.display = 'block';
+    }
+  }
     document.getElementById('ahpri').value=t.priority||'Medium';
     document.getElementById('ahstat').value=t.status||'Not Started';
     document.getElementById('ahdue').value=t.due||'';
     document.getElementById('ahnotes').value=t.notes||'';
   }else{
     document.getElementById('ahtname').value='';
+  var ahInpR = document.getElementById('ahowner-custom');
+  if(ahInpR){ ahInpR.value=''; ahInpR.style.display='none'; }
+  var ahSelR = document.getElementById('ahowner');
+  if(ahSelR) ahSelR.value='Berenicia';
     document.getElementById('ahowner').value='Berenicia';
     document.getElementById('ahpri').value='High';
     document.getElementById('ahstat').value='Not Started';
@@ -1962,7 +2016,7 @@ function openAdHocModal(id){
   openMo('ahmodal');
 }
 function saveAdHoc(){
-  const d={name:document.getElementById('ahtname').value,owner:document.getElementById('ahowner').value,priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
+  const d={name:document.getElementById('ahtname').value,owner:getAhOwnerValue(),priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
   if(ahEditId){const i=adHocTasks.findIndex(t=>t.id===ahEditId);adHocTasks[i]={...adHocTasks[i],...d};}
   else adHocTasks.push({id:'ah'+Date.now(),...d});
   var isNewAh = !ahEditId;
@@ -2296,7 +2350,7 @@ function renderUpdateLog(projId){
 
 function postProjectUpdate(){
   var text = document.getElementById('update-text').value.trim();
-  var author = document.getElementById('update-author').value;
+  var author = getUpdateAuthorValue();
   if(!text){ showToast('Please enter an update','warn'); return; }
   var now = new Date();
   var dt = now.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})
