@@ -686,7 +686,26 @@ function toggleMeetingMode(){
 // -- Constants -----------------------------------------------------------------
 const PHASES=['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
 const PTASKS={'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],'Planning':['Project plan','Resource plan','Risk register','Communication plan'],'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']};
-const LEADS=['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+// Default leads - included even if no data references them yet
+const DEFAULT_LEADS = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+
+// Dynamic leads - returns all unique names found in projects, tasks, updates, comments + defaults
+function getAllLeads(){
+  const set = new Set(DEFAULT_LEADS);
+  // Each block wrapped in try/catch to handle TDZ and any other access issues
+  try { if(Array.isArray(projects)) projects.forEach(function(p){
+    if(p.lead) set.add(p.lead);
+    if(Array.isArray(p.collaborators)) p.collaborators.forEach(function(c){ if(c) set.add(c); });
+  }); } catch(e){}
+  try { if(Array.isArray(tasks)) tasks.forEach(function(t){ if(t.owner && t.type==='task') set.add(t.owner); }); } catch(e){}
+  try { if(Array.isArray(adHocTasks)) adHocTasks.forEach(function(t){ if(t.owner) set.add(t.owner); }); } catch(e){}
+  try { if(Array.isArray(projectUpdates)) projectUpdates.forEach(function(u){ if(u.author) set.add(u.author); }); } catch(e){}
+  try { if(Array.isArray(comments)) comments.forEach(function(c){ if(c.author) set.add(c.author); }); } catch(e){}
+  return Array.from(set).sort();
+}
+
+// LEADS is a dynamic property on window - always returns fresh list
+Object.defineProperty(window, 'LEADS', { get: function(){ return getAllLeads(); }, configurable: true });
 const CATS=['Operations','People & Training','Technology & Assets','Finance'];
 const PRIS=['Critical','High','Medium','Low'];
 const STATUSES=['Not Started','In Progress','On Hold','Complete'];
@@ -1223,7 +1242,7 @@ function renderDash(){
   }).join('');
 
   // Total involvement = lead + collaborator
-  document.getElementById('dwl').innerHTML=LEADS.map(l=>{
+  document.getElementById('dwl').innerHTML=getAllLeads().map(l=>{
     const led=projects.filter(p=>p.lead===l).length;
     const collab=projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length;
     const tot=led+collab;const heavy=tot>4;
@@ -1234,7 +1253,7 @@ function renderDash(){
     </div>`;
   }).join('');
 
-  const overloaded=LEADS.filter(l=>{
+  const overloaded=getAllLeads().filter(l=>{
     const led=projects.filter(p=>p.lead===l).length;
     const collab=projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length;
     return led+collab>4;
@@ -1495,7 +1514,7 @@ function renderPhases(p){
       // Owner select
       var ownerSel = document.createElement('select');
       ownerSel.style.cssText = 'font-size:9px;border:1px solid #D6C8DB;border-radius:4px;padding:2px 3px;color:#4A1759;font-family:inherit';
-      LEADS.forEach(function(l){
+      getAllLeads().forEach(function(l){
         var opt = document.createElement('option');
         opt.value = l; opt.textContent = l;
         if(l===(t.owner||p.lead)) opt.selected = true;
@@ -1880,7 +1899,7 @@ function renderByLead(allTasks){
   var type = document.getElementById('tb-type').value;
 
   // Build per-lead summary
-  var leadsToShow = lead ? [lead] : LEADS;
+  var leadsToShow = lead ? [lead] : getAllLeads();
   var statuses = ['Not Started','In Progress','On Hold','Complete'];
 
   // Header
@@ -2182,7 +2201,7 @@ function renderBenefits(){
 // -- Recommendations -----------------------------------------------------------
 function genRecs(){
   const recs=[];const today=new Date();const dd=(a,b)=>Math.round((b-a)/86400000);
-  const wl=LEADS.map(l=>({lead:l,total:projects.filter(p=>p.lead===l).length+projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length}));
+  const wl=getAllLeads().map(l=>({lead:l,total:projects.filter(p=>p.lead===l).length+projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length}));
   const unassigned=wl.filter(w=>w.total===0).map(w=>w.lead);
   wl.filter(w=>w.total>4).forEach(w=>recs.push({id:`wl-${w.lead}`,severity:'high',category:'Workload',icon:'&#9888;',title:`${w.lead} total involvement exceeds 4`,detail:`${w.lead} leads or collaborates on ${w.total} projects.`,action:`Redistribute work to ${unassigned.join(' or ')||'a less involved lead'}.`,affected:projects.filter(p=>p.lead===w.lead||(p.collaborators||[]).includes(w.lead)).map(p=>p.name)}));
   if(unassigned.length)recs.push({id:'wl-un',severity:'info',category:'Workload',icon:'&#128100;',title:`${unassigned.join(', ')} ${unassigned.length===1?'has':'have'} no involvement`,detail:'Available capacity exists.',action:'Assign projects or collaborator roles to balance the portfolio.',affected:[]});
