@@ -282,7 +282,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   <div id="tracker-active-view">
     <div class="frow">
       <input class="sinp" id="si" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
-      <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select>
+      <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option></select>
       <select class="fsel" id="fp" onchange="renderTracker()"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
       <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
       <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
@@ -475,7 +475,10 @@ body.meeting-mode .trow:hover { background:inherit !important; }
             <input class="fi" id="fld-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncLeadSelect()"/>
           </div>
         </div>
-        <div><label class="fl">Category</label><select class="fi" id="fcat"><option>Operations</option><option>People &amp; Training</option><option>Technology &amp; Assets</option><option>Finance</option></select></div>
+        <div><label class="fl">Category</label><div style="display:flex;gap:5px">
+            <select class="fi" id="fcat" onchange="syncCatInput()" style="flex:1"></select>
+            <input class="fi" id="fcat-custom" type="text" placeholder="New category" style="display:none;flex:1" oninput="syncCatSelect()"/>
+          </div></div>
       </div>
       <div class="mrow">
         <div><label class="fl">Priority</label><select class="fi" id="fpri"><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></div>
@@ -706,6 +709,16 @@ function getAllLeads(){
 
 // LEADS is a dynamic property on window - always returns fresh list
 Object.defineProperty(window, 'LEADS', { get: function(){ return getAllLeads(); }, configurable: true });
+
+// Default project categories - included even if no project uses them yet
+const DEFAULT_CATEGORIES = ['Operations','People & Training','Technology & Assets','Finance'];
+
+// Dynamic categories from existing projects + defaults
+function getAllCategories(){
+  const set = new Set(DEFAULT_CATEGORIES);
+  try { if(Array.isArray(projects)) projects.forEach(function(p){ if(p.category) set.add(p.category); }); } catch(e){}
+  return Array.from(set).sort();
+}
 const CATS=['Operations','People & Training','Technology & Assets','Finance'];
 const PRIS=['Critical','High','Medium','Low'];
 const STATUSES=['Not Started','In Progress','On Hold','Complete'];
@@ -800,6 +813,58 @@ function syncLeadSelect(){
   var sel = document.getElementById('fld');
   if(sel) sel.value = '__other__';
 }
+// Category sync helpers (mirrors lead sync pattern)
+function syncCatInput(){
+  var sel = document.getElementById('fcat');
+  var inp = document.getElementById('fcat-custom');
+  if(!sel||!inp) return;
+  if(sel.value==='__other__'){ inp.style.display='block'; inp.focus(); }
+  else inp.style.display='none';
+}
+function syncCatSelect(){
+  var sel = document.getElementById('fcat');
+  if(sel) sel.value='__other__';
+}
+function getCatValue(){
+  var sel = document.getElementById('fcat');
+  var inp = document.getElementById('fcat-custom');
+  if(sel && sel.value==='__other__' && inp && inp.value.trim()) return inp.value.trim();
+  return sel ? sel.value : '';
+}
+
+// Populate a select element with options from an array
+function populateSelect(selectId, options, includeAddNew, includeAllOption){
+  var sel = document.getElementById(selectId);
+  if(!sel) return;
+  var currentVal = sel.value;
+  var html = '';
+  if(includeAllOption) html += '<option value="">'+includeAllOption+'</option>';
+  options.forEach(function(opt){
+    html += '<option value="'+opt.replace(/"/g,'&quot;')+'">'+opt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>';
+  });
+  if(includeAddNew) html += '<option value="__other__">+ Add new...</option>';
+  sel.innerHTML = html;
+  // Try to restore previous value
+  if(currentVal && (options.indexOf(currentVal) >= 0 || currentVal === '__other__' || currentVal === '')){
+    sel.value = currentVal;
+  }
+}
+
+// Refresh all dynamic dropdowns - call before opening modals or filter changes
+function refreshDropdowns(){
+  try {
+    var leads = getAllLeads();
+    populateSelect('fld', leads, true, null);
+    populateSelect('ahowner', leads, true, null);
+    populateSelect('update-author', leads, true, null);
+    populateSelect('fl', leads, false, 'All Leads');
+    populateSelect('weekly-lead', leads, false, 'All Leads');
+    var cats = getAllCategories();
+    populateSelect('fcat', cats, true, null);
+    populateSelect('fc', cats, false, 'All Categories');
+  } catch(e) { console.warn('refreshDropdowns:', e); }
+}
+
 function getLeadValue(){
   var sel = document.getElementById('fld');
   var inp = document.getElementById('fld-custom');
@@ -1100,6 +1165,7 @@ function renderTracker(){
 let editId=null;
 function openModal(id){
   editId=id;
+  if(typeof refreshDropdowns==='function') refreshDropdowns();
   const isNew=!id;
   document.getElementById('mtitle').textContent=isNew?'New Project':'Edit Project';
   document.getElementById('mdelb').style.display=isNew?'none':'block';
@@ -1116,7 +1182,23 @@ function openModal(id){
     fldInp.value = p.lead;
     fldInp.style.display = 'block';
   }
-  document.getElementById('fcat').value=p.category;
+  // Set category - if custom, switch to "+ Add new" mode
+  var fcatSel = document.getElementById('fcat');
+  var fcatInp = document.getElementById('fcat-custom');
+  var allCats = getAllCategories();
+  if(fcatSel && fcatInp){
+    if(allCats.indexOf(p.category) >= 0){
+      fcatSel.value = p.category;
+      fcatInp.style.display = 'none';
+    } else if(p.category){
+      fcatSel.value = '__other__';
+      fcatInp.value = p.category;
+      fcatInp.style.display = 'block';
+    } else {
+      fcatSel.value = allCats[0] || '';
+      fcatInp.style.display = 'none';
+    }
+  }
   document.getElementById('fpri').value=p.priority;
   document.getElementById('fst').value=p.status;
   document.getElementById('fap').value=p.approval;
@@ -1998,6 +2080,7 @@ function openTaskStatusModal(taskId){
 let ahEditId=null;
 function openAdHocModal(id){
   ahEditId=id||null;
+  if(typeof refreshDropdowns==='function') refreshDropdowns();
   document.getElementById('ahtitle').textContent=id?'Edit Task':'Add Ad Hoc Task';
   document.getElementById('ahdelb').style.display=id?'block':'none';
   if(id){
@@ -3280,6 +3363,7 @@ function delTask(taskId, projId) {
   if (arr) arr.innerHTML = '&#9660;';
 }
 
+if(typeof refreshDropdowns==='function') refreshDropdowns();
 renderTracker();updateSub();updateBadge();
 
 
