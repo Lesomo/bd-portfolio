@@ -555,6 +555,18 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   </div>
 </div>
 
+
+<!-- LEAD PROJECTS MODAL -->
+<div class="mo" id="leadmodal" onclick="closeMo('leadmodal',event)">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span id="lead-modal-title">Projects</span>
+      <button class="bcls" onclick="closeMo('leadmodal')">&#215;</button>
+    </div>
+    <div class="mbody" id="lead-modal-body" style="padding:14px"></div>
+  </div>
+</div>
+
 <!-- AD HOC TASK MODAL -->
 <div class="mo" id="ahmodal" onclick="closeMo('ahmodal',event)">
   <div class="mbox" style="max-width:440px" onclick="event.stopPropagation()">
@@ -1236,6 +1248,58 @@ function renderTracker(){
 
 // -- Modal ---------------------------------------------------------------------
 let editId=null;
+
+// -- Lead Projects Modal ------------------------------------------------------
+function openLeadProjects(leadName){
+  if(!leadName) return;
+  var leading = projects.filter(function(p){ return p.lead === leadName; });
+  var collab = projects.filter(function(p){
+    return p.lead !== leadName && (p.collaborators||[]).indexOf(leadName) >= 0;
+  });
+  document.getElementById('lead-modal-title').textContent = leadName + ' - ' + (leading.length + collab.length) + ' project' + (leading.length+collab.length !== 1 ? 's' : '');
+
+  var html = '';
+  if(leading.length){
+    html += '<div style="font-size:9px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Leading (' + leading.length + ')</div>';
+    html += '<div style="display:grid;gap:6px;margin-bottom:14px">';
+    leading.forEach(function(p){ html += renderLeadModalRow(p, 'lead'); });
+    html += '</div>';
+  }
+  if(collab.length){
+    html += '<div style="font-size:9px;font-weight:800;color:#3A3F60;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Collaborating on (' + collab.length + ')</div>';
+    html += '<div style="display:grid;gap:6px">';
+    collab.forEach(function(p){ html += renderLeadModalRow(p, 'collab'); });
+    html += '</div>';
+  }
+  if(!leading.length && !collab.length){
+    html = '<div style="text-align:center;padding:20px;color:#595959;font-size:11px">No projects found for ' + esc(leadName) + '</div>';
+  }
+  document.getElementById('lead-modal-body').innerHTML = html;
+  document.getElementById('leadmodal').classList.add('show');
+}
+
+function renderLeadModalRow(p, role){
+  var statusColors = {
+    'Not Started':{bg:'#F0F0F0',fg:'#595959'},
+    'In Progress':{bg:'#E8D5EE',fg:'#68217D'},
+    'On Hold':{bg:'#FCE4D6',fg:'#C55A11'},
+    'Complete':{bg:'#E2EFDA',fg:'#375623'}
+  };
+  var ss = statusColors[p.status] || statusColors['Not Started'];
+  var priColors = {Critical:'#C00000',High:'#C55A11',Medium:'#DBC25D',Low:'#375623'};
+  var roleBadgeBg = role === 'lead' ? '#68217D' : '#3A3F60';
+  var roleBadgeText = role === 'lead' ? 'Lead' : 'Collab';
+  return '<div onclick="closeMo(\'leadmodal\');setTimeout(function(){openModal('+p.id+');},150);" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FCF5E3;border-radius:8px;border-left:3px solid '+(priColors[p.priority]||'#999')+';cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'#F5F0F7\'" onmouseout="this.style.background=\'#FCF5E3\'">'
+    + '<span style="background:'+roleBadgeBg+';color:#fff;font-size:8px;font-weight:700;padding:2px 7px;border-radius:4px">'+roleBadgeText+'</span>'
+    + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:11px;font-weight:700;color:#4A1759">'+esc(p.name)+'</div>'
+      + '<div style="font-size:9px;color:#595959;margin-top:1px">'+esc(p.category||'')+(p.category&&p.priority?' &middot; ':'')+esc(p.priority||'')+'</div>'
+    + '</div>'
+    + '<span style="background:'+ss.bg+';color:'+ss.fg+';font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px">'+esc(p.status)+'</span>'
+    + '<span style="font-size:11px;font-weight:800;color:#68217D;min-width:36px;text-align:right">'+(p.pct||0)+'%</span>'
+    + '</div>';
+}
+
 function openModal(id){
   editId=id;
   if(typeof refreshDropdowns==='function') refreshDropdowns();
@@ -1412,7 +1476,8 @@ function renderDash(){
     const led=projects.filter(p=>p.lead===l).length;
     const collab=projects.filter(p=>(p.collaborators||[]).includes(l)&&p.lead!==l).length;
     const tot=led+collab;const heavy=tot>4;
-    return`<div style="background:${heavy?'#FCE4D6':tot===0?'#F0F0F0':'#E8D5EE'};border-radius:9px;padding:10px 12px;text-align:center;flex:1;min-width:80px">
+    const clickable=tot>0;
+    return`<div onclick="${clickable?`openLeadProjects('${l.replace(/'/g,"\\'")}');`:''}" style="background:${heavy?'#FCE4D6':tot===0?'#F0F0F0':'#E8D5EE'};border-radius:9px;padding:10px 12px;text-align:center;flex:1;min-width:80px;${clickable?'cursor:pointer;transition:transform .15s,box-shadow .15s':''}" ${clickable?`onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"`:''}>
       <div style="font-size:22px;font-weight:800;color:${heavy?'#C55A11':tot===0?'#595959':'#68217D'}">${tot}</div>
       <div style="font-size:8px;color:#595959;margin-top:1px">${esc(l)}</div>
       ${tot>0?`<div style="font-size:8px;color:#595959">${led} lead${collab>0?` + ${collab} collab`:''}</div>`:''}
