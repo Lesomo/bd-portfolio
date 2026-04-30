@@ -3010,8 +3010,43 @@ function parseUpdateDate(dt){
 function getWeeklyFilters(){
   var leadF = (document.getElementById('weekly-lead')||{value:''}).value;
   var rangeDays = parseInt((document.getElementById('weekly-range')||{value:'7'}).value)||7;
-  var today = new Date(); today.setHours(23,59,59,999);
-  var cutoff = new Date(); cutoff.setDate(cutoff.getDate()-rangeDays); cutoff.setHours(0,0,0,0);
+  var now = new Date();
+  var dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ... 5=Fri, 6=Sat
+  var isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+  // End-of-window: today 23:59 on Mon-Fri, Friday 23:59 on Sat/Sun
+  var today = new Date(now);
+  if(isWeekend){
+    // Roll back to the most recent Friday
+    var daysBackToFri = (dayOfWeek === 6) ? 1 : 2; // Sat->1, Sun->2
+    today.setDate(today.getDate() - daysBackToFri);
+  }
+  today.setHours(23,59,59,999);
+
+  // Cutoff = start of window (Monday 00:00)
+  var cutoff = new Date(now);
+  if(rangeDays === 7){
+    // This Week: Monday of the current (or just-ended) work week
+    var daysBackToMon = isWeekend
+      ? (dayOfWeek === 6 ? 5 : 6)  // Sat: back 5 days, Sun: back 6 days
+      : (dayOfWeek - 1);            // Mon=0, Tue=1, ... Fri=4
+    cutoff.setDate(cutoff.getDate() - daysBackToMon);
+    cutoff.setHours(0,0,0,0);
+  } else if(rangeDays === 14){
+    // Last 2 Weeks: Previous Monday (8-13 days back depending on day)
+    var daysBackToMon2 = isWeekend
+      ? (dayOfWeek === 6 ? 5 : 6)
+      : (dayOfWeek - 1);
+    cutoff.setDate(cutoff.getDate() - daysBackToMon2 - 7);
+    cutoff.setHours(0,0,0,0);
+  } else if(rangeDays === 30){
+    // This Month: 1st of current month
+    cutoff = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  } else {
+    // 999 / All time: very old date
+    cutoff = new Date(0);
+  }
+
   return {leadF:leadF, rangeDays:rangeDays, today:today, cutoff:cutoff};
 }
 
