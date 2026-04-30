@@ -3014,40 +3014,56 @@ function getWeeklyFilters(){
   var dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ... 5=Fri, 6=Sat
   var isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
 
-  // End-of-window: today 23:59 on Mon-Fri, Friday 23:59 on Sat/Sun
+  // today = end of past window (today 23:59 on weekday, Fri 23:59 on weekend)
   var today = new Date(now);
   if(isWeekend){
-    // Roll back to the most recent Friday
-    var daysBackToFri = (dayOfWeek === 6) ? 1 : 2; // Sat->1, Sun->2
+    var daysBackToFri = (dayOfWeek === 6) ? 1 : 2;
     today.setDate(today.getDate() - daysBackToFri);
   }
   today.setHours(23,59,59,999);
 
-  // Cutoff = start of window (Monday 00:00)
+  // cutoff = start of window (Monday 00:00 / 1st of month / etc.)
   var cutoff = new Date(now);
   if(rangeDays === 7){
-    // This Week: Monday of the current (or just-ended) work week
     var daysBackToMon = isWeekend
-      ? (dayOfWeek === 6 ? 5 : 6)  // Sat: back 5 days, Sun: back 6 days
-      : (dayOfWeek - 1);            // Mon=0, Tue=1, ... Fri=4
+      ? (dayOfWeek === 6 ? 5 : 6)
+      : (dayOfWeek - 1);
     cutoff.setDate(cutoff.getDate() - daysBackToMon);
     cutoff.setHours(0,0,0,0);
   } else if(rangeDays === 14){
-    // Last 2 Weeks: Previous Monday (8-13 days back depending on day)
     var daysBackToMon2 = isWeekend
       ? (dayOfWeek === 6 ? 5 : 6)
       : (dayOfWeek - 1);
     cutoff.setDate(cutoff.getDate() - daysBackToMon2 - 7);
     cutoff.setHours(0,0,0,0);
   } else if(rangeDays === 30){
-    // This Month: 1st of current month
     cutoff = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
   } else {
-    // 999 / All time: very old date
     cutoff = new Date(0);
   }
 
-  return {leadF:leadF, rangeDays:rangeDays, today:today, cutoff:cutoff};
+  // weekEnd = forward-looking end of window (used for Tasks "due in this period")
+  // For This Week: Friday 23:59 of current work week
+  // For Last 2 Weeks: Friday 23:59 of current work week (still 2 weeks total looking forward to Fri)
+  // For This Month: end of current month
+  // For All Time: very far future
+  var weekEnd;
+  if(rangeDays === 7 || rangeDays === 14){
+    weekEnd = new Date(now);
+    var daysToFri = isWeekend
+      ? (dayOfWeek === 6 ? 6 : 5)  // Sat -> next Fri (6 days), Sun -> next Fri (5 days)
+      : (5 - dayOfWeek);            // Mon=4, Tue=3, ... Fri=0
+    weekEnd.setDate(weekEnd.getDate() + daysToFri);
+    weekEnd.setHours(23,59,59,999);
+  } else if(rangeDays === 30){
+    // End of current month
+    weekEnd = new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59, 999);
+  } else {
+    // 999: far future
+    weekEnd = new Date(now.getFullYear()+10, 11, 31, 23, 59, 59, 999);
+  }
+
+  return {leadF:leadF, rangeDays:rangeDays, today:today, cutoff:cutoff, weekEnd:weekEnd};
 }
 
 function renderWeeklyBody(){
@@ -3176,17 +3192,18 @@ function renderWeeklyUpdates(body){
 function renderWeeklyTasks(body){
   var f = getWeeklyFilters();
   var today = new Date(); today.setHours(0,0,0,0);
-  var nextWeek = new Date(today); nextWeek.setDate(nextWeek.getDate()+7);
+  // Use f.weekEnd from getWeeklyFilters - matches the selected range (Fri/end-of-month/etc)
+  var windowEnd = f.weekEnd;
 
-  // Get all project tasks relevant this week
+  // Get all project tasks relevant for this period
   var allTasks = tasks.filter(function(t){
     if(t.type!=='task') return false;
     if(f.leadF && t.owner!==f.leadF) return false;
     var dueDate = t.end ? new Date(t.end) : null;
     var overdue = dueDate && dueDate<today && t.status!=='Complete';
-    var dueThisWeek = dueDate && dueDate>=today && dueDate<=nextWeek;
-    var complete = t.status==='Complete';
-    return overdue || dueThisWeek || (complete && dueDate && dueDate>=f.cutoff);
+    var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
+    var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
+    return overdue || dueInWindow || completedInWindow;
   });
 
   if(!allTasks.length){
@@ -3197,7 +3214,7 @@ function renderWeeklyTasks(body){
 
   // Summary
   var overdueTasks = allTasks.filter(function(t){ var d=t.end?new Date(t.end):null; return d&&d<today&&t.status!=='Complete'; });
-  var dueSoon = allTasks.filter(function(t){ var d=t.end?new Date(t.end):null; return d&&d>=today&&d<=nextWeek&&t.status!=='Complete'; });
+  var dueSoon = allTasks.filter(function(t){ var d=t.end?new Date(t.end):null; return d&&d>=today&&d<=windowEnd&&t.status!=='Complete'; });
   var completedTasks = allTasks.filter(function(t){ return t.status==='Complete'; });
 
   var html = weekSummaryStrip([
@@ -3228,7 +3245,7 @@ function renderWeeklyTasks(body){
       var proj = projects.find(function(p){ return p.id===t.projId; });
       var dueDate = t.end ? new Date(t.end) : null;
       var overdue = dueDate && dueDate<today && t.status!=='Complete';
-      var dueSoonFlag = dueDate && dueDate>=today && dueDate<=nextWeek && t.status!=='Complete';
+      var dueSoonFlag = dueDate && dueDate>=today && dueDate<=windowEnd && t.status!=='Complete';
       var ss = SS(t.status);
 
       html += '<div style="display:grid;grid-template-columns:1fr 100px 90px 90px;gap:8px;padding:8px 14px;align-items:center;background:'+(i%2===0?'#FCF5E3':'#fff')+';border-top:1px solid #E8E0EC">'
@@ -3252,21 +3269,22 @@ function renderWeeklyTasks(body){
 function renderWeeklyAdhoc(body){
   var f = getWeeklyFilters();
   var today = new Date(); today.setHours(0,0,0,0);
-  var nextWeek = new Date(today); nextWeek.setDate(nextWeek.getDate()+7);
+  var windowEnd = f.weekEnd;
 
   var filtered = adHocTasks.filter(function(t){
     if(f.leadF && t.owner!==f.leadF) return false;
     var dueDate = t.due ? new Date(t.due) : null;
     var overdue = dueDate && dueDate<today && t.status!=='Complete';
-    var dueThisWeek = dueDate && dueDate>=today && dueDate<=nextWeek;
-    var recentComplete = t.status==='Complete' && dueDate && dueDate>=f.cutoff;
-    return overdue || dueThisWeek || recentComplete || (!dueDate && t.status!=='Complete');
+    var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
+    var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
+    var openNoDate = !dueDate && t.status!=='Complete';
+    return overdue || dueInWindow || completedInWindow || openNoDate;
   });
 
   var overdue = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d<today&&t.status!=='Complete'; });
-  var dueNow = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d>=today&&d<=nextWeek&&t.status!=='Complete'; });
+  var dueNow = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d>=today&&d<=windowEnd&&t.status!=='Complete'; });
   var done = filtered.filter(function(t){ return t.status==='Complete'; });
-  var open = filtered.filter(function(t){ return t.status!=='Complete'&&(!t.due||new Date(t.due)>nextWeek); });
+  var open = filtered.filter(function(t){ return t.status!=='Complete' && !t.due; });
 
   if(!filtered.length){
     body.innerHTML = noDataBox('&#9889;','No ad hoc tasks this period',
