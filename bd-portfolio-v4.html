@@ -2741,10 +2741,13 @@ function renderCharts() {
   });
 
   // -- Bar: projects by category ----------------------------------
-  var CATS_LIST = ['Operations','People & Training','Technology & Assets','Finance'];
-  var CATS_SHORT = ['Operations','People & Training','Technology & Assets','Finance'];
+  // Use dynamic categories so newly added ones (e.g. R & D) show up in the chart
+  var CATS_LIST = getAllCategories();
+  var CATS_SHORT = CATS_LIST;
   var cCounts = CATS_LIST.map(function(c){ return projects.filter(function(p){ return p.category === c; }).length; });
-  var cCols = ['#A6C4CF','#E8D5EE','#CFCFB7','#DBC25D'];
+  // Default colour palette - cycles if more categories than colours
+  var palette = ['#A6C4CF','#E8D5EE','#CFCFB7','#DBC25D','#68217D','#3A3F60','#A14B7A','#5C8D89','#B07F4A','#7E4E70'];
+  var cCols = CATS_LIST.map(function(_, i){ return palette[i % palette.length]; });
   document.getElementById('leg-cat').innerHTML = CATS_LIST.map(function(c,i){
     return '<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:' + cCols[i] + ';display:inline-block"></span><span style="color:#595959">' + c + '</span></span>';
   }).join('');
