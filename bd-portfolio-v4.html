@@ -1275,7 +1275,7 @@ function openLeadProjects(leadName){
     html = '<div style="text-align:center;padding:20px;color:#595959;font-size:11px">No projects found for ' + esc(leadName) + '</div>';
   }
   document.getElementById('lead-modal-body').innerHTML = html;
-  document.getElementById('leadmodal').classList.add('show');
+  openMo('leadmodal');
 }
 
 function renderLeadModalRow(p, role){
