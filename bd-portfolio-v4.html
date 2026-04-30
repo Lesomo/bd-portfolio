@@ -735,7 +735,9 @@ const DEFAULT_CATEGORIES = ['Operations','People & Training','Technology & Asset
 // Dynamic categories from existing projects + defaults
 function getAllCategories(){
   const set = new Set(DEFAULT_CATEGORIES);
-  try { if(Array.isArray(projects)) projects.forEach(function(p){ if(p.category) set.add(p.category); }); } catch(e){}
+  try { if(Array.isArray(projects)) projects.forEach(function(p){
+    if(p.category && p.category !== '__other__') set.add(p.category);
+  }); } catch(e){}
   return Array.from(set).sort();
 }
 const CATS=['Operations','People & Training','Technology & Assets','Finance'];
@@ -1300,7 +1302,7 @@ function saveProj(){
   const d={
     name:document.getElementById('fn').value,
     lead:getLeadValue(),
-    category:document.getElementById('fcat').value.replace(/&amp;/g,'&'),
+    category:getCatValue().replace(/&amp;/g,'&'),
     priority:document.getElementById('fpri').value,
     status:document.getElementById('fst').value,
     approval:document.getElementById('fap').value,
@@ -1395,7 +1397,7 @@ function renderDash(){
     {l:'Avg Progress',v:avg+'%',bg:'#E8D5EE',fg:'#68217D'},
   ].map(k=>`<div class="kcard" style="background:${k.bg}"><div class="klbl" style="color:${k.fg}">${k.l}</div><div class="kval" style="color:${k.fg}">${k.v}</div></div>`).join('');
 
-  document.getElementById('dcat').innerHTML=CATS.map(c=>{
+  document.getElementById('dcat').innerHTML=getAllCategories().map(c=>{
     const n=projects.filter(p=>p.category===c).length;const cs=CS(c);
     return`<div class="mbi"><div class="mbl"><span>${pill(c,cs)}</span><strong style="font-size:10px;color:#4A1759">${n}</strong></div><div class="mbb"><div style="width:${Math.round(n/total*100)}%;height:100%;background:${cs.fg};border-radius:3px"></div></div></div>`;
   }).join('');
@@ -2304,7 +2306,7 @@ function renderBenefits(){
   ].map(k=>`<div class="bkpi" style="background:${k.bg}"><div class="bklbl" style="color:${k.fg}">${k.l}</div><div class="bkval" style="color:${k.fg}">${k.v}</div></div>`).join('');
 
   // Value by category
-  const catVal=CATS.map(c=>{
+  const catVal=getAllCategories().map(c=>{
     const pk=kpis.filter(k=>k.unit==='R'&&k.category==='Financial'&&projects.find(p=>p.id===k.projId&&p.category===c));
     const v=pk.reduce((a,k)=>a+k.actual,0);
     return{cat:c,v};
