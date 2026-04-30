@@ -854,11 +854,17 @@ function populateSelect(selectId, options, includeAddNew, includeAllOption){
 function refreshDropdowns(){
   try {
     var leads = getAllLeads();
+    // Editing dropdowns - include + Add new... option
     populateSelect('fld', leads, true, null);
     populateSelect('ahowner', leads, true, null);
     populateSelect('update-author', leads, true, null);
+    populateSelect('comment-author', leads, false, null);
+    // Filter dropdowns - include All Leads option, no Add new
     populateSelect('fl', leads, false, 'All Leads');
     populateSelect('weekly-lead', leads, false, 'All Leads');
+    populateSelect('tb-lead', leads, false, 'All Leads');
+    populateSelect('gantt-lead-filter', leads, false, 'All Leads');
+    // Categories
     var cats = getAllCategories();
     populateSelect('fcat', cats, true, null);
     populateSelect('fc', cats, false, 'All Categories');
@@ -2367,6 +2373,7 @@ function saveComments(){ try{ localStorage.setItem('bd-comments', JSON.stringify
 let panelTaskId = null, panelIsAdHoc = false;
 
 function openPanel(taskId, isAdHoc) {
+  if(typeof refreshDropdowns==='function') refreshDropdowns();
   panelTaskId = String(taskId);
   panelIsAdHoc = isAdHoc === true || isAdHoc === 'true';
   var task = null;
