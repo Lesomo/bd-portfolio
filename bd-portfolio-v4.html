@@ -180,6 +180,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .collab-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
 .collab-chip{display:flex;align-items:center;gap:3px;background:var(--pl);border-radius:10px;padding:2px 7px 2px 3px;font-size:9px;color:var(--pd)}
 /* ── Scrollbar ── */
+/* Hide Recommendations tab and Critical Issues for non-Admin users */
+body.hide-recs .tb[onclick*="'recs'"],
+body.hide-recs #strip-crit,
+body.hide-recs #strip-health { display:none !important; }
+
 /* Meeting / Presentation mode */
 body.meeting-mode .abtn,
 body.meeting-mode #addpb,
@@ -918,6 +923,21 @@ function getUpdateAuthorValue(){
 }
 
 function getRole(){ return (document.getElementById('role-sel')||{value:'Admin'}).value; }
+// -- Role-based visibility -----------------------------------------------------
+function applyRoleVisibility(){
+  var role = (typeof getRole==='function') ? getRole() : 'Admin';
+  if(role === 'Admin'){
+    document.body.classList.remove('hide-recs');
+  } else {
+    document.body.classList.add('hide-recs');
+    // If user is currently on the recs tab and role is no longer Admin,
+    // redirect to dashboard
+    if(typeof curView !== 'undefined' && curView === 'recs'){
+      if(typeof sv === 'function') sv('dashboard');
+    }
+  }
+}
+
 var _adminUnlocked = false;
 function onRoleChange(){
   var sel = document.getElementById('role-sel');
@@ -945,6 +965,8 @@ function onRoleChange(){
     if(curView==='weekly') renderWeekly();
   }
   updateImportVisibility();
+  if(typeof applyRoleVisibility==='function') applyRoleVisibility();
+  if(typeof updateSub==='function') updateSub();
 }
 function updateImportVisibility(){
   var importBtn = document.getElementById('import-btn');
@@ -975,7 +997,10 @@ function updateSub(){
   const ip=projects.filter(p=>p.status==='In Progress').length;
   const cr=projects.filter(p=>p.priority==='Critical').length;
   const rn=urgentRecs();
-  document.getElementById('psub').textContent=`${projects.length} projects . ${ip} in progress . ${cr} critical${rn>0?` . ${rn} urgent recommendation${rn>1?'s':''}`:''}`;
+  const isAdmin = (typeof getRole==='function') && getRole()==='Admin';
+  var subText = `${projects.length} projects . ${ip} in progress . ${cr} critical`;
+  if(isAdmin && rn>0) subText += ` . ${rn} urgent recommendation${rn>1?'s':''}`;
+  document.getElementById('psub').textContent = subText;
 }
 
 // -- Tracker -------------------------------------------------------------------
@@ -3371,6 +3396,7 @@ function delTask(taskId, projId) {
 }
 
 if(typeof refreshDropdowns==='function') refreshDropdowns();
+if(typeof applyRoleVisibility==='function') applyRoleVisibility();
 renderTracker();updateSub();updateBadge();
 
 
