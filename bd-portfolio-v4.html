@@ -534,6 +534,19 @@ body.meeting-mode .trow:hover { background:inherit !important; }
         </div>
         <div id="update-log-list" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
       </div>
+      <div id="template-section" style="display:none;margin-top:14px;padding:12px;background:#F5F0F7;border-radius:8px;border:1px solid #D6C8DB">
+        <label class="fl" style="margin-bottom:8px">Starting structure</label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button type="button" id="tpl-template" onclick="setProjectTemplate('template')" style="flex:1;padding:10px 12px;border:2px solid #68217D;background:#68217D;color:#fff;border-radius:7px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;text-align:left">
+            <div style="font-size:11px;margin-bottom:3px">&#128203; Use Template</div>
+            <div style="font-size:9px;font-weight:500;opacity:.85;line-height:1.4">5 phases, 17 tasks (Initiation through Closure)</div>
+          </button>
+          <button type="button" id="tpl-blank" onclick="setProjectTemplate('blank')" style="flex:1;padding:10px 12px;border:2px solid #D6C8DB;background:#fff;color:#595959;border-radius:7px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;text-align:left">
+            <div style="font-size:11px;margin-bottom:3px">&#9998; Start Blank</div>
+            <div style="font-size:9px;font-weight:500;opacity:.85;line-height:1.4">No phases or tasks - add your own</div>
+          </button>
+        </div>
+      </div>
       <div class="mact">
         <button class="bcan" onclick="closeMo('pmodal')">Cancel</button>
         <button class="bsav" onclick="saveProj()">Save Changes</button>
@@ -728,6 +741,32 @@ function getAllCategories(){
 const CATS=['Operations','People & Training','Technology & Assets','Finance'];
 const PRIS=['Critical','High','Medium','Low'];
 const STATUSES=['Not Started','In Progress','On Hold','Complete'];
+
+
+// -- Project Template Selection -----------------------------------------------
+var _projectTemplate = 'template'; // default for new projects
+function setProjectTemplate(choice){
+  _projectTemplate = choice;
+  var tplBtn = document.getElementById('tpl-template');
+  var blankBtn = document.getElementById('tpl-blank');
+  if(tplBtn && blankBtn){
+    if(choice === 'template'){
+      tplBtn.style.background = '#68217D';
+      tplBtn.style.color = '#fff';
+      tplBtn.style.borderColor = '#68217D';
+      blankBtn.style.background = '#fff';
+      blankBtn.style.color = '#595959';
+      blankBtn.style.borderColor = '#D6C8DB';
+    } else {
+      blankBtn.style.background = '#68217D';
+      blankBtn.style.color = '#fff';
+      blankBtn.style.borderColor = '#68217D';
+      tplBtn.style.background = '#fff';
+      tplBtn.style.color = '#595959';
+      tplBtn.style.borderColor = '#D6C8DB';
+    }
+  }
+}
 
 function buildTasks(pid){
   const t=[];
@@ -1201,6 +1240,10 @@ function openModal(id){
   const isNew=!id;
   document.getElementById('mtitle').textContent=isNew?'New Project':'Edit Project';
   document.getElementById('mdelb').style.display=isNew?'none':'block';
+  // Template selector only shown for new projects
+  var tplSection = document.getElementById('template-section');
+  if(tplSection) tplSection.style.display = isNew ? 'block' : 'none';
+  if(isNew && typeof setProjectTemplate === 'function') setProjectTemplate('template');
   const p=isNew?{name:'New Project',lead:'Berenicia',category:'Operations',priority:'Medium',status:'Not Started',approval:'Proposed',pct:0,bizImpact:'Efficiency Gain',custValue:'Order Qualifier',startDate:'',endDate:'',collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:''}:projects.find(x=>x.id===id);
   document.getElementById('fn').value=p.name;
   var fldSel = document.getElementById('fld');
@@ -1280,14 +1323,21 @@ function saveProj(){
   }else{
     const nid=Math.max(...projects.map(p=>p.id),0)+1;
     projects.push({id:nid,...d});
-    tasks.push(...buildTasks(nid));
+    // Only add the default phase/task template if user chose 'template'
+    if(_projectTemplate !== 'blank'){
+      tasks.push(...buildTasks(nid));
+    }
   }
   var isNew = !editId;
   saveAll();
   if(window.sbSaveProject) sbSaveProject(isNew ? projects[projects.length-1] : projects.find(function(p){return p.id===editId;}), isNew, collabs);
   closeMo('pmodal');sv('dashboard');updateBadge();
   if(isNew){
-    showToast('Project added -- open Activity Breakdown to add tasks and KPIs', 'info');
+    if(_projectTemplate === 'blank'){
+      showToast('Blank project added -- open Activity Breakdown to add phases and tasks', 'info');
+    } else {
+      showToast('Project added with default 5-phase template -- customise in Activity Breakdown', 'info');
+    }
   } else {
     showToast('Project saved successfully');
   }
