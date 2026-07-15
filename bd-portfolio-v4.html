@@ -2019,10 +2019,18 @@ function changeTaskStatus(taskId, isAdHoc, newStatus) {
   isAdHoc = isAdHoc === true || isAdHoc === 'true';
   if (isAdHoc) {
     var t = adHocTasks.find(function(x){ return String(x.id) === String(taskId); });
-    if (t) { t.status = newStatus; saveAll(); }
+    if (t) {
+      t.status = newStatus;
+      saveAll();
+      if(window.sbSaveAdHoc) sbSaveAdHoc(t, false);
+    }
   } else {
     var t2 = tasks.find(function(x){ return String(x.id) === String(taskId); });
-    if (t2) { t2.status = newStatus; saveAll(); }
+    if (t2) {
+      t2.status = newStatus;
+      saveAll();
+      if(window.sbUpdTask) sbUpdTask(t2);
+    }
   }
   renderTaskBoard();
   if (curView === 'activity') renderActivity();
@@ -2698,10 +2706,18 @@ function updatePanelStatus(newStatus) {
   if (!panelTaskId) return;
   if (panelIsAdHoc) {
     var t = adHocTasks.find(function(x){ return String(x.id) === panelTaskId; });
-    if (t) { t.status = newStatus; saveAll(); }
+    if (t) {
+      t.status = newStatus;
+      saveAll();
+      if(window.sbSaveAdHoc) sbSaveAdHoc(t, false);
+    }
   } else {
     var t2 = tasks.find(function(x){ return String(x.id) === panelTaskId; });
-    if (t2) { t2.status = newStatus; saveAll(); }
+    if (t2) {
+      t2.status = newStatus;
+      saveAll();
+      if(window.sbUpdTask) sbUpdTask(t2);
+    }
   }
   renderTaskBoard();
   if (curView === 'activity') renderActivity();
@@ -2967,6 +2983,7 @@ function editTSRow(idx){
   var pt = period.trim().toUpperCase().slice(0,1)==='Q' ? 'quarterly' : 'monthly';
   k.timeSeries[idx] = {period:period, value:value, notes:notes, periodType:pt, order:idx};
   saveAll();
+  if(window.sbUpdateTS) sbUpdateTS(r, {period:period, value:value, notes:notes, period_type:pt});
   renderTSModalRows();
   showToast('Period updated: '+period);
 }
@@ -2976,10 +2993,12 @@ function delTSRow(idx){
   if(!k || !k.timeSeries) return;
   var period = k.timeSeries[idx] ? k.timeSeries[idx].period : 'this period';
   if(!confirm('Delete '+period+'?')) return;
+  var rowToDelete = k.timeSeries[idx];
   k.timeSeries.splice(idx, 1);
   // Re-order remaining
   k.timeSeries.forEach(function(r,i){ r.order=i; });
   saveAll();
+  if(window.sbDeleteTS) sbDeleteTS(rowToDelete);
   renderTSModalRows();
   showToast('Period deleted');
 }
@@ -3053,7 +3072,7 @@ function importData(event){
   if (!file) return;
   // Auto-export current data before overwriting
   exportData();
-  if (!confirm('A backup of your current data has been downloaded first.\n\nImport this file? This will REPLACE all current data. This cannot be undone.')) {
+  if (!confirm('A backup of your current data has been downloaded first.\n\nImport this file? This will REPLACE all current data locally in this browser.\n\nNOTE: This does NOT push the restored data back to the shared database - it only updates what you see here. Anyone else using this tool (or you, on another device) will still see the database version until the database itself is restored. This cannot be undone locally.')) {
     event.target.value = '';
     return;
   }
@@ -3074,7 +3093,7 @@ function importData(event){
       saveComments();
       sv(curView);
       updateBadge();
-      showToast('Data restored from backup successfully');
+      showToast('Local data restored from backup. This was NOT synced to the shared database - contact an admin if the database also needs to be restored.', 'warn');
     } catch(err) {
       showToast('Failed to read backup file: ' + err.message, 'error');
     }
@@ -3163,23 +3182,17 @@ function getWeeklyFilters(){
   }
 
   // weekEnd = forward-looking end of window (used for Tasks "due in this period")
-  // For This Week: Friday 23:59 of current work week
-  // For Last 2 Weeks: Friday 23:59 of current work week (still 2 weeks total looking forward to Fri)
-  // For This Month: end of current month
-  // For All Time: very far future
   var weekEnd;
   if(rangeDays === 7 || rangeDays === 14){
     weekEnd = new Date(now);
     var daysToFri = isWeekend
-      ? (dayOfWeek === 6 ? 6 : 5)  // Sat -> next Fri (6 days), Sun -> next Fri (5 days)
-      : (5 - dayOfWeek);            // Mon=4, Tue=3, ... Fri=0
+      ? (dayOfWeek === 6 ? 6 : 5)
+      : (5 - dayOfWeek);
     weekEnd.setDate(weekEnd.getDate() + daysToFri);
     weekEnd.setHours(23,59,59,999);
   } else if(rangeDays === 30){
-    // End of current month
     weekEnd = new Date(now.getFullYear(), now.getMonth()+1, 0, 23, 59, 59, 999);
   } else {
-    // 999: far future
     weekEnd = new Date(now.getFullYear()+10, 11, 31, 23, 59, 59, 999);
   }
 
@@ -3312,10 +3325,8 @@ function renderWeeklyUpdates(body){
 function renderWeeklyTasks(body){
   var f = getWeeklyFilters();
   var today = new Date(); today.setHours(0,0,0,0);
-  // Use f.weekEnd from getWeeklyFilters - matches the selected range (Fri/end-of-month/etc)
   var windowEnd = f.weekEnd;
 
-  // Get all project tasks relevant for this period
   var allTasks = tasks.filter(function(t){
     if(t.type!=='task') return false;
     if(f.leadF && t.owner!==f.leadF) return false;
@@ -3332,7 +3343,6 @@ function renderWeeklyTasks(body){
     return;
   }
 
-  // Summary
   var overdueTasks = allTasks.filter(function(t){ var d=t.end?new Date(t.end):null; return d&&d<today&&t.status!=='Complete'; });
   var dueSoon = allTasks.filter(function(t){ var d=t.end?new Date(t.end):null; return d&&d>=today&&d<=windowEnd&&t.status!=='Complete'; });
   var completedTasks = allTasks.filter(function(t){ return t.status==='Complete'; });
@@ -3343,7 +3353,6 @@ function renderWeeklyTasks(body){
     {val:completedTasks.length, label:'Completed', bg:'#E2EFDA', fg:'#375623'}
   ]);
 
-  // Group by lead
   var byLead = {};
   allTasks.forEach(function(t){
     var owner = t.owner || 'Unassigned';
@@ -3419,7 +3428,6 @@ function renderWeeklyAdhoc(body){
     {val:open.length, label:'Open / No Date', bg:'#E8E8E8', fg:'#595959'}
   ]);
 
-  // Group by priority
   var sections = [
     {label:'Overdue', items:overdue, headerBg:'#FFDCE0', headerFg:'#C00000'},
     {label:'Due This Week', items:dueNow, headerBg:'#FFF8DC', headerFg:'#6B5A10'},
@@ -3481,7 +3489,11 @@ function startInlineEdit(span, taskId) {
   function save() {
     var val = inp.value.trim() || current;
     var t = tasks.find(function(x){ return String(x.id) === String(taskId); });
-    if (t) { t.name = val; saveAll(); }
+    if (t) {
+      t.name = val;
+      saveAll();
+      if(window.sbUpdTask) sbUpdTask(t);
+    }
     span.textContent = val;
   }
   inp.addEventListener('blur', save);
@@ -3772,7 +3784,7 @@ window.sbSaveProject = function(p, isNew, collabs) {
   var lead = p.lead;
   if (isNew) {
     sb.from('projects').insert(Object.assign({id: p.id}, d)).then(function(r){
-      if (r.error) { console.warn('sbSaveProject insert:', r.error); return; }
+      if (r.error) { console.warn('sbSaveProject insert:', r.error); showToast('Project save to database failed: '+r.error.message,'error'); return; }
       // Insert tasks
       var newTasks = [];
       PHASES.forEach(function(ph, pi){
@@ -3790,7 +3802,7 @@ window.sbSaveProject = function(p, isNew, collabs) {
     });
   } else {
     sb.from('projects').update(d).eq('id', p.id).then(function(r){
-      if (r.error) { console.warn('sbSaveProject update:', r.error); return; }
+      if (r.error) { console.warn('sbSaveProject update:', r.error); showToast('Project save to database failed: '+r.error.message,'error'); return; }
       // Sync collaborators
       sb.from('collaborators').delete().eq('project_id', p.id).then(function(){
         if (collabs && collabs.length) {
@@ -3815,7 +3827,7 @@ window.sbUpdTask = function(task) {
   var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name};
   // Tasks may have string IDs like "1-p0" - upsert handles both new and existing
   sb.from('tasks').upsert(Object.assign({id: String(task.id), project_id: task.projId, type: task.type, phase: task.phase}, d), {onConflict:'id'})
-    .then(function(r){ if(r.error) console.warn('sbUpdTask:', r.error); });
+    .then(function(r){ if(r.error){ console.warn('sbUpdTask:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); } });
 };
 
 window.sbSaveKPI = function(kpi, isNew) {
@@ -3851,7 +3863,7 @@ window.sbSaveAdHoc = function(task, isNew) {
   var d = adhocToDb(task);
   if (isNew) {
     sb.from('adhoc_tasks').insert(d).select().then(function(r){
-      if(r.error){ console.warn('sbSaveAdHoc insert:', r.error); return; }
+      if(r.error){ console.warn('sbSaveAdHoc insert:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); return; }
       // Sync Supabase id back to local task
       if(r.data && r.data[0]){
         var newDbId = r.data[0].id;
@@ -3866,7 +3878,7 @@ window.sbSaveAdHoc = function(task, isNew) {
     });
   } else {
     var dbId = task._dbId || String(task.id).replace('ah','');
-    sb.from('adhoc_tasks').update(d).eq('id', dbId).then(function(r){ if(r.error) console.warn('sbSaveAdHoc update:', r.error); });
+    sb.from('adhoc_tasks').update(d).eq('id', dbId).then(function(r){ if(r.error){ console.warn('sbSaveAdHoc update:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); } });
   }
 };
 
@@ -3925,7 +3937,31 @@ window.sbSaveTS = function(kpiId, tsRow) {
   sb.from('kpi_timeseries').insert({
     kpi_id: realId, period: tsRow.period, period_type: tsRow.periodType,
     value: tsRow.value, notes: tsRow.notes || ''
-  }).then(function(r){ if(r.error) console.warn('sbSaveTS:', r.error); });
+  }).select().then(function(r){
+    if(r.error){ console.warn('sbSaveTS:', r.error); return; }
+    // Sync the Supabase-assigned row id back into the local timeSeries entry's
+    // 'order' field, since that field doubles as the DB id used by edit/delete.
+    if(r.data && r.data[0] && k){
+      var newTsId = r.data[0].id;
+      var localRow = (k.timeSeries||[]).find(function(t){
+        return t.period===tsRow.period && t.value===tsRow.value && t.periodType===tsRow.periodType;
+      });
+      if(localRow){ localRow.order = newTsId; saveAll(); }
+    }
+  });
+};
+
+window.sbUpdateTS = function(tsRow, data) {
+  if (!sb || !tsRow || tsRow.order == null) return;
+  sb.from('kpi_timeseries').update({
+    period: data.period, period_type: data.period_type,
+    value: data.value, notes: data.notes || ''
+  }).eq('id', tsRow.order).then(function(r){ if(r.error) console.warn('sbUpdateTS:', r.error); });
+};
+
+window.sbDeleteTS = function(tsRow) {
+  if (!sb || !tsRow || tsRow.order == null) return;
+  sb.from('kpi_timeseries').delete().eq('id', tsRow.order).then(function(r){ if(r.error) console.warn('sbDeleteTS:', r.error); });
 };
 
 window.sbSaveUpdate = function(update) {
