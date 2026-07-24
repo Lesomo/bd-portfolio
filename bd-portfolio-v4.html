@@ -1014,7 +1014,7 @@ function onRoleChange(){
   if(sel.value === 'Admin'){
     if(!_adminUnlocked){
       var pw = prompt('Enter Admin password:');
-      if(pw !== '2025'){
+      if(pw !== 'Timwood_10.'){
         alert('Incorrect password.');
         sel.value = 'Project Leads';
         return;
@@ -2723,10 +2723,12 @@ function postComment() {
 function savePanelNotes() {
   if (!panelTaskId) return;
   var val = document.getElementById('panel-notes').value;
+  var now = new Date().toISOString();
   if (panelIsAdHoc) {
     var t = adHocTasks.find(function(x){ return String(x.id) === panelTaskId; });
     if (t) {
       t.notes = val;
+      t.notesUpdatedAt = now;
       saveAll();
       if(window.sbSaveAdHoc) sbSaveAdHoc(t, false);
     }
@@ -2734,6 +2736,7 @@ function savePanelNotes() {
     var t2 = tasks.find(function(x){ return String(x.id) === panelTaskId; });
     if (t2) {
       t2.notes = val;
+      t2.notesUpdatedAt = now;
       saveAll();
       if(window.sbUpdTask) sbUpdTask(t2);
     }
@@ -3186,6 +3189,14 @@ function parseUpdateDate(dt){
   return new Date(0);
 }
 
+function fmtUpdateDate(iso){
+  try{
+    var d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-ZA',{day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return ''; }
+}
+
 function getWeeklyFilters(){
   var leadF = (document.getElementById('weekly-lead')||{value:''}).value;
   var rangeDays = parseInt((document.getElementById('weekly-range')||{value:'7'}).value)||7;
@@ -3374,7 +3385,9 @@ function renderWeeklyTasks(body){
     var overdue = dueDate && dueDate<today && t.status!=='Complete';
     var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
     var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
-    return overdue || dueInWindow || completedInWindow;
+    var noteDate = t.notesUpdatedAt ? new Date(t.notesUpdatedAt) : null;
+    var noteInWindow = noteDate && (f.rangeDays===999 || (noteDate>=f.cutoff && noteDate<=f.today));
+    return overdue || dueInWindow || completedInWindow || noteInWindow;
   });
 
   if(!allTasks.length){
@@ -3431,6 +3444,7 @@ function renderWeeklyTasks(body){
         html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
           +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
           +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
+          +(t.notesUpdatedAt?'<span style="font-size:8px;color:#595959;font-weight:600;margin-right:5px">'+fmtUpdateDate(t.notesUpdatedAt)+'</span>':'')
           +esc(t.notes)
           +'</div></div>';
       }
@@ -3454,13 +3468,25 @@ function renderWeeklyAdhoc(body){
     var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
     var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
     var openNoDate = !dueDate && t.status!=='Complete';
-    return overdue || dueInWindow || completedInWindow || openNoDate;
+    var noteDate = t.notesUpdatedAt ? new Date(t.notesUpdatedAt) : null;
+    var noteInWindow = noteDate && (f.rangeDays===999 || (noteDate>=f.cutoff && noteDate<=f.today));
+    return overdue || dueInWindow || completedInWindow || openNoDate || noteInWindow;
   });
 
   var overdue = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d<today&&t.status!=='Complete'; });
   var dueNow = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d>=today&&d<=windowEnd&&t.status!=='Complete'; });
   var done = filtered.filter(function(t){ return t.status==='Complete'; });
   var open = filtered.filter(function(t){ return t.status!=='Complete' && !t.due; });
+  // Tasks that only qualify because of a recent Task Update - not overdue, not due soon,
+  // not complete, and do have a due date (so they didn't land in "open" either).
+  var recentlyUpdated = filtered.filter(function(t){
+    var d = t.due ? new Date(t.due) : null;
+    var isOverdue = d && d<today && t.status!=='Complete';
+    var isDueNow = d && d>=today && d<=windowEnd && t.status!=='Complete';
+    var isDone = t.status==='Complete';
+    var isOpenNoDate = t.status!=='Complete' && !d;
+    return !(isOverdue || isDueNow || isDone || isOpenNoDate);
+  });
 
   if(!filtered.length){
     body.innerHTML = noDataBox('&#9889;','No ad hoc tasks this period',
@@ -3472,14 +3498,16 @@ function renderWeeklyAdhoc(body){
     {val:overdue.length, label:'Overdue', bg:'#FFDCE0', fg:'#C00000'},
     {val:dueNow.length, label:'Due This Week', bg:'#FFF8DC', fg:'#6B5A10'},
     {val:done.length, label:'Completed', bg:'#E2EFDA', fg:'#375623'},
-    {val:open.length, label:'Open / No Date', bg:'#E8E8E8', fg:'#595959'}
+    {val:open.length, label:'Open / No Date', bg:'#E8E8E8', fg:'#595959'},
+    {val:recentlyUpdated.length, label:'Recently Updated', bg:'#E8D5EE', fg:'#68217D'}
   ]);
 
   var sections = [
     {label:'Overdue', items:overdue, headerBg:'#FFDCE0', headerFg:'#C00000'},
     {label:'Due This Week', items:dueNow, headerBg:'#FFF8DC', headerFg:'#6B5A10'},
     {label:'Completed', items:done, headerBg:'#E2EFDA', headerFg:'#375623'},
-    {label:'Open / No Due Date', items:open, headerBg:'#E8E8E8', headerFg:'#595959'}
+    {label:'Open / No Due Date', items:open, headerBg:'#E8E8E8', headerFg:'#595959'},
+    {label:'Recently Updated', items:recentlyUpdated, headerBg:'#E8D5EE', headerFg:'#68217D'}
   ];
 
   sections.forEach(function(sec){
@@ -3515,6 +3543,7 @@ function renderWeeklyAdhoc(body){
         html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
           +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
           +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
+          +(t.notesUpdatedAt?'<span style="font-size:8px;color:#595959;font-weight:600;margin-right:5px">'+fmtUpdateDate(t.notesUpdatedAt)+'</span>':'')
           +esc(t.notes)
           +'</div></div>';
       }
@@ -3701,7 +3730,7 @@ function dbToTask(r) {
     id: r.id, projId: r.project_id, type: r.type, phase: r.phase,
     name: r.name, status: r.status || 'Not Started', pct: r.pct || 0,
     owner: r.owner || '', start: r.start_date || '', end: r.end_date || '',
-    notes: r.notes || ''
+    notes: r.notes || '', notesUpdatedAt: r.notes_updated_at || ''
   };
 }
 function taskToDb(t) {
@@ -3709,7 +3738,7 @@ function taskToDb(t) {
     project_id: t.projId, type: t.type, phase: t.phase, name: t.name,
     status: t.status || 'Not Started', pct: t.pct || 0,
     owner: t.owner || '', start_date: t.start || null, end_date: t.end || null,
-    notes: t.notes || ''
+    notes: t.notes || '', notes_updated_at: t.notesUpdatedAt || null
   };
 }
 function dbToKpi(r, tsRows) {
@@ -3733,14 +3762,15 @@ function dbToAdhoc(r) {
   return {
     id: 'ah' + r.id, _dbId: r.id, name: r.name, owner: r.owner || '',
     priority: r.priority || 'Medium', status: r.status || 'Not Started',
-    due: r.due_date || '', notes: r.notes || '', type: 'task', isAdHoc: true
+    due: r.due_date || '', notes: r.notes || '', notesUpdatedAt: r.notes_updated_at || '',
+    type: 'task', isAdHoc: true
   };
 }
 function adhocToDb(t) {
   return {
     name: t.name, owner: t.owner || '', priority: t.priority || 'Medium',
     status: t.status || 'Not Started',
-    due_date: t.due || null, notes: t.notes || ''
+    due_date: t.due || null, notes: t.notes || '', notes_updated_at: t.notesUpdatedAt || null
   };
 }
 function dbToComment(r) {
@@ -3853,9 +3883,10 @@ create policy "anon_all_collaborators" on public.collaborators for all using (tr
   id text primary key,
   project_id bigint, type text, phase text, name text,
   status text default 'Not Started', pct integer default 0, owner text,
-  start_date date, end_date date, notes text
+  start_date date, end_date date, notes text, notes_updated_at timestamptz
 );
 alter table public.tasks add column if not exists notes text;
+alter table public.tasks add column if not exists notes_updated_at timestamptz;
 alter table public.tasks enable row level security;
 drop policy if exists "anon_all_tasks" on public.tasks;
 create policy "anon_all_tasks" on public.tasks for all using (true) with check (true);`,
@@ -3865,8 +3896,9 @@ create policy "anon_all_tasks" on public.tasks for all using (true) with check (
   id bigint generated by default as identity primary key,
   name text not null, owner text,
   priority text default 'Medium', status text default 'Not Started',
-  due_date date, notes text, created_at timestamptz default now()
+  due_date date, notes text, notes_updated_at timestamptz, created_at timestamptz default now()
 );
+alter table public.adhoc_tasks add column if not exists notes_updated_at timestamptz;
 alter table public.adhoc_tasks enable row level security;
 drop policy if exists "anon_all_adhoc_tasks" on public.adhoc_tasks;
 create policy "anon_all_adhoc_tasks" on public.adhoc_tasks for all using (true) with check (true);`,
@@ -4068,7 +4100,7 @@ window.sbDelProject = function(pid) {
 
 window.sbUpdTask = function(task) {
   if (!sb || !task) return;
-  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name, notes: task.notes||''};
+  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name, notes: task.notes||'', notes_updated_at: task.notesUpdatedAt||null};
   // Tasks may have string IDs like "1-p0" - upsert handles both new and existing
   sb.from('tasks').upsert(Object.assign({id: String(task.id), project_id: task.projId, type: task.type, phase: task.phase}, d), {onConflict:'id'})
     .then(function(r){ if(r.error){ console.warn('sbUpdTask:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); } });
