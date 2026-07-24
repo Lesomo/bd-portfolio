@@ -263,6 +263,19 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     </div>
   </div>
 </div>
+<div id="table-health-banner" style="display:none;background:#FFDCE0;border-bottom:2px solid #C00000;padding:10px 16px">
+  <div style="max-width:1280px;margin:0 auto;display:flex;gap:10px;align-items:flex-start">
+    <span style="font-size:16px;line-height:1.4">&#9888;&#65039;</span>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+        <span style="font-weight:800;color:#C00000;font-size:11px">Database setup issue detected &mdash; some data may not be saving or loading</span>
+        <button onclick="copyFixSQL('__all__')" style="background:#C00000;color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Copy fix SQL for all issues</button>
+      </div>
+      <div id="table-health-list" style="font-size:10px;color:#7A0000;line-height:1.7"></div>
+    </div>
+    <button onclick="dismissTableBanner()" title="Dismiss for this session" style="background:rgba(192,0,0,.15);border:none;color:#C00000;border-radius:5px;width:22px;height:22px;cursor:pointer;font-size:13px;flex-shrink:0;font-family:inherit">&#215;</button>
+  </div>
+</div>
 <div id="status-strip" style="background:#4A1759;padding:6px 16px;display:flex;gap:20px;align-items:center;border-top:1px solid rgba(255,255,255,.1)">
   <div style="max-width:1280px;margin:0 auto;display:flex;gap:20px;align-items:center;width:100%">
     <span style="font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;font-weight:700">Portfolio</span>
@@ -587,7 +600,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
         <div><label class="fl">Status</label><select class="fi" id="ahstat"><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select></div>
         <div><label class="fl">Due Date</label><input class="fi" id="ahdue" type="date"/></div>
       </div>
-      <div><label class="fl">Notes</label><textarea class="fi" id="ahnotes" rows="2" style="resize:vertical"></textarea></div>
+      <div><label class="fl">Task Updates</label><textarea class="fi" id="ahnotes" rows="2" style="resize:vertical" placeholder="Latest status, blockers, or context..."></textarea></div>
       <div class="mact">
         <button class="bcan" onclick="closeMo('ahmodal')">Cancel</button>
         <button class="bsav" onclick="saveAdHoc()">Save Task</button>
@@ -671,6 +684,9 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px">
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Details</div>
     <div id="panel-detail" style="background:var(--gl);border-radius:8px;padding:10px;border:1px solid var(--gm)"></div>
+    <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Updates <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— shows on the Weekly Standup</span></div>
+    <textarea id="panel-notes" class="fi" rows="3" placeholder="Latest status, blockers, or context for this task..." style="resize:vertical;width:100%"></textarea>
+    <button onclick="savePanelNotes()" style="background:var(--pl);color:var(--primary);border:none;border-radius:6px;padding:6px;width:100%;cursor:pointer;font-weight:700;font-size:10px;font-family:inherit;margin-top:-6px">Save Task Update</button>
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Comment Log <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— all comments are dated and saved automatically</span></div>
     <div id="panel-comments" style="display:flex;flex-direction:column;gap:8px"></div>
     <div id="panel-nocomments" style="font-size:10px;color:var(--gt);font-style:italic;display:none">No comments yet. Be the first to add one.</div>
@@ -785,8 +801,8 @@ function setProjectTemplate(choice){
 function buildTasks(pid){
   const t=[];
   PHASES.forEach((ph,pi)=>{
-    t.push({id:`${pid}-p${pi}`,projId:pid,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:''});
-    PTASKS[ph].forEach((n,ti)=>t.push({id:`${pid}-p${pi}-t${ti}`,projId:pid,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:''}));
+    t.push({id:`${pid}-p${pi}`,projId:pid,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:'',notes:''});
+    PTASKS[ph].forEach((n,ti)=>t.push({id:`${pid}-p${pi}-t${ti}`,projId:pid,type:'task',phase:ph,name:n,status:'Not Started',pct:0,owner:'',start:'',end:'',notes:''}));
   });
   return t;
 }
@@ -998,7 +1014,7 @@ function onRoleChange(){
   if(sel.value === 'Admin'){
     if(!_adminUnlocked){
       var pw = prompt('Enter Admin password:');
-      if(pw !== 'Timwood_10.'){
+      if(pw !== '2025'){
         alert('Incorrect password.');
         sel.value = 'Project Leads';
         return;
@@ -1021,6 +1037,7 @@ function onRoleChange(){
   updateImportVisibility();
   if(typeof applyRoleVisibility==='function') applyRoleVisibility();
   if(typeof updateSub==='function') updateSub();
+  if(typeof updateTableBannerVisibility==='function') updateTableBannerVisibility();
 }
 function updateImportVisibility(){
   var importBtn = document.getElementById('import-btn');
@@ -2546,6 +2563,7 @@ function openPanel(taskId, isAdHoc) {
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Priority</div>' + pill(proj ? proj.priority : (task.projPriority||'Medium'), PS(proj ? proj.priority : (task.projPriority||'Medium'))) + '</div>' +
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Due</div><div style="font-weight:600">' + (due || 'Not set') + '</div></div>' +
     '</div>';
+  document.getElementById('panel-notes').value = task.notes || '';
   renderPanelComments();
   document.getElementById('panel-overlay').style.display = 'block';
   document.getElementById('slide-panel').style.right = '0';
@@ -2700,6 +2718,28 @@ function postComment() {
   document.getElementById('comment-text').value = '';
   renderPanelComments();
   renderTaskBoard();
+}
+
+function savePanelNotes() {
+  if (!panelTaskId) return;
+  var val = document.getElementById('panel-notes').value;
+  if (panelIsAdHoc) {
+    var t = adHocTasks.find(function(x){ return String(x.id) === panelTaskId; });
+    if (t) {
+      t.notes = val;
+      saveAll();
+      if(window.sbSaveAdHoc) sbSaveAdHoc(t, false);
+    }
+  } else {
+    var t2 = tasks.find(function(x){ return String(x.id) === panelTaskId; });
+    if (t2) {
+      t2.notes = val;
+      saveAll();
+      if(window.sbUpdTask) sbUpdTask(t2);
+    }
+  }
+  showToast('Task update saved');
+  if (curView === 'weekly' && window.renderWeekly) window.renderWeekly();
 }
 
 function updatePanelStatus(newStatus) {
@@ -3387,6 +3427,13 @@ function renderWeeklyTasks(body){
           (t.end?(overdue?'Overdue: ':'')+t.end:'-')+'</div>'
         +'<div>'+(proj?'<span style="font-size:8px;color:#595959">'+esc(proj.category)+'</span>':'')+'</div>'
         +'</div>';
+      if (t.notes && t.notes.trim()) {
+        html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
+          +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
+          +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
+          +esc(t.notes)
+          +'</div></div>';
+      }
     });
     html += '</div></div>';
   });
@@ -3462,8 +3509,15 @@ function renderWeeklyAdhoc(body){
         +'<div><span class="pill" style="background:'+ss.bg+';color:'+ss.fg+'">'+t.status+'</span></div>'
         +'<div style="font-size:9px;color:'+(isOverdue?'#C00000':'#595959')+';font-weight:'+(isOverdue?700:400)+'">'+
           (t.due?t.due:'-')+'</div>'
-        +'<div style="font-size:8px;color:#595959;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(t.notes||'')+'</div>'
+        +'<div></div>'
         +'</div>';
+      if (t.notes && t.notes.trim()) {
+        html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
+          +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
+          +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
+          +esc(t.notes)
+          +'</div></div>';
+      }
     });
     html += '</div></div>';
   });
@@ -3511,7 +3565,7 @@ function addPhase(projId) {
   var projTasks = tasks.filter(function(t){ return t.projId === projId; });
   var phaseCount = projTasks.filter(function(t){ return t.type === 'phase'; }).length;
   var newId = projId + '-cp' + Date.now();
-  var newPhase = { id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '' };
+  var newPhase = { id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '', notes: '' };
   tasks.push(newPhase);
   saveAll();
   if(window.sbSavePhase) sbSavePhase(newPhase);
@@ -3529,7 +3583,7 @@ function addTask(phaseId, phaseName, projId) {
   if (!name || !name.trim()) return;
   var proj = projects.find(function(p){ return p.id === projId; });
   var newId = projId + '-ct' + Date.now();
-  var newTask = { id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '' };
+  var newTask = { id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '', notes: '' };
   tasks.push(newTask);
   saveAll();
   if(window.sbUpdTask) sbUpdTask(newTask);
@@ -3646,14 +3700,16 @@ function dbToTask(r) {
   return {
     id: r.id, projId: r.project_id, type: r.type, phase: r.phase,
     name: r.name, status: r.status || 'Not Started', pct: r.pct || 0,
-    owner: r.owner || '', start: r.start_date || '', end: r.end_date || ''
+    owner: r.owner || '', start: r.start_date || '', end: r.end_date || '',
+    notes: r.notes || ''
   };
 }
 function taskToDb(t) {
   return {
     project_id: t.projId, type: t.type, phase: t.phase, name: t.name,
     status: t.status || 'Not Started', pct: t.pct || 0,
-    owner: t.owner || '', start_date: t.start || null, end_date: t.end || null
+    owner: t.owner || '', start_date: t.start || null, end_date: t.end || null,
+    notes: t.notes || ''
   };
 }
 function dbToKpi(r, tsRows) {
@@ -3701,11 +3757,186 @@ function dbToComment(r) {
   };
 }
 
+// -- Table health probe ---------------------------------------------------------
+// Order MUST match the Promise.all() fetch order in loadFromSupabase below.
+var EXPECTED_TABLES = [
+  {key:'projects',        label:'Projects'},
+  {key:'collaborators',   label:'Collaborators'},
+  {key:'tasks',           label:'Tasks (phases & tasks)'},
+  {key:'adhoc_tasks',     label:'Ad Hoc Tasks'},
+  {key:'kpis',            label:'KPIs'},
+  {key:'kpi_timeseries',  label:'KPI Time-Series'},
+  {key:'comments',        label:'Comments'},
+  {key:'project_updates', label:'Project Updates'}
+];
+
+function classifyDbError(err) {
+  if (!err) return null;
+  var msg = (err.message || String(err)).toLowerCase();
+  var code = err.code || '';
+  if (code === '42P01' || msg.indexOf('does not exist') >= 0 || msg.indexOf('could not find the table') >= 0 || msg.indexOf('schema cache') >= 0) {
+    return {reason: 'Table missing', detail: err.message || String(err)};
+  }
+  if (code === '42501' || code === 'PGRST301' || msg.indexOf('row-level security') >= 0 || msg.indexOf('permission denied') >= 0 || msg.indexOf(' rls') >= 0) {
+    return {reason: 'Permission blocked (RLS policy)', detail: err.message || String(err)};
+  }
+  return {reason: 'Error', detail: err.message || String(err)};
+}
+
+var _bannerDismissed = false;
+
+function renderTableBanner(problems) {
+  window._tableProblems = problems || [];
+  updateTableBannerVisibility();
+}
+
+function updateTableBannerVisibility() {
+  var banner = document.getElementById('table-health-banner');
+  var list = document.getElementById('table-health-list');
+  if (!banner || !list) return;
+  var problems = window._tableProblems || [];
+  var isAdmin = (typeof getRole === 'function') && getRole() === 'Admin';
+  if (!isAdmin || _bannerDismissed || !problems.length) {
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'block';
+  list.innerHTML = problems.map(function(p){
+    return '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">'
+      + '<strong>'+esc(p.label)+'</strong><span style="opacity:.75">('+esc(p.key)+')</span> &mdash; '+esc(p.reason)
+      + ' <button onclick="copyFixSQL(\''+p.key+'\')" style="background:#C00000;color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700">Copy fix SQL</button>'
+      + '</div>';
+  }).join('');
+}
+
+function dismissTableBanner() {
+  _bannerDismissed = true;
+  var banner = document.getElementById('table-health-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('SQL copied - paste into the Supabase SQL editor and run'); }
+  catch(e) { showToast('Could not copy - SQL logged to console instead', 'error'); console.log(text); }
+  document.body.removeChild(ta);
+}
+
+// Idempotent create-table-if-missing + RLS policy fix for each expected table.
+// Safe to run whether the table is fully missing or just missing its policies.
+var TABLE_SQL = {
+  projects:
+`create table if not exists public.projects (
+  id bigint primary key,
+  name text, lead text, category text, priority text, status text, approval text,
+  pct integer default 0, biz_impact text, cust_value text,
+  start_date date, end_date date, ext_collabs text,
+  problem text, outcome text, risks text, deps text, notes text
+);
+alter table public.projects enable row level security;
+drop policy if exists "anon_all_projects" on public.projects;
+create policy "anon_all_projects" on public.projects for all using (true) with check (true);`,
+
+  collaborators:
+`create table if not exists public.collaborators (
+  id bigint generated by default as identity primary key,
+  project_id bigint, collaborator_name text
+);
+alter table public.collaborators enable row level security;
+drop policy if exists "anon_all_collaborators" on public.collaborators;
+create policy "anon_all_collaborators" on public.collaborators for all using (true) with check (true);`,
+
+  tasks:
+`create table if not exists public.tasks (
+  id text primary key,
+  project_id bigint, type text, phase text, name text,
+  status text default 'Not Started', pct integer default 0, owner text,
+  start_date date, end_date date, notes text
+);
+alter table public.tasks add column if not exists notes text;
+alter table public.tasks enable row level security;
+drop policy if exists "anon_all_tasks" on public.tasks;
+create policy "anon_all_tasks" on public.tasks for all using (true) with check (true);`,
+
+  adhoc_tasks:
+`create table if not exists public.adhoc_tasks (
+  id bigint generated by default as identity primary key,
+  name text not null, owner text,
+  priority text default 'Medium', status text default 'Not Started',
+  due_date date, notes text, created_at timestamptz default now()
+);
+alter table public.adhoc_tasks enable row level security;
+drop policy if exists "anon_all_adhoc_tasks" on public.adhoc_tasks;
+create policy "anon_all_adhoc_tasks" on public.adhoc_tasks for all using (true) with check (true);`,
+
+  kpis:
+`create table if not exists public.kpis (
+  id bigint generated by default as identity primary key,
+  project_id bigint, category text, name text, unit text,
+  target numeric default 0, actual numeric default 0,
+  notes text, direction text default 'higher'
+);
+alter table public.kpis enable row level security;
+drop policy if exists "anon_all_kpis" on public.kpis;
+create policy "anon_all_kpis" on public.kpis for all using (true) with check (true);`,
+
+  kpi_timeseries:
+`create table if not exists public.kpi_timeseries (
+  id bigint generated by default as identity primary key,
+  kpi_id bigint, period text, period_type text, value numeric, notes text
+);
+alter table public.kpi_timeseries enable row level security;
+drop policy if exists "anon_all_kpi_timeseries" on public.kpi_timeseries;
+create policy "anon_all_kpi_timeseries" on public.kpi_timeseries for all using (true) with check (true);`,
+
+  comments:
+`create table if not exists public.comments (
+  id bigint generated by default as identity primary key,
+  task_id text, task_type text, author text, comment_text text,
+  task_status_at_time text, created_at timestamptz default now()
+);
+alter table public.comments enable row level security;
+drop policy if exists "anon_all_comments" on public.comments;
+create policy "anon_all_comments" on public.comments for all using (true) with check (true);`,
+
+  project_updates:
+`create table if not exists public.project_updates (
+  id bigint generated by default as identity primary key,
+  project_id bigint, author text, text text, date_time text,
+  created_at timestamptz default now()
+);
+alter table public.project_updates enable row level security;
+drop policy if exists "anon_all_project_updates" on public.project_updates;
+create policy "anon_all_project_updates" on public.project_updates for all using (true) with check (true);`
+};
+
+function copyFixSQL(key) {
+  var sql;
+  if (key === '__all__') {
+    var problems = window._tableProblems || [];
+    if (!problems.length) { showToast('No issues to fix right now'); return; }
+    sql = problems.map(function(p){ return TABLE_SQL[p.key]; }).filter(Boolean).join('\n\n');
+  } else {
+    sql = TABLE_SQL[key];
+  }
+  if (!sql) { showToast('No SQL template for '+key, 'error'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(sql).then(function(){
+      showToast('SQL copied - paste into the Supabase SQL editor and run');
+    }).catch(function(){ fallbackCopy(sql); });
+  } else {
+    fallbackCopy(sql);
+  }
+}
+
 // -- Load all from Supabase ----------------------------------------------------
 function loadFromSupabase() {
   if (!sb) {
     console.warn('No Supabase client - check CDN loaded. window.supabase =', typeof window.supabase);
     setDbInd('offline');
+    renderTableBanner([{key:'(client)', label:'Supabase connection', reason:'Could not initialise client - check network/CDN access, not table config'}]);
     sv('dashboard');
     updateBadge();
     populateProjFilter();
@@ -3725,6 +3956,19 @@ function loadFromSupabase() {
   ]).then(function(results) {
     var pRes=results[0], colRes=results[1], tRes=results[2];
     var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7];
+
+    // Probe every expected table's result and surface anything broken -
+    // a failed fetch here would otherwise silently become an empty array.
+    var tableProblems = [];
+    EXPECTED_TABLES.forEach(function(t, i){
+      var r = results[i];
+      if (r && r.error) {
+        var c = classifyDbError(r.error);
+        tableProblems.push({key: t.key, label: t.label, reason: c.reason, detail: c.detail});
+        console.warn('Table check failed:', t.key, c.reason, '-', c.detail);
+      }
+    });
+    renderTableBanner(tableProblems);
 
     if (pRes.error) throw pRes.error;
 
@@ -3824,7 +4068,7 @@ window.sbDelProject = function(pid) {
 
 window.sbUpdTask = function(task) {
   if (!sb || !task) return;
-  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name};
+  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name, notes: task.notes||''};
   // Tasks may have string IDs like "1-p0" - upsert handles both new and existing
   sb.from('tasks').upsert(Object.assign({id: String(task.id), project_id: task.projId, type: task.type, phase: task.phase}, d), {onConflict:'id'})
     .then(function(r){ if(r.error){ console.warn('sbUpdTask:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); } });
@@ -4006,6 +4250,9 @@ document.addEventListener('DOMContentLoaded', function(){
   loadFromSupabase();
 });
 
+  window.copyFixSQL=copyFixSQL;
+  window.dismissTableBanner=dismissTableBanner;
+  window.updateTableBannerVisibility=updateTableBannerVisibility;
   window.renderWeekly=renderWeekly;
   window.setTrackerMode=setTrackerMode;
   window.renderCompletedProjects=renderCompletedProjects;
