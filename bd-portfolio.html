@@ -600,7 +600,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
         <div><label class="fl">Status</label><select class="fi" id="ahstat"><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select></div>
         <div><label class="fl">Due Date</label><input class="fi" id="ahdue" type="date"/></div>
       </div>
-      <div><label class="fl">Task Updates</label><textarea class="fi" id="ahnotes" rows="2" style="resize:vertical" placeholder="Latest status, blockers, or context..."></textarea></div>
+      <div><label class="fl" style="margin-bottom:2px">Task Updates</label><div style="font-size:9px;color:var(--gt);font-style:italic">Add updates from the task card after creating this task.</div></div>
       <div class="mact">
         <button class="bcan" onclick="closeMo('ahmodal')">Cancel</button>
         <button class="bsav" onclick="saveAdHoc()">Save Task</button>
@@ -685,8 +685,12 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Details</div>
     <div id="panel-detail" style="background:var(--gl);border-radius:8px;padding:10px;border:1px solid var(--gm)"></div>
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Updates <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— shows on the Weekly Standup</span></div>
-    <textarea id="panel-notes" class="fi" rows="3" placeholder="Latest status, blockers, or context for this task..." style="resize:vertical;width:100%"></textarea>
-    <button onclick="savePanelNotes()" style="background:var(--pl);color:var(--primary);border:none;border-radius:6px;padding:6px;width:100%;cursor:pointer;font-weight:700;font-size:10px;font-family:inherit;margin-top:-6px">Save Task Update</button>
+    <div style="display:flex;gap:6px">
+      <select id="panel-update-author" class="fsel" style="width:120px;flex-shrink:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+      <input id="panel-update-text" class="fi" type="text" placeholder="Add a task update..." style="flex:1"/>
+      <button onclick="postTaskUpdate()" style="background:#68217D;color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Post</button>
+    </div>
+    <div id="panel-updates-list" style="max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Comment Log <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— all comments are dated and saved automatically</span></div>
     <div id="panel-comments" style="display:flex;flex-direction:column;gap:8px"></div>
     <div id="panel-nocomments" style="font-size:10px;color:var(--gt);font-style:italic;display:none">No comments yet. Be the first to add one.</div>
@@ -934,6 +938,7 @@ function refreshDropdowns(){
     populateSelect('ahowner', leads, true, null);
     populateSelect('update-author', leads, true, null);
     populateSelect('comment-author', leads, false, null);
+    populateSelect('panel-update-author', leads, false, null);
     // Filter dropdowns - include All Leads option, no Add new
     populateSelect('fl', leads, false, 'All Leads');
     populateSelect('weekly-lead', leads, false, 'All Leads');
@@ -1014,7 +1019,7 @@ function onRoleChange(){
   if(sel.value === 'Admin'){
     if(!_adminUnlocked){
       var pw = prompt('Enter Admin password:');
-      if(pw !== '2025'){
+      if(pw !== 'Timwood_10.'){
         alert('Incorrect password.');
         sel.value = 'Project Leads';
         return;
@@ -2276,7 +2281,6 @@ function openAdHocModal(id){
     document.getElementById('ahpri').value=t.priority||'Medium';
     document.getElementById('ahstat').value=t.status||'Not Started';
     document.getElementById('ahdue').value=t.due||'';
-    document.getElementById('ahnotes').value=t.notes||'';
   }else{
     document.getElementById('ahtname').value='';
   var ahInpR = document.getElementById('ahowner-custom');
@@ -2287,12 +2291,11 @@ function openAdHocModal(id){
     document.getElementById('ahpri').value='High';
     document.getElementById('ahstat').value='Not Started';
     document.getElementById('ahdue').value='';
-    document.getElementById('ahnotes').value='';
   }
   openMo('ahmodal');
 }
 function saveAdHoc(){
-  const d={name:document.getElementById('ahtname').value,owner:getAhOwnerValue(),priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,notes:document.getElementById('ahnotes').value,type:'task',isAdHoc:true};
+  const d={name:document.getElementById('ahtname').value,owner:getAhOwnerValue(),priority:document.getElementById('ahpri').value,status:document.getElementById('ahstat').value,due:document.getElementById('ahdue').value,type:'task',isAdHoc:true};
   if(ahEditId){const i=adHocTasks.findIndex(t=>t.id===ahEditId);adHocTasks[i]={...adHocTasks[i],...d};}
   else adHocTasks.push({id:'ah'+Date.now(),...d});
   var isNewAh = !ahEditId;
@@ -2536,7 +2539,10 @@ let comments = [];
 try { comments = JSON.parse(localStorage.getItem('bd-comments') || '[]'); } catch(e){}
 let projectUpdates = [];
 try { projectUpdates = JSON.parse(localStorage.getItem('bd-updates') || '[]'); } catch(e){}
+let taskUpdates = [];
+try { taskUpdates = JSON.parse(localStorage.getItem('bd-task-updates') || '[]'); } catch(e){}
 function saveComments(){ try{ localStorage.setItem('bd-comments', JSON.stringify(comments)); }catch(e){} }
+function saveTaskUpdates(){ try{ localStorage.setItem('bd-task-updates', JSON.stringify(taskUpdates)); }catch(e){} }
 
 let panelTaskId = null, panelIsAdHoc = false;
 
@@ -2563,7 +2569,8 @@ function openPanel(taskId, isAdHoc) {
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Priority</div>' + pill(proj ? proj.priority : (task.projPriority||'Medium'), PS(proj ? proj.priority : (task.projPriority||'Medium'))) + '</div>' +
     '<div><div style="font-size:8px;color:#595959;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Due</div><div style="font-weight:600">' + (due || 'Not set') + '</div></div>' +
     '</div>';
-  document.getElementById('panel-notes').value = task.notes || '';
+  document.getElementById('panel-update-text').value = '';
+  renderTaskUpdateLog(panelTaskId, panelIsAdHoc);
   renderPanelComments();
   document.getElementById('panel-overlay').style.display = 'block';
   document.getElementById('slide-panel').style.right = '0';
@@ -2720,26 +2727,90 @@ function postComment() {
   renderTaskBoard();
 }
 
-function savePanelNotes() {
-  if (!panelTaskId) return;
-  var val = document.getElementById('panel-notes').value;
-  if (panelIsAdHoc) {
-    var t = adHocTasks.find(function(x){ return String(x.id) === panelTaskId; });
-    if (t) {
-      t.notes = val;
-      saveAll();
-      if(window.sbSaveAdHoc) sbSaveAdHoc(t, false);
-    }
-  } else {
-    var t2 = tasks.find(function(x){ return String(x.id) === panelTaskId; });
-    if (t2) {
-      t2.notes = val;
-      saveAll();
-      if(window.sbUpdTask) sbUpdTask(t2);
+function renderTaskUpdateLog(taskId, isAdHocFlag){
+  var list = document.getElementById('panel-updates-list');
+  if(!list) return;
+  // One-time migration: if this task has legacy single-note text (from the old
+  // overwrite-based Task Updates field) and no log entries yet, carry it over
+  // as the first entry so nothing already saved gets lost.
+  var hasLogEntries = taskUpdates.some(function(u){ return String(u.taskId)===String(taskId) && u.isAdHoc===isAdHocFlag; });
+  if(!hasLogEntries){
+    var srcTask = isAdHocFlag
+      ? adHocTasks.find(function(x){ return String(x.id)===String(taskId); })
+      : tasks.find(function(x){ return String(x.id)===String(taskId); });
+    if(srcTask && srcTask.notes && srcTask.notes.trim()){
+      var legacyDt = srcTask.notesUpdatedAt ? fmtUpdateDate(srcTask.notesUpdatedAt) : 'Earlier';
+      var legacyEntry = {taskId:String(taskId), isAdHoc:isAdHocFlag, author:srcTask.owner||'Unknown', text:srcTask.notes.trim(), dateTime:legacyDt};
+      taskUpdates.push(legacyEntry);
+      saveTaskUpdates();
+      if(window.sbSaveTaskUpdate) sbSaveTaskUpdate(legacyEntry);
     }
   }
-  showToast('Task update saved');
+  var updates = taskUpdates.filter(function(u){ return String(u.taskId)===String(taskId) && u.isAdHoc===isAdHocFlag; })
+    .slice().reverse(); // newest first
+  if(!updates.length){
+    list.innerHTML = '<div style="font-size:9px;color:#595959;font-style:italic;padding:4px 0">No updates yet - be the first to post one</div>';
+    return;
+  }
+  list.innerHTML = updates.map(function(u){
+    var realIdx = taskUpdates.indexOf(u);
+    return '<div style="display:flex;gap:7px;padding:7px 9px;background:var(--gl);border-radius:7px;border:1px solid var(--gm);position:relative">'
+      + avHtml(u.author, true)
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:5px">'
+          + '<span style="font-size:10px;font-weight:700;color:var(--pd)">'+esc(u.author)+'</span>'
+          + '<span style="font-size:8px;color:var(--gt)">'+esc(u.dateTime)+'</span>'
+        + '</div>'
+        + '<div style="font-size:10px;color:#333;line-height:1.5;margin-top:2px">'+esc(u.text)+'</div>'
+      + '</div>'
+      + '<div style="position:absolute;top:5px;right:5px;display:flex;gap:3px">'      + '<button onclick="editTaskUpdate('+realIdx+')" title="Edit" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.8">&#9998;</button>'      + '<button onclick="deleteTaskUpdate('+realIdx+')" title="Delete" style="background:#FFDCE0;color:#C00000;border:none;border-radius:4px;padding:1px 6px;font-size:8px;cursor:pointer;font-family:inherit;opacity:.8">&#215;</button>'      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function postTaskUpdate(){
+  if(!panelTaskId) return;
+  var text = document.getElementById('panel-update-text').value.trim();
+  var author = document.getElementById('panel-update-author').value;
+  if(!text){ showToast('Please enter an update','warn'); return; }
+  var now = new Date();
+  var dt = now.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'})
+    + ' ' + now.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  var newUpdate = {taskId:panelTaskId, isAdHoc:panelIsAdHoc, author:author, text:text, dateTime:dt};
+  taskUpdates.push(newUpdate);
+  saveTaskUpdates();
+  if(window.sbSaveTaskUpdate) sbSaveTaskUpdate(newUpdate);
+  document.getElementById('panel-update-text').value = '';
+  renderTaskUpdateLog(panelTaskId, panelIsAdHoc);
+  showToast('Task update posted');
   if (curView === 'weekly' && window.renderWeekly) window.renderWeekly();
+}
+
+function editTaskUpdate(idx){
+  var u = taskUpdates[idx];
+  if(!u) return;
+  var newText = prompt('Edit task update:', u.text);
+  if(newText===null || !newText.trim()) return;
+  u.text = newText.trim();
+  saveTaskUpdates();
+  if(u.id && window._sb){
+    window._sb.from('task_updates').update({text:u.text}).eq('id',u.id)
+      .then(function(r){ if(r.error) console.warn('editTaskUpdate:',r.error); });
+  }
+  renderTaskUpdateLog(panelTaskId, panelIsAdHoc);
+  if (curView === 'weekly' && window.renderWeekly) window.renderWeekly();
+  showToast('Task update edited');
+}
+
+function deleteTaskUpdate(idx){
+  if(!confirm('Delete this update?')) return;
+  var u = taskUpdates[idx];
+  if(u && u.id && window.sbDeleteTaskUpdate) window.sbDeleteTaskUpdate(u.id);
+  taskUpdates.splice(idx,1);
+  saveTaskUpdates();
+  renderTaskUpdateLog(panelTaskId, panelIsAdHoc);
+  if (curView === 'weekly' && window.renderWeekly) window.renderWeekly();
+  showToast('Task update deleted');
 }
 
 function updatePanelStatus(newStatus) {
@@ -3091,7 +3162,8 @@ function exportData(){
     tasks: tasks,
     adHocTasks: adHocTasks,
     kpis: kpis,
-    comments: comments
+    comments: comments,
+    taskUpdates: taskUpdates
   };
   var json = JSON.stringify(backup, null, 2);
   var blob = new Blob([json], {type: 'application/json'});
@@ -3129,8 +3201,10 @@ function importData(event){
       adHocTasks = backup.adHocTasks || [];
       kpis = backup.kpis || [];
       comments = backup.comments || [];
+      taskUpdates = backup.taskUpdates || [];
       saveAll();
       saveComments();
+      saveTaskUpdates();
       sv(curView);
       updateBadge();
       showToast('Local data restored from backup. This was NOT synced to the shared database - contact an admin if the database also needs to be restored.', 'warn');
@@ -3184,6 +3258,36 @@ function parseUpdateDate(dt){
     }
   }catch(e){}
   return new Date(0);
+}
+
+function fmtUpdateDate(iso){
+  try{
+    var d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-ZA',{day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return ''; }
+}
+
+function taskUpdatesInWindow(taskId, isAdHocFlag, f){
+  return taskUpdates.filter(function(u){
+    if(String(u.taskId)!==String(taskId) || u.isAdHoc!==isAdHocFlag) return false;
+    var d = parseUpdateDate(u.dateTime);
+    return f.rangeDays===999 || (d>=f.cutoff && d<=f.today);
+  }).sort(function(a,b){ return parseUpdateDate(b.dateTime) - parseUpdateDate(a.dateTime); });
+}
+
+function renderTaskUpdateCallouts(updatesInWindow, zebraBg){
+  if(!updatesInWindow.length) return '';
+  var html = '<div style="padding:0 14px 8px 14px;background:'+zebraBg+'">';
+  updatesInWindow.forEach(function(u){
+    html += '<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5;margin-bottom:4px">'
+      +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
+      +'<span style="font-size:8px;color:#595959;font-weight:600;margin-right:5px">'+esc(u.author)+' &middot; '+esc(u.dateTime)+'</span>'
+      +esc(u.text)
+      +'</div>';
+  });
+  html += '</div>';
+  return html;
 }
 
 function getWeeklyFilters(){
@@ -3374,7 +3478,8 @@ function renderWeeklyTasks(body){
     var overdue = dueDate && dueDate<today && t.status!=='Complete';
     var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
     var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
-    return overdue || dueInWindow || completedInWindow;
+    var hasUpdatesInWindow = taskUpdatesInWindow(t.id, false, f).length > 0;
+    return overdue || dueInWindow || completedInWindow || hasUpdatesInWindow;
   });
 
   if(!allTasks.length){
@@ -3427,13 +3532,7 @@ function renderWeeklyTasks(body){
           (t.end?(overdue?'Overdue: ':'')+t.end:'-')+'</div>'
         +'<div>'+(proj?'<span style="font-size:8px;color:#595959">'+esc(proj.category)+'</span>':'')+'</div>'
         +'</div>';
-      if (t.notes && t.notes.trim()) {
-        html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
-          +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
-          +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
-          +esc(t.notes)
-          +'</div></div>';
-      }
+      html += renderTaskUpdateCallouts(taskUpdatesInWindow(t.id, false, f), i%2===0?'#FCF5E3':'#fff');
     });
     html += '</div></div>';
   });
@@ -3454,13 +3553,24 @@ function renderWeeklyAdhoc(body){
     var dueInWindow = dueDate && dueDate>=today && dueDate<=windowEnd;
     var completedInWindow = t.status==='Complete' && dueDate && dueDate>=f.cutoff && dueDate<=windowEnd;
     var openNoDate = !dueDate && t.status!=='Complete';
-    return overdue || dueInWindow || completedInWindow || openNoDate;
+    var hasUpdatesInWindow = taskUpdatesInWindow(t.id, true, f).length > 0;
+    return overdue || dueInWindow || completedInWindow || openNoDate || hasUpdatesInWindow;
   });
 
   var overdue = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d<today&&t.status!=='Complete'; });
   var dueNow = filtered.filter(function(t){ var d=t.due?new Date(t.due):null; return d&&d>=today&&d<=windowEnd&&t.status!=='Complete'; });
   var done = filtered.filter(function(t){ return t.status==='Complete'; });
   var open = filtered.filter(function(t){ return t.status!=='Complete' && !t.due; });
+  // Tasks that only qualify because of a recent Task Update - not overdue, not due soon,
+  // not complete, and do have a due date (so they didn't land in "open" either).
+  var recentlyUpdated = filtered.filter(function(t){
+    var d = t.due ? new Date(t.due) : null;
+    var isOverdue = d && d<today && t.status!=='Complete';
+    var isDueNow = d && d>=today && d<=windowEnd && t.status!=='Complete';
+    var isDone = t.status==='Complete';
+    var isOpenNoDate = t.status!=='Complete' && !d;
+    return !(isOverdue || isDueNow || isDone || isOpenNoDate);
+  });
 
   if(!filtered.length){
     body.innerHTML = noDataBox('&#9889;','No ad hoc tasks this period',
@@ -3472,14 +3582,16 @@ function renderWeeklyAdhoc(body){
     {val:overdue.length, label:'Overdue', bg:'#FFDCE0', fg:'#C00000'},
     {val:dueNow.length, label:'Due This Week', bg:'#FFF8DC', fg:'#6B5A10'},
     {val:done.length, label:'Completed', bg:'#E2EFDA', fg:'#375623'},
-    {val:open.length, label:'Open / No Date', bg:'#E8E8E8', fg:'#595959'}
+    {val:open.length, label:'Open / No Date', bg:'#E8E8E8', fg:'#595959'},
+    {val:recentlyUpdated.length, label:'Recently Updated', bg:'#E8D5EE', fg:'#68217D'}
   ]);
 
   var sections = [
     {label:'Overdue', items:overdue, headerBg:'#FFDCE0', headerFg:'#C00000'},
     {label:'Due This Week', items:dueNow, headerBg:'#FFF8DC', headerFg:'#6B5A10'},
     {label:'Completed', items:done, headerBg:'#E2EFDA', headerFg:'#375623'},
-    {label:'Open / No Due Date', items:open, headerBg:'#E8E8E8', headerFg:'#595959'}
+    {label:'Open / No Due Date', items:open, headerBg:'#E8E8E8', headerFg:'#595959'},
+    {label:'Recently Updated', items:recentlyUpdated, headerBg:'#E8D5EE', headerFg:'#68217D'}
   ];
 
   sections.forEach(function(sec){
@@ -3511,13 +3623,7 @@ function renderWeeklyAdhoc(body){
           (t.due?t.due:'-')+'</div>'
         +'<div></div>'
         +'</div>';
-      if (t.notes && t.notes.trim()) {
-        html += '<div style="padding:0 14px 8px 14px;background:'+(i%2===0?'#FCF5E3':'#fff')+'">'
-          +'<div style="background:#FAFAFA;border:1px solid #E8E0EC;border-radius:7px;padding:7px 10px;font-size:9px;color:#333;line-height:1.5">'
-          +'<span style="font-size:8px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.4px;margin-right:5px">Task Update</span>'
-          +esc(t.notes)
-          +'</div></div>';
-      }
+      html += renderTaskUpdateCallouts(taskUpdatesInWindow(t.id, true, f), i%2===0?'#FCF5E3':'#fff');
     });
     html += '</div></div>';
   });
@@ -3701,7 +3807,7 @@ function dbToTask(r) {
     id: r.id, projId: r.project_id, type: r.type, phase: r.phase,
     name: r.name, status: r.status || 'Not Started', pct: r.pct || 0,
     owner: r.owner || '', start: r.start_date || '', end: r.end_date || '',
-    notes: r.notes || ''
+    notes: r.notes || '', notesUpdatedAt: r.notes_updated_at || ''
   };
 }
 function taskToDb(t) {
@@ -3709,7 +3815,7 @@ function taskToDb(t) {
     project_id: t.projId, type: t.type, phase: t.phase, name: t.name,
     status: t.status || 'Not Started', pct: t.pct || 0,
     owner: t.owner || '', start_date: t.start || null, end_date: t.end || null,
-    notes: t.notes || ''
+    notes: t.notes || '', notes_updated_at: t.notesUpdatedAt || null
   };
 }
 function dbToKpi(r, tsRows) {
@@ -3733,14 +3839,15 @@ function dbToAdhoc(r) {
   return {
     id: 'ah' + r.id, _dbId: r.id, name: r.name, owner: r.owner || '',
     priority: r.priority || 'Medium', status: r.status || 'Not Started',
-    due: r.due_date || '', notes: r.notes || '', type: 'task', isAdHoc: true
+    due: r.due_date || '', notes: r.notes || '', notesUpdatedAt: r.notes_updated_at || '',
+    type: 'task', isAdHoc: true
   };
 }
 function adhocToDb(t) {
   return {
     name: t.name, owner: t.owner || '', priority: t.priority || 'Medium',
     status: t.status || 'Not Started',
-    due_date: t.due || null, notes: t.notes || ''
+    due_date: t.due || null, notes: t.notes || '', notes_updated_at: t.notesUpdatedAt || null
   };
 }
 function dbToComment(r) {
@@ -3767,7 +3874,8 @@ var EXPECTED_TABLES = [
   {key:'kpis',            label:'KPIs'},
   {key:'kpi_timeseries',  label:'KPI Time-Series'},
   {key:'comments',        label:'Comments'},
-  {key:'project_updates', label:'Project Updates'}
+  {key:'project_updates', label:'Project Updates'},
+  {key:'task_updates',    label:'Task Updates'}
 ];
 
 function classifyDbError(err) {
@@ -3853,9 +3961,10 @@ create policy "anon_all_collaborators" on public.collaborators for all using (tr
   id text primary key,
   project_id bigint, type text, phase text, name text,
   status text default 'Not Started', pct integer default 0, owner text,
-  start_date date, end_date date, notes text
+  start_date date, end_date date, notes text, notes_updated_at timestamptz
 );
 alter table public.tasks add column if not exists notes text;
+alter table public.tasks add column if not exists notes_updated_at timestamptz;
 alter table public.tasks enable row level security;
 drop policy if exists "anon_all_tasks" on public.tasks;
 create policy "anon_all_tasks" on public.tasks for all using (true) with check (true);`,
@@ -3865,8 +3974,9 @@ create policy "anon_all_tasks" on public.tasks for all using (true) with check (
   id bigint generated by default as identity primary key,
   name text not null, owner text,
   priority text default 'Medium', status text default 'Not Started',
-  due_date date, notes text, created_at timestamptz default now()
+  due_date date, notes text, notes_updated_at timestamptz, created_at timestamptz default now()
 );
+alter table public.adhoc_tasks add column if not exists notes_updated_at timestamptz;
 alter table public.adhoc_tasks enable row level security;
 drop policy if exists "anon_all_adhoc_tasks" on public.adhoc_tasks;
 create policy "anon_all_adhoc_tasks" on public.adhoc_tasks for all using (true) with check (true);`,
@@ -3909,7 +4019,17 @@ create policy "anon_all_comments" on public.comments for all using (true) with c
 );
 alter table public.project_updates enable row level security;
 drop policy if exists "anon_all_project_updates" on public.project_updates;
-create policy "anon_all_project_updates" on public.project_updates for all using (true) with check (true);`
+create policy "anon_all_project_updates" on public.project_updates for all using (true) with check (true);`,
+
+  task_updates:
+`create table if not exists public.task_updates (
+  id bigint generated by default as identity primary key,
+  task_id text, is_adhoc boolean default false, author text, text text, date_time text,
+  created_at timestamptz default now()
+);
+alter table public.task_updates enable row level security;
+drop policy if exists "anon_all_task_updates" on public.task_updates;
+create policy "anon_all_task_updates" on public.task_updates for all using (true) with check (true);`
 };
 
 function copyFixSQL(key) {
@@ -3952,10 +4072,11 @@ function loadFromSupabase() {
     sb.from('kpis').select('*').order('id'),
     sb.from('kpi_timeseries').select('*').order('id'),
     sb.from('comments').select('*').order('created_at'),
-    sb.from('project_updates').select('*').order('created_at')
+    sb.from('project_updates').select('*').order('created_at'),
+    sb.from('task_updates').select('*').order('created_at')
   ]).then(function(results) {
     var pRes=results[0], colRes=results[1], tRes=results[2];
-    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7];
+    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7], tuRes=results[8];
 
     // Probe every expected table's result and surface anything broken -
     // a failed fetch here would otherwise silently become an empty array.
@@ -3983,6 +4104,10 @@ function loadFromSupabase() {
       return {id:r.id, projId:r.project_id, author:r.author, text:r.text, dateTime:r.date_time};
     });
     localStorage.setItem('bd-updates', JSON.stringify(projectUpdates));
+    taskUpdates = (tuRes && tuRes.data || []).map(function(r){
+      return {id:r.id, taskId:r.task_id, isAdHoc:r.is_adhoc, author:r.author, text:r.text, dateTime:r.date_time};
+    });
+    saveTaskUpdates();
 
     // Also save to localStorage as cache
     sd('bd-projs', projects);
@@ -4068,7 +4193,7 @@ window.sbDelProject = function(pid) {
 
 window.sbUpdTask = function(task) {
   if (!sb || !task) return;
-  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name, notes: task.notes||''};
+  var d = {status: task.status, pct: task.pct||0, owner: task.owner||'', start_date: task.start||null, end_date: task.end||null, name: task.name, notes: task.notes||'', notes_updated_at: task.notesUpdatedAt||null};
   // Tasks may have string IDs like "1-p0" - upsert handles both new and existing
   sb.from('tasks').upsert(Object.assign({id: String(task.id), project_id: task.projId, type: task.type, phase: task.phase}, d), {onConflict:'id'})
     .then(function(r){ if(r.error){ console.warn('sbUpdTask:', r.error); showToast('Task save to database failed: '+r.error.message,'error'); } });
@@ -4232,6 +4357,31 @@ window.sbDeleteUpdate = function(updateId) {
   if (!sb || !updateId) return;
   sb.from('project_updates').delete().eq('id', updateId)
     .then(function(r){ if(r.error) console.warn('sbDeleteUpdate:', r.error); });
+};
+
+window.sbSaveTaskUpdate = function(update) {
+  if (!sb) return;
+  sb.from('task_updates').insert({
+    task_id: update.taskId,
+    is_adhoc: !!update.isAdHoc,
+    author: update.author,
+    text: update.text,
+    date_time: update.dateTime
+  }).select().then(function(r){
+    if(r.error){ console.warn('sbSaveTaskUpdate:', r.error); showToast('Task update save to database failed: '+r.error.message,'error'); return; }
+    if(r.data && r.data[0]){
+      var saved = taskUpdates.find(function(u){
+        return u.taskId===update.taskId && u.isAdHoc===update.isAdHoc && u.text===update.text && u.dateTime===update.dateTime && !u.id;
+      });
+      if(saved){ saved.id = r.data[0].id; saveTaskUpdates(); }
+    }
+  });
+};
+
+window.sbDeleteTaskUpdate = function(updateId) {
+  if (!sb || !updateId) return;
+  sb.from('task_updates').delete().eq('id', updateId)
+    .then(function(r){ if(r.error) console.warn('sbDeleteTaskUpdate:', r.error); });
 };
 
 // -- Start ---------------------------------------------------------------------
