@@ -233,8 +233,11 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   </div>
   <div style="display:flex;gap:6px;align-items:center;margin-left:auto;flex-shrink:0">
     <span id="db-ind" style="font-size:9px;padding:2px 10px;border-radius:10px;font-weight:700;background:rgba(219,194,93,.3);color:#FFF8DC;flex-shrink:0">Connecting...</span>
+    <input id="global-search" type="text" placeholder="Search everything..." onkeydown="if(event.key==='Enter')runGlobalSearch()" style="border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:4px 8px;font-size:9px;color:var(--pd);background:#fff;width:140px;font-family:inherit"/>
+    <button onclick="runGlobalSearch()" title="Search projects, tasks, comments and updates" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#128269;</button>
     <button onclick="sv('weekly')" id="weekly-nav-btn" title="Weekly standup view" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#128197; Weekly</button>
     <button id="meeting-btn" onclick="toggleMeetingMode()" title="Meeting mode - clean presentation view" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#127909; Present</button>
+    <button onclick="openTrash()" title="Recently deleted items - restorable for 30 days" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#128465; Trash <span class="nbadge" id="trash-badge">0</span></button>
     <button onclick="exportData()" title="Export all data as JSON backup" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#8595; Export</button>
     <button id="import-btn" onclick="document.getElementById('import-file').click()" title="Restore from JSON backup (Admin only)" style="display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);border-radius:5px;padding:3px 9px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">&#8593; Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"/>
@@ -363,7 +366,16 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
     <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
+    <button class="togb" onclick="selectAllVisible()" title="Select every task currently shown">Select All</button>
     <button class="abtn" id="add-task-btn" onclick="openAdHocModal()">+ Add Task</button>
+  </div>
+  <div id="bulk-bar" style="display:none;background:#FFF8DC;border:1px solid #DBC25D;border-radius:10px;padding:9px 12px;align-items:center;gap:8px;flex-wrap:wrap">
+    <span id="bulk-count" style="font-size:10px;font-weight:700;color:#6B5A10">0 selected</span>
+    <select id="bulk-status" class="fsel"><option value="">Change status to...</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
+    <button class="abtn" style="margin-left:0" onclick="applyBulkStatus()">Apply</button>
+    <select id="bulk-owner" class="fsel"><option value="">Reassign to...</option></select>
+    <button class="abtn" style="margin-left:0" onclick="applyBulkOwner()">Apply</button>
+    <button class="bcan" onclick="clearSelection()">Clear selection</button>
   </div>
   <div id="tbboard"></div>
   <div id="tblist" style="display:none"></div>
@@ -580,6 +592,28 @@ body.meeting-mode .trow:hover { background:inherit !important; }
       <button class="bcls" onclick="closeMo('leadmodal')">&#215;</button>
     </div>
     <div class="mbody" id="lead-modal-body" style="padding:14px"></div>
+  </div>
+</div>
+
+<!-- TRASH MODAL -->
+<div class="mo" id="trashmodal" onclick="closeMo('trashmodal',event)">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span>Recently Deleted <span style="font-weight:400;font-size:10px;opacity:.75">— restorable for 30 days</span></span>
+      <button class="bcls" onclick="closeMo('trashmodal')">&#215;</button>
+    </div>
+    <div class="mbody" id="trash-list" style="padding:14px;max-height:70vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- GLOBAL SEARCH MODAL -->
+<div class="mo" id="searchmodal" onclick="closeMo('searchmodal',event)">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhdr">
+      <span id="search-modal-title">Search</span>
+      <button class="bcls" onclick="closeMo('searchmodal')">&#215;</button>
+    </div>
+    <div class="mbody" id="search-results-body" style="padding:14px;max-height:70vh;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -947,6 +981,7 @@ function refreshDropdowns(){
     populateSelect('weekly-lead', leads, false, 'All Leads');
     populateSelect('tb-lead', leads, false, 'All Leads');
     populateSelect('gantt-lead-filter', leads, false, 'All Leads');
+    populateSelect('bulk-owner', leads, false, 'Reassign to...');
     // Categories
     var cats = getAllCategories();
     populateSelect('fcat', cats, true, null);
@@ -1434,7 +1469,11 @@ function saveProj(){
   }
 }
 function delProj(){
-  if(!editId||!confirm('Delete this project and all its tasks and KPIs?'))return;
+  if(!editId||!confirm('Delete this project and all its tasks and KPIs? You can restore it from Trash within 30 days.'))return;
+  var projToDelete = projects.find(function(p){return p.id===editId;});
+  var tasksToDelete = tasks.filter(function(t){return t.projId===editId;});
+  var kpisToDelete = kpis.filter(function(k){return k.projId===editId;});
+  pushToTrash('project', {project: projToDelete, tasks: tasksToDelete, kpis: kpisToDelete});
   projects=projects.filter(p=>p.id!==editId);
   tasks=tasks.filter(t=>t.projId!==editId);
   kpis=kpis.filter(k=>k.projId!==editId);
@@ -1442,6 +1481,7 @@ function delProj(){
   saveAll();
   if(window.sbDelProject) sbDelProject(dpId);
   closeMo('pmodal');sv('dashboard');updateBadge();
+  showToast('Project moved to Trash - restore within 30 days if needed');
 }
 
 // -- Dashboard -----------------------------------------------------------------
@@ -2002,14 +2042,16 @@ function saveKPI(){
 
 function delKPI(){
   if(!kpiEditId)return;
-  var kpiToDelete = kpiEditId;
+  var kpiIdToDelete = kpiEditId;
+  var kpiObj = kpis.find(function(k){return String(k.id)===String(kpiEditId);});
+  if(kpiObj) pushToTrash('kpi', {kpi: kpiObj});
   kpis=kpis.filter(k=>String(k.id)!==String(kpiEditId));
   saveAll();
-  if(window.sbDelKPI) sbDelKPI(kpiToDelete);
+  if(window.sbDelKPI) sbDelKPI(kpiIdToDelete);
   closeMo('kpimodal');
   if(curView==='activity')renderActivity();
   if(curView==='benefits')renderBenefits();
-  showToast('KPI deleted');
+  showToast('KPI moved to Trash');
 }
 
 // -- Task Board ----------------------------------------------------------------
@@ -2063,7 +2105,69 @@ function changeTaskStatus(taskId, isAdHoc, newStatus) {
   if (curView === 'activity') renderActivity();
 }
 
+// -- Bulk selection / actions ---------------------------------------------------
+var selectedTasks = {};
+var _lastBoardTasks = [];
+function taskKey(id, isAdHoc){ return String(id)+'|'+(isAdHoc?'1':'0'); }
+function toggleTaskSelect(id, isAdHoc, checked){
+  var key = taskKey(id, isAdHoc);
+  if(checked) selectedTasks[key] = {id:id, isAdHoc:isAdHoc};
+  else delete selectedTasks[key];
+  updateBulkBar();
+}
+function clearSelection(){
+  selectedTasks = {};
+  updateBulkBar();
+  renderTaskBoard();
+}
+function updateBulkBar(){
+  var bar = document.getElementById('bulk-bar');
+  var countEl = document.getElementById('bulk-count');
+  var n = Object.keys(selectedTasks).length;
+  if(!bar) return;
+  if(n>0){ bar.style.display='flex'; if(countEl) countEl.textContent = n+' selected'; }
+  else { bar.style.display='none'; }
+}
+function selectAllVisible(){
+  _lastBoardTasks.forEach(function(t){ selectedTasks[taskKey(t.id,t.isAdHoc)] = {id:t.id, isAdHoc:t.isAdHoc}; });
+  updateBulkBar();
+  renderTaskBoard();
+}
+function applyBulkStatus(){
+  var newStatus = document.getElementById('bulk-status').value;
+  if(!newStatus){ showToast('Choose a status first','warn'); return; }
+  var keys = Object.keys(selectedTasks);
+  if(!keys.length) return;
+  keys.forEach(function(key){
+    var sel = selectedTasks[key];
+    changeTaskStatus(sel.id, sel.isAdHoc, newStatus);
+  });
+  showToast(keys.length+' task'+(keys.length>1?'s':'')+' updated');
+  clearSelection();
+  document.getElementById('bulk-status').value = '';
+}
+function applyBulkOwner(){
+  var newOwner = document.getElementById('bulk-owner').value;
+  if(!newOwner){ showToast('Choose an owner first','warn'); return; }
+  var keys = Object.keys(selectedTasks);
+  if(!keys.length) return;
+  keys.forEach(function(key){
+    var sel = selectedTasks[key];
+    if(sel.isAdHoc){
+      var t = adHocTasks.find(function(x){ return String(x.id)===String(sel.id); });
+      if(t){ t.owner = newOwner; saveAll(); if(window.sbSaveAdHoc) sbSaveAdHoc(t, false); }
+    } else {
+      var t2 = tasks.find(function(x){ return String(x.id)===String(sel.id); });
+      if(t2){ t2.owner = newOwner; saveAll(); if(window.sbUpdTask) sbUpdTask(t2); }
+    }
+  });
+  showToast(keys.length+' task'+(keys.length>1?'s':'')+' reassigned');
+  clearSelection();
+  document.getElementById('bulk-owner').value = '';
+}
+
 function renderTaskBoard(){
+  if(typeof refreshDropdowns==='function') refreshDropdowns();
   var addTaskBtnEl = document.getElementById('add-task-btn');
   if(addTaskBtnEl) addTaskBtnEl.style.display = getRole()==='Leadership' ? 'none' : '';
   const lead=document.getElementById('tb-lead').value;
@@ -2087,6 +2191,8 @@ function renderTaskBoard(){
     }
     return true;
   });
+  _lastBoardTasks = all;
+  updateBulkBar();
 
   if(togView==='board'){
     const activeStatuses=STATUSES.filter(function(s){ return s!=='Complete'; });
@@ -2101,8 +2207,9 @@ function renderTaskBoard(){
         const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
         const cc=(comments||[]).filter(c=>c.taskId===String(t.id)&&c.isAdHoc===t.isAdHoc).length;
         return`<div class="tcard${t.isAdHoc?' style="border:1px dashed #DBC25D"':''}" style="position:relative">
+          <input type="checkbox" onclick="event.stopPropagation()" onchange="toggleTaskSelect('${t.id}',${t.isAdHoc},this.checked)" ${selectedTasks[taskKey(t.id,t.isAdHoc)]?'checked':''} style="position:absolute;top:6px;left:6px;width:13px;height:13px;cursor:pointer;z-index:2">
           ${cc>0?'<span style="position:absolute;top:5px;right:5px;background:#4A1759;color:#fff;font-size:7px;font-weight:800;border-radius:8px;padding:1px 5px">'+cc+'</span>':''}
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;padding-left:19px">
             <div class="tcard-name" style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">${esc(t.name)}</div>
             ${t.isAdHoc?'<span class="adhoc-badge" data-ahid="'+t.id+'" onclick="editAdHocFromBadge(this)" style="cursor:pointer">Ad Hoc &#9998;</span>':''}
           </div>
@@ -2137,7 +2244,8 @@ function renderTaskBoard(){
       const overdue=due&&due<today&&t.status!=='Complete';
       const pri=t.isAdHoc?t.priority:(t.projPriority||'Medium');
       const ss=SS(t.status);
-      return`<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;">
+      return`<div style="display:grid;grid-template-columns:24px 2fr 1fr 1fr 1fr 90px 28px;padding:8px 13px;gap:7px;align-items:center;background:${i%2===0?'#FCF5E3':'#fff'};border-top:1px solid #D6C8DB;">
+        <input type="checkbox" onclick="event.stopPropagation()" onchange="toggleTaskSelect('${t.id}',${t.isAdHoc},this.checked)" ${selectedTasks[taskKey(t.id,t.isAdHoc)]?'checked':''} style="width:13px;height:13px;cursor:pointer">
         <div style="cursor:pointer" onclick="openPanel('${t.id}',${t.isAdHoc})">
           <div style="font-size:10px;font-weight:700;color:#4A1759;margin-bottom:1px">${esc(t.name)}</div>
           <div style="font-size:8px;color:#595959;display:flex;align-items:center;gap:4px">
@@ -2157,7 +2265,8 @@ function renderTaskBoard(){
     const emptyMsg = togView==='archived' ? 'No completed tasks yet.' : 'No tasks found.';
     const archNote = togView==='archived' ? '<div style="padding:8px 13px;margin-bottom:9px;background:#E2EFDA;border-radius:8px;font-size:9px;color:#375623;font-weight:700">Completed tasks are archived here so they stay out of the active board. Change the status dropdown below to move a task back to an active column.</div>' : '';
     document.getElementById(targetId).innerHTML=`${archNote}<div class="card">
-      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
+      <div style="display:grid;grid-template-columns:24px 2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
+        <span></span>
         ${['Task','Owner','Priority','Status','Due',''].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
       </div>
       ${rows||`<div style="padding:20px;text-align:center;color:#595959;font-size:10px">${emptyMsg}</div>`}
@@ -2318,10 +2427,12 @@ function saveAdHoc(){
 function delAdHoc(){
   if(!ahEditId)return;
   var ahToDelete = adHocTasks.find(function(t){return t.id===ahEditId;});
+  if(ahToDelete) pushToTrash('adhoc', {task: ahToDelete});
   adHocTasks=adHocTasks.filter(t=>t.id!==ahEditId);
   saveAll();
   if(window.sbDelAdHoc && ahToDelete) sbDelAdHoc(ahToDelete);
   closeMo('ahmodal');renderTaskBoard();
+  showToast('Task moved to Trash');
 }
 
 // -- Gantt ---------------------------------------------------------------------
@@ -2551,8 +2662,232 @@ let projectUpdates = [];
 try { projectUpdates = JSON.parse(localStorage.getItem('bd-updates') || '[]'); } catch(e){}
 let taskUpdates = [];
 try { taskUpdates = JSON.parse(localStorage.getItem('bd-task-updates') || '[]'); } catch(e){}
+let deletedItems = [];
+try { deletedItems = JSON.parse(localStorage.getItem('bd-deleted-items') || '[]'); } catch(e){}
 function saveComments(){ try{ localStorage.setItem('bd-comments', JSON.stringify(comments)); }catch(e){} }
 function saveTaskUpdates(){ try{ localStorage.setItem('bd-task-updates', JSON.stringify(taskUpdates)); }catch(e){} }
+function saveDeletedItems(){ try{ localStorage.setItem('bd-deleted-items', JSON.stringify(deletedItems)); }catch(e){} }
+
+// ==============================================
+// TRASH / UNDO (soft delete for projects, phases, tasks, KPIs, ad hoc tasks)
+// ==============================================
+function updateTrashBadge(){
+  var b = document.getElementById('trash-badge');
+  if(b) b.textContent = deletedItems.length;
+}
+
+function purgeOldTrash(){
+  var cutoff = Date.now() - 30*24*60*60*1000;
+  var before = deletedItems.length;
+  var purged = deletedItems.filter(function(e){ return new Date(e.deletedAt).getTime() < cutoff; });
+  deletedItems = deletedItems.filter(function(e){ return new Date(e.deletedAt).getTime() >= cutoff; });
+  if(deletedItems.length !== before){
+    saveDeletedItems();
+    purged.forEach(function(e){ if(window.sbDeleteDeletedItem) sbDeleteDeletedItem(e.id); });
+  }
+  updateTrashBadge();
+}
+
+function pushToTrash(type, payload){
+  var entry = { id: 'trash'+Date.now()+Math.random().toString(36).slice(2,7), type: type, payload: payload, deletedAt: new Date().toISOString() };
+  deletedItems.push(entry);
+  saveDeletedItems();
+  if(window.sbSaveDeletedItem) sbSaveDeletedItem(entry);
+  updateTrashBadge();
+  return entry;
+}
+
+function trashItemIcon(type){
+  return { project:'&#128193;', phase:'&#128203;', task:'&#9989;', kpi:'&#127919;', adhoc:'&#9889;' }[type] || '&#128465;';
+}
+function trashItemLabel(e){
+  var p = e.payload || {};
+  if(e.type==='project') return { name: p.project ? p.project.name : 'Unknown project', sub: 'Project' + (p.tasks?' &middot; '+p.tasks.length+' tasks':'') + (p.kpis&&p.kpis.length?' &middot; '+p.kpis.length+' KPIs':'') };
+  if(e.type==='phase')   return { name: p.phaseTask ? p.phaseTask.name : 'Unknown phase', sub: 'Phase' + (p.tasks?' &middot; '+p.tasks.length+' tasks':'') };
+  if(e.type==='task')    return { name: p.task ? p.task.name : 'Unknown task', sub: 'Task' };
+  if(e.type==='kpi')     return { name: p.kpi ? p.kpi.name : 'Unknown KPI', sub: 'KPI' };
+  if(e.type==='adhoc')   return { name: p.task ? p.task.name : 'Unknown task', sub: 'Ad Hoc Task' };
+  return { name:'Unknown item', sub:e.type||'' };
+}
+
+function renderTrash(){
+  purgeOldTrash();
+  var list = document.getElementById('trash-list');
+  if(!list) return;
+  if(!deletedItems.length){
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:#595959;font-size:11px">Nothing in the trash. Deleted projects, phases, tasks, ad hoc tasks, and KPIs will appear here for 30 days.</div>';
+    return;
+  }
+  var sorted = deletedItems.slice().sort(function(a,b){ return new Date(b.deletedAt) - new Date(a.deletedAt); });
+  list.innerHTML = sorted.map(function(e){
+    var lbl = trashItemLabel(e);
+    var daysLeft = Math.max(0, 30 - Math.floor((Date.now()-new Date(e.deletedAt).getTime())/86400000));
+    return '<div style="display:flex;align-items:center;gap:9px;padding:9px 11px;background:#FCF5E3;border-radius:8px;margin-bottom:7px">'
+      + '<span style="font-size:16px;flex-shrink:0">'+trashItemIcon(e.type)+'</span>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:11px;font-weight:700;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(lbl.name)+'</div>'
+        + '<div style="font-size:9px;color:#595959;margin-top:1px">'+lbl.sub+' &middot; deleted '+esc(fmtUpdateDate(e.deletedAt))+' &middot; '+daysLeft+'d left</div>'
+      + '</div>'
+      + '<button onclick="restoreTrashItem(\''+e.id+'\')" style="background:#E2EFDA;color:#375623;border:none;border-radius:5px;padding:4px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Restore</button>'
+      + '<button onclick="permanentlyDeleteTrashItem(\''+e.id+'\')" style="background:#FFDCE0;color:#C00000;border:none;border-radius:5px;padding:4px 10px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Delete Forever</button>'
+      + '</div>';
+  }).join('');
+}
+
+function openTrash(){
+  renderTrash();
+  openMo('trashmodal');
+}
+
+function restoreTrashItem(id){
+  var entry = deletedItems.find(function(e){ return e.id===id; });
+  if(!entry) return;
+  var p = entry.payload || {};
+  if(entry.type==='project' && p.project){
+    projects.push(p.project);
+    tasks.push(...(p.tasks||[]));
+    kpis.push(...(p.kpis||[]));
+    saveAll();
+    if(window.sbSaveProject) sbSaveProject(p.project, true, p.project.collaborators||[]);
+    (p.tasks||[]).forEach(function(t){ if(window.sbUpdTask) sbUpdTask(t); });
+    (p.kpis||[]).forEach(function(k){ if(window.sbSaveKPI) sbSaveKPI(k, true); });
+  } else if(entry.type==='phase' && p.phaseTask){
+    tasks.push(p.phaseTask);
+    tasks.push(...(p.tasks||[]));
+    saveAll();
+    if(window.sbSavePhase) sbSavePhase(p.phaseTask);
+    (p.tasks||[]).forEach(function(t){ if(window.sbUpdTask) sbUpdTask(t); });
+  } else if(entry.type==='task' && p.task){
+    tasks.push(p.task);
+    saveAll();
+    if(window.sbUpdTask) sbUpdTask(p.task);
+  } else if(entry.type==='kpi' && p.kpi){
+    kpis.push(p.kpi);
+    saveAll();
+    if(window.sbSaveKPI) sbSaveKPI(p.kpi, true);
+  } else if(entry.type==='adhoc' && p.task){
+    adHocTasks.push(p.task);
+    saveAll();
+    if(window.sbSaveAdHoc) sbSaveAdHoc(p.task, true);
+  }
+  deletedItems = deletedItems.filter(function(e){ return e.id!==id; });
+  saveDeletedItems();
+  if(window.sbDeleteDeletedItem) sbDeleteDeletedItem(entry.id);
+  updateTrashBadge();
+  showToast('Restored successfully');
+  if(curView==='activity') renderActivity();
+  if(curView==='dashboard') renderDash();
+  if(curView==='tracker') renderTracker();
+  if(curView==='taskboard') renderTaskBoard();
+  if(curView==='benefits') renderBenefits();
+  renderTrash();
+}
+
+function permanentlyDeleteTrashItem(id){
+  if(!confirm('Permanently delete this item? This cannot be undone.')) return;
+  deletedItems = deletedItems.filter(function(e){ return e.id!==id; });
+  saveDeletedItems();
+  if(window.sbDeleteDeletedItem) sbDeleteDeletedItem(id);
+  updateTrashBadge();
+  renderTrash();
+}
+
+// ==============================================
+// GLOBAL SEARCH
+// ==============================================
+function sectionHeader(title, count){
+  return '<div style="font-size:9px;font-weight:800;color:#68217D;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px 0">'+esc(title)+' ('+count+')</div>';
+}
+function searchResultRow(onclickAttr, titleHtml, subHtml){
+  return '<div onclick="'+onclickAttr+'" style="padding:9px 11px;background:#FCF5E3;border-radius:8px;margin-bottom:6px;cursor:pointer">'
+    + '<div style="font-size:10px;font-weight:700;color:#4A1759;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+titleHtml+'</div>'
+    + '<div style="font-size:9px;color:#595959;margin-top:1px">'+subHtml+'</div>'
+    + '</div>';
+}
+function truncateForSearch(s){
+  s = String(s||'');
+  return s.length>90 ? s.slice(0,90)+'...' : s;
+}
+function runGlobalSearch(){
+  var qEl = document.getElementById('global-search');
+  var q = (qEl.value||'').trim().toLowerCase();
+  if(!q){ showToast('Type something to search for','warn'); return; }
+  var results = { projects:[], tasks:[], adhoc:[], comments:[], projectUpdates:[], taskUpdates:[] };
+
+  projects.forEach(function(p){
+    var haystack = [p.name,p.problem,p.outcome,p.notes,p.lead,p.category].join(' ').toLowerCase();
+    if(haystack.indexOf(q)>=0) results.projects.push(p);
+  });
+  tasks.filter(function(t){ return t.type==='task'; }).forEach(function(t){
+    if((t.name||'').toLowerCase().indexOf(q)>=0) results.tasks.push(t);
+  });
+  adHocTasks.forEach(function(t){
+    if((t.name||'').toLowerCase().indexOf(q)>=0) results.adhoc.push(t);
+  });
+  comments.forEach(function(c){
+    if((c.text||'').toLowerCase().indexOf(q)>=0) results.comments.push(c);
+  });
+  projectUpdates.forEach(function(u){
+    if((u.text||'').toLowerCase().indexOf(q)>=0) results.projectUpdates.push(u);
+  });
+  taskUpdates.forEach(function(u){
+    if((u.text||'').toLowerCase().indexOf(q)>=0) results.taskUpdates.push(u);
+  });
+
+  renderSearchResults(q, results);
+  openMo('searchmodal');
+}
+function renderSearchResults(q, results){
+  var body = document.getElementById('search-results-body');
+  var titleEl = document.getElementById('search-modal-title');
+  if(!body) return;
+  var total = results.projects.length+results.tasks.length+results.adhoc.length+results.comments.length+results.projectUpdates.length+results.taskUpdates.length;
+  if(titleEl) titleEl.textContent = 'Search results for "'+q+'" ('+total+')';
+  if(!total){
+    body.innerHTML = '<div style="padding:20px;text-align:center;color:#595959;font-size:11px">No matches found. Try a different keyword.</div>';
+    return;
+  }
+  var html = '';
+  if(results.projects.length){
+    html += sectionHeader('Projects', results.projects.length);
+    results.projects.slice(0,20).forEach(function(p){
+      html += searchResultRow("closeMo('searchmodal');openModal("+p.id+");", esc(p.name), esc(p.lead)+' &middot; '+esc(p.status));
+    });
+  }
+  if(results.tasks.length){
+    html += sectionHeader('Project Tasks', results.tasks.length);
+    results.tasks.slice(0,20).forEach(function(t){
+      var proj = projects.find(function(p){ return p.id===t.projId; });
+      html += searchResultRow("closeMo('searchmodal');openPanel('"+t.id+"',false);", esc(t.name), esc(proj?proj.name:'Unknown project')+' &middot; '+esc(t.status));
+    });
+  }
+  if(results.adhoc.length){
+    html += sectionHeader('Ad Hoc Tasks', results.adhoc.length);
+    results.adhoc.slice(0,20).forEach(function(t){
+      html += searchResultRow("closeMo('searchmodal');openPanel('"+t.id+"',true);", esc(t.name), 'Ad Hoc &middot; '+esc(t.status));
+    });
+  }
+  if(results.comments.length){
+    html += sectionHeader('Comments', results.comments.length);
+    results.comments.slice(0,20).forEach(function(c){
+      html += searchResultRow("closeMo('searchmodal');openPanel('"+c.taskId+"',"+(c.isAdHoc?'true':'false')+");", esc(c.author)+': '+esc(truncateForSearch(c.text)), esc(c.dateTime));
+    });
+  }
+  if(results.projectUpdates.length){
+    html += sectionHeader('Project Updates', results.projectUpdates.length);
+    results.projectUpdates.slice(0,20).forEach(function(u){
+      var proj = projects.find(function(p){ return p.id===u.projId; });
+      html += searchResultRow("closeMo('searchmodal');openModal("+u.projId+");", esc(u.author)+': '+esc(truncateForSearch(u.text)), esc(proj?proj.name:'Unknown project')+' &middot; '+esc(u.dateTime));
+    });
+  }
+  if(results.taskUpdates.length){
+    html += sectionHeader('Task Updates', results.taskUpdates.length);
+    results.taskUpdates.slice(0,20).forEach(function(u){
+      html += searchResultRow("closeMo('searchmodal');openPanel('"+u.taskId+"',"+(u.isAdHoc?'true':'false')+");", esc(u.author)+': '+esc(truncateForSearch(u.text)), esc(u.dateTime));
+    });
+  }
+  body.innerHTML = html;
+}
 
 let panelTaskId = null, panelIsAdHoc = false;
 
@@ -3721,9 +4056,11 @@ function addTask(phaseId, phaseName, projId) {
 function delPhase(phaseId, projId) {
   var ph = tasks.find(function(t){ return String(t.id) === String(phaseId); });
   var taskCount = tasks.filter(function(t){ return t.projId === projId && t.type === 'task' && t.phase === (ph ? ph.phase : ''); }).length;
-  var msg = 'Delete this phase' + (taskCount > 0 ? ' and its ' + taskCount + ' task' + (taskCount > 1 ? 's' : '') : '') + '?';
+  var msg = 'Delete this phase' + (taskCount > 0 ? ' and its ' + taskCount + ' task' + (taskCount > 1 ? 's' : '') : '') + '? You can restore it from Trash within 30 days.';
   if (!confirm(msg)) return;
   var phaseName = ph ? ph.phase : '';
+  var childTasks = tasks.filter(function(t){ return t.projId === projId && t.type === 'task' && t.phase === phaseName; });
+  pushToTrash('phase', {projId: projId, phaseTask: ph, tasks: childTasks});
   tasks = tasks.filter(function(t){
     if (String(t.id) === String(phaseId)) return false;
     if (t.projId === projId && t.type === 'task' && t.phase === phaseName) return false;
@@ -3736,10 +4073,13 @@ function delPhase(phaseId, projId) {
   var arr = document.getElementById('act-arr-' + projId);
   if (el) el.style.display = 'block';
   if (arr) arr.innerHTML = '&#9660;';
+  showToast('Phase moved to Trash');
 }
 
 // -- Delete task ------------------------------------------------------------
 function delTask(taskId, projId) {
+  var taskObj = tasks.find(function(t){ return String(t.id) === String(taskId); });
+  if(taskObj) pushToTrash('task', {projId: projId, task: taskObj});
   tasks = tasks.filter(function(t){ return String(t.id) !== String(taskId); });
   saveAll();
   if(window.sbDelTask) sbDelTask(taskId);
@@ -3749,11 +4089,14 @@ function delTask(taskId, projId) {
   var arr = document.getElementById('act-arr-' + projId);
   if (el) el.style.display = 'block';
   if (arr) arr.innerHTML = '&#9660;';
+  showToast('Task moved to Trash');
 }
 
 if(typeof refreshDropdowns==='function') refreshDropdowns();
 if(typeof applyRoleVisibility==='function') applyRoleVisibility();
 renderTracker();updateSub();updateBadge();
+if(typeof purgeOldTrash==='function') purgeOldTrash();
+if(typeof updateTrashBadge==='function') updateTrashBadge();
 
 
 
@@ -3885,7 +4228,8 @@ var EXPECTED_TABLES = [
   {key:'kpi_timeseries',  label:'KPI Time-Series'},
   {key:'comments',        label:'Comments'},
   {key:'project_updates', label:'Project Updates'},
-  {key:'task_updates',    label:'Task Updates'}
+  {key:'task_updates',    label:'Task Updates'},
+  {key:'deleted_items',   label:'Deleted Items (Trash)'}
 ];
 
 function classifyDbError(err) {
@@ -4039,7 +4383,16 @@ create policy "anon_all_project_updates" on public.project_updates for all using
 );
 alter table public.task_updates enable row level security;
 drop policy if exists "anon_all_task_updates" on public.task_updates;
-create policy "anon_all_task_updates" on public.task_updates for all using (true) with check (true);`
+create policy "anon_all_task_updates" on public.task_updates for all using (true) with check (true);`,
+
+  deleted_items:
+`create table if not exists public.deleted_items (
+  id text primary key,
+  type text, payload jsonb, deleted_at timestamptz default now()
+);
+alter table public.deleted_items enable row level security;
+drop policy if exists "anon_all_deleted_items" on public.deleted_items;
+create policy "anon_all_deleted_items" on public.deleted_items for all using (true) with check (true);`
 };
 
 function copyFixSQL(key) {
@@ -4083,10 +4436,11 @@ function loadFromSupabase() {
     sb.from('kpi_timeseries').select('*').order('id'),
     sb.from('comments').select('*').order('created_at'),
     sb.from('project_updates').select('*').order('created_at'),
-    sb.from('task_updates').select('*').order('created_at')
+    sb.from('task_updates').select('*').order('created_at'),
+    sb.from('deleted_items').select('*').order('deleted_at')
   ]).then(function(results) {
     var pRes=results[0], colRes=results[1], tRes=results[2];
-    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7], tuRes=results[8];
+    var ahRes=results[3], kRes=results[4], tsRes=results[5], cRes=results[6], uRes=results[7], tuRes=results[8], diRes=results[9];
 
     // Probe every expected table's result and surface anything broken -
     // a failed fetch here would otherwise silently become an empty array.
@@ -4118,6 +4472,12 @@ function loadFromSupabase() {
       return {id:r.id, taskId:r.task_id, isAdHoc:r.is_adhoc, author:r.author, text:r.text, dateTime:r.date_time};
     });
     saveTaskUpdates();
+    deletedItems = (diRes && diRes.data || []).map(function(r){
+      return {id:r.id, type:r.type, payload:r.payload, deletedAt:r.deleted_at};
+    });
+    saveDeletedItems();
+    purgeOldTrash();
+    updateTrashBadge();
 
     // Also save to localStorage as cache
     sd('bd-projs', projects);
@@ -4392,6 +4752,19 @@ window.sbDeleteTaskUpdate = function(updateId) {
   if (!sb || !updateId) return;
   sb.from('task_updates').delete().eq('id', updateId)
     .then(function(r){ if(r.error) console.warn('sbDeleteTaskUpdate:', r.error); });
+};
+
+window.sbSaveDeletedItem = function(entry) {
+  if (!sb) return;
+  sb.from('deleted_items').insert({
+    id: entry.id, type: entry.type, payload: entry.payload, deleted_at: entry.deletedAt
+  }).then(function(r){ if(r.error) console.warn('sbSaveDeletedItem:', r.error); });
+};
+
+window.sbDeleteDeletedItem = function(id) {
+  if (!sb || !id) return;
+  sb.from('deleted_items').delete().eq('id', id)
+    .then(function(r){ if(r.error) console.warn('sbDeleteDeletedItem:', r.error); });
 };
 
 // -- Start ---------------------------------------------------------------------
