@@ -180,8 +180,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F0F7;min-height:1
 .collab-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
 .collab-chip{display:flex;align-items:center;gap:3px;background:var(--pl);border-radius:10px;padding:2px 7px 2px 3px;font-size:9px;color:var(--pd)}
 /* ── Scrollbar ── */
-/* Hide Recommendations tab and Critical Issues for non-Admin users */
+/* Hide Recommendations and Results & Benefits tabs (Admin-only) for non-Admin users */
 body.hide-recs .tb[onclick*="'recs'"],
+body.hide-recs .tb[onclick*="'benefits'"],
 body.hide-recs #strip-crit,
 body.hide-recs #strip-health,
 body.hide-recs #dwlw { display:none !important; }
@@ -358,6 +359,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <button class="togb active" id="tog-board" onclick="setTog('board')">Board</button>
     <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
     <button class="togb" id="tog-bylead" onclick="setTog('bylead')">By Lead</button>
+    <button class="togb" id="tog-archived" onclick="setTog('archived')">Archived</button>
     <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
     <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
@@ -366,6 +368,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   <div id="tbboard"></div>
   <div id="tblist" style="display:none"></div>
   <div id="tbbylead" style="display:none"></div>
+  <div id="tbarchived" style="display:none"></div>
 </div>
 
 <!-- GANTT -->
@@ -1005,9 +1008,9 @@ function applyRoleVisibility(){
     document.body.classList.remove('hide-recs');
   } else {
     document.body.classList.add('hide-recs');
-    // If user is currently on the recs tab and role is no longer Admin,
-    // redirect to dashboard
-    if(typeof curView !== 'undefined' && curView === 'recs'){
+    // If user is currently on the recs or benefits tab and role is no longer
+    // Admin, redirect to dashboard - both tabs are Admin-only.
+    if(typeof curView !== 'undefined' && (curView === 'recs' || curView === 'benefits')){
       if(typeof sv === 'function') sv('dashboard');
     }
   }
@@ -2016,9 +2019,11 @@ function setTog(v){
   document.getElementById('tog-board').classList.toggle('active',v==='board');
   document.getElementById('tog-list').classList.toggle('active',v==='list');
   document.getElementById('tog-bylead').classList.toggle('active',v==='bylead');
+  document.getElementById('tog-archived').classList.toggle('active',v==='archived');
   document.getElementById('tbboard').style.display=v==='board'?'block':'none';
   document.getElementById('tblist').style.display=v==='list'?'block':'none';
   document.getElementById('tbbylead').style.display=v==='bylead'?'block':'none';
+  document.getElementById('tbarchived').style.display=v==='archived'?'block':'none';
   renderTaskBoard();
 }
 function populateProjFilter(){
@@ -2072,11 +2077,20 @@ function renderTaskBoard(){
     if(proj&&proj!=='adhoc'&&t.projId!=proj)return false;
     if(type==='project'&&t.isAdHoc)return false;
     if(type==='adhoc'&&!t.isAdHoc)return false;
+    // Completed tasks are archived out of the active board/list/by-lead views
+    // and only surfaced in the dedicated Archived toggle, so they stay
+    // accessible without cluttering day-to-day tracking.
+    if(togView==='archived'){
+      if(t.status!=='Complete')return false;
+    } else {
+      if(t.status==='Complete')return false;
+    }
     return true;
   });
 
   if(togView==='board'){
-    const cols=STATUSES.map(s=>{
+    const activeStatuses=STATUSES.filter(function(s){ return s!=='Complete'; });
+    const cols=activeStatuses.map(s=>{
       const items=all.filter(t=>t.status===s);
       const hdr=SS(s);
       const cards=items.map(t=>{
@@ -2115,8 +2129,8 @@ function renderTaskBoard(){
         <div class="bcol-body">${cards||`<div style="font-size:9px;color:#595959;font-style:italic;padding:6px">No tasks</div>`}</div>
       </div>`;
     }).join('');
-    document.getElementById('tbboard').innerHTML=`<div class="board">${cols}</div>`;
-  } else {
+    document.getElementById('tbboard').innerHTML=`<div class="board" style="grid-template-columns:repeat(${activeStatuses.length},1fr)">${cols}</div>`;
+  } else if(togView==='list' || togView==='archived') {
     const rows=all.map((t,i)=>{
       const dueStr=t.end||t.due||'';
       const due=dueStr?new Date(dueStr):null;
@@ -2139,11 +2153,14 @@ function renderTaskBoard(){
         ${t.isAdHoc?'<button data-ahid="'+t.id+'" onclick="event.stopPropagation();editAdHocFromBadge(this)" style="background:#E8D5EE;color:#68217D;border:none;border-radius:4px;padding:2px 6px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit">Edit</button>':'<span></span>'}
       </div>`;
     }).join('');
-    document.getElementById('tblist').innerHTML=`<div class="card">
+    const targetId = togView==='archived' ? 'tbarchived' : 'tblist';
+    const emptyMsg = togView==='archived' ? 'No completed tasks yet.' : 'No tasks found.';
+    const archNote = togView==='archived' ? '<div style="padding:8px 13px;margin-bottom:9px;background:#E2EFDA;border-radius:8px;font-size:9px;color:#375623;font-weight:700">Completed tasks are archived here so they stay out of the active board. Change the status dropdown below to move a task back to an active column.</div>' : '';
+    document.getElementById(targetId).innerHTML=`${archNote}<div class="card">
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 90px 28px;background:#68217D;padding:8px 13px;gap:7px">
         ${['Task','Owner','Priority','Status','Due',''].map(h=>`<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">${h}</span>`).join('')}
       </div>
-      ${rows||'<div style="padding:20px;text-align:center;color:#595959;font-size:10px">No tasks found.</div>'}
+      ${rows||`<div style="padding:20px;text-align:center;color:#595959;font-size:10px">${emptyMsg}</div>`}
     </div>`;
   }
   if(togView==='bylead') renderByLead(all);
@@ -2159,13 +2176,14 @@ function renderByLead(allTasks){
   var proj = document.getElementById('tb-proj').value;
   var type = document.getElementById('tb-type').value;
 
-  // Build per-lead summary
+  // Build per-lead summary. Complete tasks are already excluded from
+  // allTasks (archived), so only the active statuses are tracked here.
   var leadsToShow = lead ? [lead] : getAllLeads();
-  var statuses = ['Not Started','In Progress','On Hold','Complete'];
+  var statuses = ['Not Started','In Progress','On Hold'];
 
   // Header
   var html = '<div class="card" style="overflow-x:auto">';
-  html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;background:#68217D;padding:9px 14px;gap:7px;min-width:600px">';
+  html += '<div style="display:grid;grid-template-columns:140px repeat(4,1fr) 80px;background:#68217D;padding:9px 14px;gap:7px;min-width:600px">';
   html += '<span style="font-size:9px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px">Lead</span>';
   statuses.forEach(function(s){
     var ss = SS(s);
@@ -2190,7 +2208,7 @@ function renderByLead(allTasks){
     statuses.forEach(function(s){ grandTotal[s] += counts[s]; });
 
     var bg = idx%2===0 ? '#FCF5E3' : '#fff';
-    html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;padding:8px 14px;gap:7px;background:'+bg+';border-top:1px solid #D6C8DB;align-items:center;min-width:600px">';
+    html += '<div style="display:grid;grid-template-columns:140px repeat(4,1fr) 80px;padding:8px 14px;gap:7px;background:'+bg+';border-top:1px solid #D6C8DB;align-items:center;min-width:600px">';
 
     // Lead avatar + name
     html += '<div style="display:flex;align-items:center;gap:5px">'+avHtml(l,true)+'<span style="font-size:10px;font-weight:700;color:#4A1759">'+esc(l)+'</span></div>';
@@ -2210,19 +2228,11 @@ function renderByLead(allTasks){
     // Total
     html += '<div style="text-align:center"><span style="font-size:11px;font-weight:800;color:#68217D">'+total+'</span></div>';
     html += '</div>';
-
-    // Mini progress bar under each row
-    if(total > 0){
-      var completePct = Math.round((counts['Complete']||0)/total*100);
-      html += '<div style="height:3px;background:#E8D5EE;min-width:600px">';
-      html += '<div style="height:100%;width:'+completePct+'%;background:#68217D;transition:width .3s"></div>';
-      html += '</div>';
-    }
   });
 
   // Grand total row
   if(leadsToShow.length > 1){
-    html += '<div style="display:grid;grid-template-columns:140px repeat(5,1fr) 80px;padding:8px 14px;gap:7px;background:#F5F0F7;border-top:2px solid #68217D;align-items:center;min-width:600px">';
+    html += '<div style="display:grid;grid-template-columns:140px repeat(4,1fr) 80px;padding:8px 14px;gap:7px;background:#F5F0F7;border-top:2px solid #68217D;align-items:center;min-width:600px">';
     html += '<span style="font-size:10px;font-weight:800;color:#4A1759">All Leads</span>';
     statuses.forEach(function(s){
       var ss = SS(s);
@@ -2240,7 +2250,7 @@ function renderByLead(allTasks){
   // Ad hoc vs project breakdown note
   var projCount = allTasks.filter(function(t){ return !t.isAdHoc; }).length;
   var ahCount = allTasks.filter(function(t){ return t.isAdHoc; }).length;
-  html += '<div style="margin-top:8px;font-size:9px;color:#595959;padding:0 2px">'+projCount+' project tasks + '+ahCount+' ad hoc tasks shown. Use filters above to narrow by lead, project or type.</div>';
+  html += '<div style="margin-top:8px;font-size:9px;color:#595959;padding:0 2px">'+projCount+' project tasks + '+ahCount+' ad hoc tasks shown (completed tasks are archived - use the Archived toggle to view them). Use filters above to narrow by lead, project or type.</div>';
 
   wrap.innerHTML = html;
 }
