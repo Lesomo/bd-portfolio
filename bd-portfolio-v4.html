@@ -881,6 +881,16 @@ let tasks=ld('bd-tasks',null)||projects.flatMap(p=>buildTasks(p.id));
 let adHocTasks=ld('bd-adhoc',[]);
 let kpis=ld('bd-kpis',DEFAULT_KPIS);
 
+// Guards against a race condition: the initial Supabase load fetch can take a
+// few seconds (cold starts, slow networks). If a project/task is added while
+// that fetch is still in flight, the fetch's later wholesale state replace
+// would otherwise silently wipe it out until the next page reload. Anything
+// added while _initialLoadPending is true gets tracked here and merged back
+// in once the initial load resolves.
+var _initialLoadPending = true;
+var _pendingLocalProjects = [];
+var _pendingLocalTasks = [];
+
 function saveAll(){sd('bd-projs',projects);sd('bd-tasks',tasks);sd('bd-adhoc',adHocTasks);sd('bd-kpis',kpis);}
 function saveUpdates(){try{localStorage.setItem('bd-updates',JSON.stringify(projectUpdates));}catch(e){}}
 
@@ -1448,10 +1458,14 @@ function saveProj(){
     projects[i]={...projects[i],...d};
   }else{
     const nid=Math.max(...projects.map(p=>p.id),0)+1;
-    projects.push({id:nid,...d});
+    const newProj={id:nid,...d, skipAutoSeed:(_projectTemplate==='blank')};
+    projects.push(newProj);
+    if(_initialLoadPending) _pendingLocalProjects.push(newProj);
     // Only add the default phase/task template if user chose 'template'
     if(_projectTemplate !== 'blank'){
-      tasks.push(...buildTasks(nid));
+      const newProjTasks=buildTasks(nid);
+      tasks.push(...newProjTasks);
+      if(_initialLoadPending) _pendingLocalTasks.push(...newProjTasks);
     }
   }
   var isNew = !editId;
@@ -1681,7 +1695,7 @@ function renderPhases(p){
   var frag = document.createDocumentFragment();
   var projTasks = tasks.filter(function(t){ return t.projId===p.id; });
   var phaseObjs = projTasks.filter(function(t){ return t.type==='phase'; });
-  if(!phaseObjs.length){
+  if(!phaseObjs.length && !p.skipAutoSeed){
     PHASES.forEach(function(ph,pi){
       tasks.push({id:p.id+'-p'+pi,projId:p.id,type:'phase',phase:ph,name:ph,status:'Not Started',pct:0,owner:'',start:'',end:''});
       PTASKS[ph].forEach(function(n,ti){
@@ -1691,6 +1705,14 @@ function renderPhases(p){
     saveAll();
     projTasks = tasks.filter(function(t){ return t.projId===p.id; });
     phaseObjs = projTasks.filter(function(t){ return t.type==='phase'; });
+  }
+
+  if(!phaseObjs.length){
+    var emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'padding:14px;text-align:center;color:#595959;font-size:10px;font-style:italic';
+    emptyMsg.textContent = 'No phases yet - use + Add Phase below to start building this project.';
+    frag.appendChild(emptyMsg);
+    return frag;
   }
 
   phaseObjs.forEach(function(pt,pi){
@@ -4018,6 +4040,7 @@ function addPhase(projId) {
   var newId = projId + '-cp' + Date.now();
   var newPhase = { id: newId, projId: projId, type: 'phase', phase: name.trim(), name: name.trim(), status: 'Not Started', pct: 0, owner: '', start: '', end: '', notes: '' };
   tasks.push(newPhase);
+  if(_initialLoadPending) _pendingLocalTasks.push(newPhase);
   saveAll();
   if(window.sbSavePhase) sbSavePhase(newPhase);
   renderActivity();
@@ -4036,6 +4059,7 @@ function addTask(phaseId, phaseName, projId) {
   var newId = projId + '-ct' + Date.now();
   var newTask = { id: newId, projId: projId, type: 'task', phase: phaseName, name: name.trim(), status: 'Not Started', pct: 0, owner: proj ? proj.lead : '', start: '', end: '', notes: '' };
   tasks.push(newTask);
+  if(_initialLoadPending) _pendingLocalTasks.push(newTask);
   saveAll();
   if(window.sbUpdTask) sbUpdTask(newTask);
   renderActivity();
@@ -4141,6 +4165,7 @@ function dbToProj(r, collabs) {
     extCollabs: r.ext_collabs || '', problem: r.problem || '',
     outcome: r.outcome || '', risks: r.risks || '',
     deps: r.deps || '', notes: r.notes || '',
+    skipAutoSeed: !!r.skip_auto_seed,
     collaborators: (collabs || []).filter(function(c){ return c.project_id === r.id; }).map(function(c){ return c.collaborator_name; })
   };
 }
@@ -4152,7 +4177,8 @@ function projToDb(p) {
     start_date: p.startDate || null, end_date: p.endDate || null,
     ext_collabs: p.extCollabs || '', problem: p.problem || '',
     outcome: p.outcome || '', risks: p.risks || '',
-    deps: p.deps || '', notes: p.notes || ''
+    deps: p.deps || '', notes: p.notes || '',
+    skip_auto_seed: !!p.skipAutoSeed
   };
 }
 function dbToTask(r) {
@@ -4295,8 +4321,9 @@ var TABLE_SQL = {
   name text, lead text, category text, priority text, status text, approval text,
   pct integer default 0, biz_impact text, cust_value text,
   start_date date, end_date date, ext_collabs text,
-  problem text, outcome text, risks text, deps text, notes text
+  problem text, outcome text, risks text, deps text, notes text, skip_auto_seed boolean default false
 );
+alter table public.projects add column if not exists skip_auto_seed boolean default false;
 alter table public.projects enable row level security;
 drop policy if exists "anon_all_projects" on public.projects;
 create policy "anon_all_projects" on public.projects for all using (true) with check (true);`,
@@ -4420,6 +4447,7 @@ function loadFromSupabase() {
     console.warn('No Supabase client - check CDN loaded. window.supabase =', typeof window.supabase);
     setDbInd('offline');
     renderTableBanner([{key:'(client)', label:'Supabase connection', reason:'Could not initialise client - check network/CDN access, not table config'}]);
+    _initialLoadPending = false;
     sv('dashboard');
     updateBadge();
     populateProjFilter();
@@ -4458,8 +4486,23 @@ function loadFromSupabase() {
     if (pRes.error) throw pRes.error;
 
     var dbCollabs = colRes.data || [];
-    projects = (pRes.data || []).map(function(r){ return dbToProj(r, dbCollabs); });
-    tasks = (tRes.data || []).map(dbToTask);
+    var freshProjects = (pRes.data || []).map(function(r){ return dbToProj(r, dbCollabs); });
+    var freshTasks = (tRes.data || []).map(dbToTask);
+
+    // Merge in anything added locally while this initial fetch was still in
+    // flight (e.g. a project or task created during a slow/cold-start load),
+    // so a slow first load can't silently wipe out a same-session addition.
+    var freshProjectIds = new Set(freshProjects.map(function(p){ return String(p.id); }));
+    var stillPendingProjects = _pendingLocalProjects.filter(function(p){ return !freshProjectIds.has(String(p.id)); });
+    var freshTaskIds = new Set(freshTasks.map(function(t){ return String(t.id); }));
+    var stillPendingTasks = _pendingLocalTasks.filter(function(t){ return !freshTaskIds.has(String(t.id)); });
+
+    projects = freshProjects.concat(stillPendingProjects);
+    tasks = freshTasks.concat(stillPendingTasks);
+    _initialLoadPending = false;
+    _pendingLocalProjects = [];
+    _pendingLocalTasks = [];
+
     adHocTasks = (ahRes.data || []).map(dbToAdhoc);
     var tsData = tsRes.data || [];
     kpis = (kRes.data || []).map(function(r){ return dbToKpi(r, tsData); });
@@ -4495,6 +4538,7 @@ function loadFromSupabase() {
   }).catch(function(err) {
     console.error('Supabase load error:', err);
     setDbInd('offline');
+    _initialLoadPending = false;
     showToast('Could not connect - using local data', 'warn');
     sv('dashboard');
     updateBadge();
@@ -4524,15 +4568,17 @@ window.sbSaveProject = function(p, isNew, collabs) {
   if (isNew) {
     sb.from('projects').insert(Object.assign({id: p.id}, d)).then(function(r){
       if (r.error) { console.warn('sbSaveProject insert:', r.error); showToast('Project save to database failed: '+r.error.message,'error'); return; }
-      // Insert tasks
-      var newTasks = [];
-      PHASES.forEach(function(ph, pi){
-        newTasks.push({id: String(p.id)+'-p'+pi, project_id: p.id, type:'phase', phase:ph, name:ph, status:'Not Started', pct:0, owner:lead});
-        PTASKS[ph].forEach(function(n, ti){
-          newTasks.push({id: String(p.id)+'-p'+pi+'-t'+ti, project_id: p.id, type:'task', phase:ph, name:n, status:'Not Started', pct:0, owner:lead});
+      // Insert default template phases/tasks only if this project wasn't started blank
+      if (!p.skipAutoSeed) {
+        var newTasks = [];
+        PHASES.forEach(function(ph, pi){
+          newTasks.push({id: String(p.id)+'-p'+pi, project_id: p.id, type:'phase', phase:ph, name:ph, status:'Not Started', pct:0, owner:lead});
+          PTASKS[ph].forEach(function(n, ti){
+            newTasks.push({id: String(p.id)+'-p'+pi+'-t'+ti, project_id: p.id, type:'task', phase:ph, name:n, status:'Not Started', pct:0, owner:lead});
+          });
         });
-      });
-      sb.from('tasks').insert(newTasks).then(function(tr){ if(tr.error) console.warn('sbSaveProject tasks:', tr.error); });
+        sb.from('tasks').insert(newTasks).then(function(tr){ if(tr.error) console.warn('sbSaveProject tasks:', tr.error); });
+      }
       // Insert collaborators
       if (collabs && collabs.length) {
         var cRows = collabs.filter(function(c){ return c !== lead; }).map(function(c){ return {project_id: p.id, collaborator_name: c}; });
