@@ -363,7 +363,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <button class="togb" id="tog-list" onclick="setTog('list')">List</button>
     <button class="togb" id="tog-bylead" onclick="setTog('bylead')">By Lead</button>
     <button class="togb" id="tog-archived" onclick="setTog('archived')">Archived</button>
-    <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+    <select class="fsel" id="tb-lead" onchange="renderTaskBoard()"><option value="">All Leads</option><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <select class="fsel" id="tb-proj" onchange="renderTaskBoard()"><option value="">All Projects</option></select>
     <select class="fsel" id="tb-type" onchange="renderTaskBoard()"><option value="">All Types</option><option value="project">Project tasks</option><option value="adhoc">Ad hoc only</option></select>
     <button class="togb" onclick="selectAllVisible()" title="Select every task currently shown">Select All</button>
@@ -630,7 +630,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <div class="mbody">
       <div><label class="fl">Task Name</label><input class="fi" id="ahtname" type="text"/></div>
       <div class="mrow">
-        <div><label class="fl">Owner</label><div style="display:flex;gap:5px"><select class="fi" id="ahowner" onchange="syncAhOwner()" style="flex:1"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="ahowner-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncAhOwnerSel()"/></div></div>
+        <div><label class="fl">Owner</label><div style="display:flex;gap:5px"><select class="fi" id="ahowner" onchange="syncAhOwner()" style="flex:1"><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="ahowner-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncAhOwnerSel()"/></div></div>
         <div><label class="fl">Priority</label><select class="fi" id="ahpri"><option>High</option><option>Critical</option><option>Medium</option><option>Low</option></select></div>
       </div>
       <div class="mrow">
@@ -734,7 +734,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
   </div>
   <div style="padding:12px 14px;border-top:1px solid var(--gm);background:#fff;flex-shrink:0">
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Add Comment</div>
-    <select id="comment-author" class="fsel" style="width:100%;margin-bottom:6px"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+    <select id="comment-author" class="fsel" style="width:100%;margin-bottom:6px"><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
     <textarea id="comment-text" class="fi" rows="3" placeholder="Add a comment..." style="resize:none;margin-bottom:6px;width:100%"></textarea>
     <button onclick="postComment()" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:7px;width:100%;cursor:pointer;font-weight:700;font-size:10px;font-family:inherit">Post Comment</button>
   </div>
@@ -778,7 +778,7 @@ function toggleMeetingMode(){
 const PHASES=['Initiation & Scoping','Planning','Execution','Monitoring & Control','Closure'];
 const PTASKS={'Initiation & Scoping':['Project charter sign-off','Stakeholder mapping','Scope definition'],'Planning':['Project plan','Resource plan','Risk register','Communication plan'],'Execution':['Core deliverable 1','Core deliverable 2','Stakeholder updates','Issue & change management'],'Monitoring & Control':['Progress reporting','Quality review','Budget tracking'],'Closure':['Deliverable sign-off','Lessons learned','Handover & BAU transition']};
 // Default leads - included even if no data references them yet
-const DEFAULT_LEADS = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+const DEFAULT_LEADS = ['Berenicia','Letlhogonolo','Wendy','Beverley','David','Danesha'];
 
 // Dynamic leads - returns all unique names found in projects, tasks, updates, comments + defaults
 function getAllLeads(){
@@ -851,18 +851,15 @@ function buildTasks(pid){
 // -- Default data --------------------------------------------------------------
 const DP=[
   {id:1,name:'Supervisory training for Prestige',lead:'Berenicia',category:'People & Training',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:20,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-01',endDate:'2025-06-30'},
-  {id:2,name:'Automations at factories - not used, switched off',lead:'Jacques',category:'Technology & Assets',priority:'High',bizImpact:'Efficiency Gain',custValue:'Disqualifier',status:'In Progress',approval:'Approved',pct:35,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-15',endDate:'2025-05-31'},
   {id:3,name:'Prestige Head Count: Cutting rooms',lead:'Letlhogonolo',category:'Operations',priority:'High',bizImpact:'Cost Saving',custValue:'Order Qualifier',status:'In Progress',approval:'Approved',pct:50,collaborators:['Berenicia'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-04-30'},
   {id:4,name:'Bullmer cutting machine Parameter settings',lead:'Letlhogonolo',category:'Operations',priority:'Critical',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-04-01',endDate:'2025-07-31'},
   {id:5,name:'Caledon cutting room: Process optimisation',lead:'Letlhogonolo',category:'Operations',priority:'Critical',bizImpact:'Efficiency Gain',custValue:'Order Qualifier',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-05-01',endDate:'2025-09-30'},
-  {id:6,name:'Equipment Capability study: Multiformer use',lead:'Jacques',category:'Operations',priority:'High',bizImpact:'Efficiency Gain',custValue:'Disqualifier',status:'Not Started',approval:'Proposed',pct:0,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-03-01',endDate:'2025-06-30'},
   {id:7,name:'AI project: training tool',lead:'Wendy',category:'People & Training',priority:'Medium',bizImpact:'Risk Reduction',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:60,collaborators:['David'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-08-31'},
   {id:8,name:'Centre of excellence - internal training academy',lead:'Wendy',category:'People & Training',priority:'High',bizImpact:'Risk Reduction',custValue:'Order Winner',status:'On Hold',approval:'Deferred',pct:15,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-06-01',endDate:'2025-12-31'},
   {id:9,name:'The Prestige Way: Process standardisation',lead:'Beverley',category:'People & Training',priority:'Critical',bizImpact:'Risk Reduction',custValue:'Order Qualifier',status:'In Progress',approval:'Approved',pct:40,collaborators:['Letlhogonolo','Wendy'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-10-31'},
   {id:10,name:'Cost of Sales and expenses finance project',lead:'David',category:'Finance',priority:'High',bizImpact:'Cost Saving',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:25,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-01',endDate:'2025-07-31'},
   {id:11,name:'GSD Quest (Design and Factory alignment)',lead:'Letlhogonolo',category:'Technology & Assets',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:30,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-03-01',endDate:'2025-09-30'},
   {id:12,name:'Asset tracking tool: Tracking, Downtime & Inventory',lead:'Letlhogonolo',category:'Technology & Assets',priority:'Medium',bizImpact:'Efficiency Gain',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:45,collaborators:[],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-02-15',endDate:'2025-08-31'},
-  {id:13,name:'Asset Age Study',lead:'Jacques',category:'Operations',priority:'Critical',bizImpact:'Cost Saving',custValue:'Order Winner',status:'In Progress',approval:'Approved',pct:70,collaborators:['Letlhogonolo'],extCollabs:'',problem:'',outcome:'',risks:'',deps:'',notes:'',startDate:'2025-01-01',endDate:'2025-05-31'},
 ];
 
 const DEFAULT_KPIS=[
