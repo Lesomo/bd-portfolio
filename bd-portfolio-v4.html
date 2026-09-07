@@ -307,7 +307,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
       <input class="sinp" id="si" type="text" placeholder="Search projects…" oninput="renderTracker()"/>
       <select class="fsel" id="fc" onchange="renderTracker()"><option value="">All Categories</option></select>
       <select class="fsel" id="fp" onchange="renderTracker()"><option value="">All Priorities</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select>
-      <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+      <select class="fsel" id="fl" onchange="renderTracker()"><option value="">All Leads</option><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
       <select class="fsel" id="fs" onchange="renderTracker()"><option value="">All Statuses</option><option>Not Started</option><option>In Progress</option><option>On Hold</option><option>Complete</option></select>
       <span id="fcount" style="font-size:9px;color:var(--gt)"></span>
       <button class="abtn" id="addpb" onclick="openModal(null)">+ Add Project</button>
@@ -392,7 +392,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
       </select>
       <select class="fsel" id="gantt-lead-filter" onchange="renderGantt()">
         <option value="">All Leads</option>
-        <option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option>
+        <option>Berenicia</option><option>Letlhogonolo</option>
         <option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option>
       </select>
       <select class="fsel" id="gantt-pri-filter" onchange="renderGantt()">
@@ -471,7 +471,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
       <div style="color:rgba(255,255,255,.6);font-size:9px;margin-top:2px" id="weekly-subtitle"></div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <select class="fsel" id="weekly-lead" onchange="if(window.renderWeekly)window.renderWeekly()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)"><option value="">All Leads</option><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+      <select class="fsel" id="weekly-lead" onchange="if(window.renderWeekly)window.renderWeekly()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)"><option value="">All Leads</option><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
       <select class="fsel" id="weekly-range" onchange="if(window.renderWeekly)window.renderWeekly()" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">
         <option value="7">This Week</option>
         <option value="14">Last 2 Weeks</option>
@@ -505,7 +505,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
         <div>
           <label class="fl">Project Lead</label>
           <div style="display:flex;gap:5px">
-            <select class="fi" id="fld" onchange="syncLeadInput()" style="flex:1"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select>
+            <select class="fi" id="fld" onchange="syncLeadInput()" style="flex:1"><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select>
             <input class="fi" id="fld-custom" type="text" placeholder="New member name" style="display:none;flex:1" oninput="syncLeadSelect()"/>
           </div>
         </div>
@@ -556,7 +556,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
           <span style="font-size:9px;color:#595959">Latest updates from the team</span>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:8px">
-          <div style="display:flex;gap:5px;width:180px;flex-shrink:0"><select class="fi" id="update-author" onchange="syncUpdateAuthor()" style="flex:1;min-width:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="update-author-custom" type="text" placeholder="Name" style="display:none;flex:1;min-width:0" oninput="syncUpdateAuthorSel()"/></div>
+          <div style="display:flex;gap:5px;width:180px;flex-shrink:0"><select class="fi" id="update-author" onchange="syncUpdateAuthor()" style="flex:1;min-width:0"><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option><option value="__other__">+ Add new...</option></select><input class="fi" id="update-author-custom" type="text" placeholder="Name" style="display:none;flex:1;min-width:0" oninput="syncUpdateAuthorSel()"/></div>
           <input class="fi" id="update-text" type="text" placeholder="Add a project update..." style="flex:1"/>
           <button onclick="postProjectUpdate()" style="background:#68217D;color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Post</button>
         </div>
@@ -723,7 +723,7 @@ body.meeting-mode .trow:hover { background:inherit !important; }
     <div id="panel-detail" style="background:var(--gl);border-radius:8px;padding:10px;border:1px solid var(--gm)"></div>
     <div style="font-size:9px;font-weight:700;color:var(--pd);text-transform:uppercase;letter-spacing:.5px">Task Updates <span style="color:var(--gt);font-weight:400;text-transform:none;font-size:9px">— shows on the Weekly Standup</span></div>
     <div style="display:flex;gap:6px">
-      <select id="panel-update-author" class="fsel" style="width:120px;flex-shrink:0"><option>Berenicia</option><option>Jacques</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
+      <select id="panel-update-author" class="fsel" style="width:120px;flex-shrink:0"><option>Berenicia</option><option>Letlhogonolo</option><option>Wendy</option><option>Beverley</option><option>David</option><option>Danesha</option></select>
       <input id="panel-update-text" class="fi" type="text" placeholder="Add a task update..." style="flex:1"/>
       <button onclick="postTaskUpdate()" style="background:#68217D;color:#fff;border:none;border-radius:6px;padding:0 12px;font-size:9px;cursor:pointer;font-weight:700;font-family:inherit;flex-shrink:0">Post</button>
     </div>
