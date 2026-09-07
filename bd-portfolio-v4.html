@@ -1381,7 +1381,7 @@ function openModal(id){
   document.getElementById('fn').value=p.name;
   var fldSel = document.getElementById('fld');
   var fldInp = document.getElementById('fld-custom');
-  var knownLeads = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+  var knownLeads = ['Berenicia','Letlhogonolo','Wendy','Beverley','David','Danesha'];
   if(knownLeads.indexOf(p.lead) >= 0){
     fldSel.value = p.lead;
     fldInp.style.display = 'none';
@@ -2405,7 +2405,7 @@ function openAdHocModal(id){
     document.getElementById('ahtname').value=t.name;
     var ahSel = document.getElementById('ahowner');
   var ahInp = document.getElementById('ahowner-custom');
-  var knownLeads = ['Berenicia','Jacques','Letlhogonolo','Wendy','Beverley','David','Danesha'];
+  var knownLeads = ['Berenicia','Letlhogonolo','Wendy','Beverley','David','Danesha'];
   if(ahSel && ahInp){
     if(knownLeads.indexOf(t.owner||'Berenicia') >= 0){
       ahSel.value = t.owner||'Berenicia';
